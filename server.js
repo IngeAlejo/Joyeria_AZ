@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
@@ -23,16 +23,19 @@ const upload = multer({ storage: storage });
 
 const app = express();
 
-// ============ CONEXIÓN MYSQL ============
-const db = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '128763248',
-  database: process.env.DB_NAME || 'jewelry_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+// ============ CONEXIÓN POSTGRESQL (SUPABASE) ============
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
+
+// Polyfill for mysql2-like getConnection
+db.getConnection = async () => {
+  const client = await db.connect();
+  return client;
+};
 
 // Middlewares
 app.use(cors());
@@ -54,7 +57,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
+    const { rows } = await connection.query('SELECT * FROM users WHERE email = $1', [email]);
     connection.release();
 
     if (rows.length === 0) {
@@ -110,13 +113,13 @@ app.post('/api/register', async (req, res) => {
     const connection = await db.getConnection();
 
     try {
-      const [result] = await connection.query(
+      const result = await connection.query(
         `INSERT INTO users (
           email, password, nombre, apellidos,
           telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa,
           pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia,
           rol, createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'cliente', NOW(), NOW())`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'cliente', NOW(), NOW()) RETURNING id`,
         [
           email, hash, nombre || 'Cliente', apellidos || '',
           telefono || null, telefonoFijo || null, dni || null, fechaNacimiento || null, genero || null, empresa || null,
@@ -127,7 +130,7 @@ app.post('/api/register', async (req, res) => {
       res.json({
         success: true,
         token: jwt.sign(
-          { id: result.insertId, rol: 'cliente' },
+          { id: result.rows[0].id, rol: 'cliente' },
           'tu-secret-key-super-secreta',
           { expiresIn: '7d' }
         ),
@@ -135,7 +138,7 @@ app.post('/api/register', async (req, res) => {
         rol: 'cliente'
       });
     } catch (dbError) {
-      if (dbError.code === 'ER_DUP_ENTRY') {
+      if (dbError.code === '23505') {
         res.status(400).json({ error: 'El email ya está registrado' });
       } else {
         throw dbError;
@@ -174,7 +177,7 @@ app.put('/api/users/profile', auth, async (req, res) => {
     const { nombre, apellidos, telefono } = req.body;
     const connection = await db.getConnection();
     await connection.query(
-      'UPDATE users SET nombre=?, apellidos=?, telefono=?, updatedAt=NOW() WHERE id=?',
+      'UPDATE users SET nombre=$1, apellidos=$2, telefono=$3, updatedAt=NOW() WHERE id=$4',
       [nombre, apellidos || '', telefono || '', req.user.id]
     );
     connection.release();
@@ -189,7 +192,7 @@ app.put('/api/users/profile', auth, async (req, res) => {
 app.get('/api/products', async (req, res) => {
   try {
     const connection = await db.getConnection();
-    const [rows] = await connection.query(
+    const { rows } = await connection.query(
       'SELECT * FROM products WHERE activo = 1 ORDER BY createdAt DESC'
     );
     connection.release();
@@ -206,7 +209,7 @@ app.get('/api/inventario', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM products ORDER BY createdAt DESC');
+    const { rows } = await connection.query('SELECT * FROM products ORDER BY createdAt DESC');
     connection.release();
 
     res.json({ productos: rows });
@@ -224,7 +227,7 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
     const connection = await db.getConnection();
 
     await connection.query(
-      'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), NOW())',
+      'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, 1, NOW(), NOW())',
       [nombre, precio, stock, descripcion, categoria || 'General', imagenPath]
     );
     connection.release();
@@ -242,7 +245,7 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     const { nombre, precio, stock, descripcion, categoria } = req.body;
     const connection = await db.getConnection();
 
-    const [existing] = await connection.query('SELECT * FROM products WHERE id=?', [req.params.id]);
+    const { rows: existing } = await connection.query('SELECT * FROM products WHERE id=$1', [req.params.id]);
     if (existing.length === 0) {
       connection.release();
       return res.status(404).json({ error: 'Producto no encontrado' });
@@ -257,7 +260,7 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     const newImg = req.file ? `/uploads/${req.file.filename}` : p.imagen;
 
     await connection.query(
-      'UPDATE products SET nombre=?, precio=?, stock=?, descripcion=?, categoria=?, imagen=?, updatedAt=NOW() WHERE id=?',
+      'UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6, updatedAt=NOW() WHERE id=$7',
       [newNombre, newPrecio, newStock, newDesc, newCat, newImg, req.params.id]
     );
 
@@ -274,7 +277,7 @@ app.delete('/api/inventario/:id', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    await connection.query('DELETE FROM products WHERE id = ?', [req.params.id]);
+    await connection.query('DELETE FROM products WHERE id = $1', [req.params.id]);
     connection.release();
 
     res.json({ success: true, msg: 'Producto eliminado' });
@@ -289,7 +292,7 @@ app.get('/api/historial', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const [rows] = await connection.query(`
+    const { rows } = await connection.query(`
       SELECT o.*, u.nombre as userName, u.email as userEmail 
       FROM orders o
       LEFT JOIN users u ON o.userId = u.id
@@ -311,7 +314,7 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
     const connection = await db.getConnection();
 
     await connection.query(
-      'UPDATE orders SET estado=?, updatedAt=NOW() WHERE id=?',
+      'UPDATE orders SET estado=$1, updatedAt=NOW() WHERE id=$2',
       [estado, req.params.id]
     );
     connection.release();
@@ -326,7 +329,7 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
 app.get('/api/products', async (req, res) => {
   try {
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM products WHERE activo = 1 ORDER BY createdAt DESC');
+    const { rows } = await connection.query('SELECT * FROM products WHERE activo = 1 ORDER BY createdAt DESC');
     connection.release();
 
     res.json({ productos: rows });
@@ -352,12 +355,12 @@ app.post('/api/admin/users', auth, async (req, res) => {
     try {
       await connection.query(
         `INSERT INTO users (nombre, apellidos, email, password, telefono, rol, createdAt, updatedAt) 
-         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
         [nombre, apellidos || '', email, hash, telefono || null, rol || 'cliente']
       );
       res.json({ success: true, msg: 'Usuario creado exitosamente' });
     } catch (dbError) {
-      if (dbError.code === 'ER_DUP_ENTRY') res.status(400).json({ error: 'El email ya está registrado' });
+      if (dbError.code === '23505') res.status(400).json({ error: 'El email ya está registrado' });
       else throw dbError;
     } finally {
       connection.release();
@@ -373,7 +376,7 @@ app.get('/api/admin/users', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT id, nombre, apellidos, email, telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa, pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia, rol, createdAt FROM users ORDER BY createdAt DESC');
+    const { rows } = await connection.query('SELECT id, nombre, apellidos, email, telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa, pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia, rol, createdAt FROM users ORDER BY createdAt DESC');
     connection.release();
 
     res.json({ users: rows });
@@ -389,7 +392,7 @@ app.put('/api/admin/users/:id/role', auth, async (req, res) => {
 
     const { rol } = req.body;
     const connection = await db.getConnection();
-    await connection.query('UPDATE users SET rol=?, updatedAt=NOW() WHERE id=?', [rol, req.params.id]);
+    await connection.query('UPDATE users SET rol=$1, updatedAt=NOW() WHERE id=$2', [rol, req.params.id]);
     connection.release();
 
     res.json({ success: true, msg: 'Rol actualizado' });
@@ -403,7 +406,7 @@ app.delete('/api/admin/users/:id', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
     const connection = await db.getConnection();
-    await connection.query('DELETE FROM users WHERE id=?', [req.params.id]);
+    await connection.query('DELETE FROM users WHERE id=$1', [req.params.id]);
     connection.release();
     res.json({ success: true, msg: 'Usuario eliminado' });
   } catch (error) {
@@ -424,10 +427,10 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
 
     await connection.query(
       `UPDATE users SET 
-        nombre=?, apellidos=?, email=?, telefono=?, telefonoFijo=?,
-        dni=?, fechaNacimiento=?, genero=?, empresa=?,
-        pais=?, departamento=?, ciudad=?, direccion=?, direccion2=?, codigoPostal=?, referencia=?,
-        rol=?, updatedAt=NOW() WHERE id=?`,
+        nombre=$1, apellidos=$2, email=$3, telefono=$4, telefonoFijo=$5,
+        dni=$6, fechaNacimiento=$7, genero=$8, empresa=$9,
+        pais=$10, departamento=$11, ciudad=$12, direccion=$13, direccion2=$14, codigoPostal=$15, referencia=$16,
+        rol=$17, updatedAt=NOW() WHERE id=$18`,
       [
         nombre, apellidos, email, telefono || null, telefonoFijo || null,
         dni || null, fechaNacimiento || null, genero || null, empresa || null,
@@ -439,7 +442,7 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Usuario actualizado completamente' });
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === '23505') {
       res.status(400).json({ error: 'El email ya está en uso' });
     } else {
       res.status(500).json({ error: error.message });
@@ -454,10 +457,15 @@ app.get('/api/admin/stats', auth, async (req, res) => {
 
     const connection = await db.getConnection();
 
-    const [[{ totalUsers }]] = await connection.query('SELECT COUNT(*) as totalUsers FROM users');
-    const [[{ totalProducts }]] = await connection.query('SELECT COUNT(*) as totalProducts FROM products WHERE activo=1');
-    const [[{ totalOrders }]] = await connection.query('SELECT COUNT(*) as totalOrders FROM orders');
-    const [[{ totalRevenue }]] = await connection.query('SELECT COALESCE(SUM(totalPrecio), 0) as totalRevenue FROM orders WHERE estado != "cancelada"');
+    const usersResult = await connection.query('SELECT COUNT(*) as total_users FROM users');
+    const productsResult = await connection.query('SELECT COUNT(*) as total_products FROM products WHERE activo=1');
+    const ordersResult = await connection.query('SELECT COUNT(*) as total_orders FROM orders');
+    const revenueResult = await connection.query("SELECT COALESCE(SUM(totalPrecio), 0) as total_revenue FROM orders WHERE estado != 'cancelada'");
+
+    const totalUsers = usersResult.rows[0].total_users;
+    const totalProducts = productsResult.rows[0].total_products;
+    const totalOrders = ordersResult.rows[0].total_orders;
+    const totalRevenue = revenueResult.rows[0].total_revenue;
 
     connection.release();
 
@@ -479,7 +487,7 @@ app.get('/api/admin/stats', auth, async (req, res) => {
 app.get('/api/test-db', async (req, res) => {
   try {
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT 1 as test');
+    const { rows } = await connection.query('SELECT 1 as test');
     connection.release();
     res.json({
       success: true,
