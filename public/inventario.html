@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario — Admin | Joyería AZ</title>
+  <meta name="description" content="Panel de administración — gestión de productos, stock y precios.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Inventario card overrides */
+    .inv-card {
+      background: var(--az-surface);
+      border: 1px solid var(--az-border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+      transition: box-shadow .25s, transform .25s;
+    }
+
+    .inv-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+
+    .inv-img-wrap {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+      background: var(--az-surface-2);
+    }
+
+    .inv-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .35s;
+    }
+
+    .inv-card:hover .inv-img-wrap img {
+      transform: scale(1.06);
+    }
+
+    .inv-upload-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 18, 32, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .25s;
+      cursor: pointer;
+    }
+
+    .inv-card:hover .inv-upload-overlay {
+      opacity: 1;
+    }
+
+    .inv-upload-btn {
+      padding: 9px 18px;
+      border-radius: var(--r-pill);
+      background: var(--az-gold);
+      color: var(--az-navy);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inv-body {
+      padding: 20px;
+    }
+
+    .inv-field {
+      background: var(--az-surface-2);
+      border: 1.5px solid var(--az-border);
+      border-radius: var(--r-input);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--az-navy);
+      padding: 9px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .inv-field:focus {
+      border-color: var(--az-gold);
+    }
+
+    .inv-notif {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--az-navy), #153322);
+      color: white;
+      padding: 14px 20px;
+      border-radius: var(--r-card);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 99999;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(184, 150, 90, 0.3);
+      transform: translateX(150%);
+      transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Toast notificación -->
+  <div id="inv-notif" class="inv-notif"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" aria-label="Joyería AZ — Inicio">
+        <img src="img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div class="d-flex gap-2 align-items-center">
+            <a class="nav-link" href="cuenta.html"><i class="fas fa-user-circle me-1"></i><span
+                id="nav-user-name">Administrador</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section style="background:var(--az-navy);padding-top:15px;position:relative;overflow:hidden;min-height:360px;display:flex;align-items:center;">
+    <!-- Decorative background elements -->
+    <div style="position:absolute;inset:0;pointer-events:none;">
+      <!-- Radial ambient glow -->
+      <div style="position:absolute;top:-100px;left:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(184,150,90,0.06) 0%,transparent 65%);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,106,79,0.06) 0%,transparent 65%);pointer-events:none;"></div>
+      <!-- Animated rings -->
+      <div style="position:absolute;top:-120px;left:-120px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(184,150,90,0.07);animation:heroRotate 35s linear infinite;"></div>
+      <div style="position:absolute;top:-60px;left:-60px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(184,150,90,0.1);animation:heroRotate 20s linear infinite reverse;"></div>
+      <!-- Fine horizontal divider line -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,150,90,0.15),transparent);"></div>
+    </div>
+    <div class="container" style="padding-top:clamp(56px,7vw,90px);padding-bottom:clamp(56px,7vw,90px);position:relative;z-index:1;">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span
+            style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:16px;">
+            <span style="display:block;width:24px;height:1px;background:var(--az-gold);"></span>
+            Panel Admin
+          </span>
+          <h1
+            style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:white;line-height:1.1;letter-spacing:-0.02em;margin:0;">
+            Gestión de <em style="font-style:italic;color:var(--az-gold);">Inventario</em>
+          </h1>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.55);margin-top:16px;max-width:440px;line-height:1.7;">
+            Edita precios, stock, descripciones y fotos de tus productos fácilmente.
+          </p>
+        </div>
+        <div class="col-lg-5 d-flex gap-3 justify-content-lg-end align-items-center">
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+            <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);" id="stat-productos">—</div>
+            <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px;">Productos</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+            <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;" id="stat-stock">—</div>
+            <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px;">Stock Total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCESO DENEGADO -->
+  <div id="admin-check" class="d-none" style="padding:80px 0;text-align:center;">
+    <div class="container">
+      <div
+        style="width:80px;height:80px;border-radius:50%;background:var(--az-surface-2);border:1.5px solid var(--az-border);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+        <i class="fas fa-lock" style="font-size:28px;color:var(--az-text-muted);"></i>
+      </div>
+      <h3 style="font-family:var(--font-display);font-weight:300;color:var(--az-navy);margin-bottom:12px;">Acceso
+        Restringido</h3>
+      <p style="font-family:var(--font-ui);color:var(--az-text-muted);margin-bottom:28px;">Solo los administradores
+        pueden gestionar el inventario.</p>
+      <a href="index.html" class="btn-gold-az">Volver al inicio</a>
+    </div>
+  </div>
+
+  <!-- GRID INVENTARIO -->
+  <section class="section-az section-light" id="inventario-section">
+    <div class="container">
+      <!-- Toolbar -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+        <button class="btn-gold-az" onclick="abrirModalProducto()" style="padding:12px 24px;font-size:14px;">
+          <i class="fas fa-plus me-2"></i>Agregar Nuevo Producto
+        </button>
+      </div>
+
+      <div class="row g-4" id="productosGrid">
+        <!-- Skeletons -->
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL AGREGAR PRODUCTO -->
+  <div class="modal fade" id="modal-producto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
+        <div class="modal-header border-0" style="padding:24px 28px 16px;">
+          <h5 class="modal-title" style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">Agregar Nuevo Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:0 28px 24px;">
+          <form id="form-producto" onsubmit="crearProducto(event)">
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Nombre del producto</label>
+              <input type="text" class="inv-field" id="new-nombre" required>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Precio (COP)</label>
+                <input type="number" class="inv-field" id="new-precio" required min="0">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Stock</label>
+                <input type="number" class="inv-field" id="new-stock" required min="0">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Categoría</label>
+              <select class="inv-field" id="new-categoria" required>
+                <option value="Anillos">Anillos</option>
+                <option value="Collares">Collares</option>
+                <option value="Aretes">Aretes</option>
+                <option value="Pulseras">Pulseras</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción</label>
+              <textarea class="inv-field" id="new-desc" rows="2"></textarea>
+            </div>
+            <div class="mb-4">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen</label>
+              <input type="file" class="inv-field" id="new-img" accept="image/*" style="padding:6px 12px;background:var(--az-surface);">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button type="button" class="btn-nav-login" data-bs-dismiss="modal" style="font-size:14px;padding:10px 20px;">Cancelar</button>
+              <button type="submit" class="btn-gold-az" style="font-size:14px;padding:10px 24px;" id="btn-crear-producto">Guardar Producto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="az-footer">
+    <div class="container text-center">
+      <p style="font-family:var(--font-ui);font-size:13px;color:rgba(255,255,255,0.35);margin:0;">© 2026 Joyería AZ —
+        Panel de Administración</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('navbar-scrolled', window.scrollY > 50);
+    });
+
+    async function cargarProductos() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) { mostrarNotif('❌ Sin autenticación'); return; }
+
+        const res = await fetch(`${API_URL}/products`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const data = await res.json();
+        const productos = data.productos || data || [];
+        renderProductos(productos);
+
+        document.getElementById('stat-productos').textContent = productos.length;
+        const totalStock = productos.reduce((s, p) => s + (Number(p.stock) || 0), 0);
+        document.getElementById('stat-stock').textContent = totalStock;
+      } catch (err) {
+        mostrarNotif(`❌ Error al cargar: ${err.message}`);
+        document.getElementById('productosGrid').innerHTML = `<div class="col-12 text-center py-5" style="font-family:var(--font-ui);color:var(--az-text-muted);">No se pudo cargar el inventario. Verifica el servidor.</div>`;
+      }
+    }
+
+    function renderProductos(productos) {
+      const grid = document.getElementById('productosGrid');
+      if (!productos || productos.length === 0) {
+        grid.innerHTML = `<div class="col-12 text-center py-5" style="font-family:var(--font-ui);color:var(--az-text-muted);">Sin productos registrados</div>`;
+        return;
+      }
+
+      grid.innerHTML = productos.map(p => `
+        <div class="col-lg-3 col-md-6">
+          <div class="inv-card">
+            <div class="inv-img-wrap">
+              <img src="${p.imagen || 'img/ALE.png'}" alt="${p.nombre}" onerror="this.src='img/ALE.png'">
+              <div class="inv-upload-overlay">
+                <label class="inv-upload-btn">
+                  <i class="fas fa-camera"></i> Cambiar foto
+                  <input type="file" accept="image/*" hidden onchange="actualizarFoto(${p.id}, event)">
+                </label>
+              </div>
+              ${p.stock <= 0 ? `<div style="position:absolute;top:10px;left:10px;padding:4px 10px;border-radius:var(--r-pill);background:#dc3545;color:white;font-family:var(--font-ui);font-size:10px;font-weight:700;">Sin stock</div>` : ''}
+            </div>
+            <div class="inv-body">
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--az-text-muted);margin-bottom:6px;">${p.categoria || 'General'}</div>
+              <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:400;color:var(--az-navy);margin-bottom:4px;">${p.nombre}</div>
+              <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:300;color:var(--az-gold);margin-bottom:16px;">$${Number(p.precio).toLocaleString('es-CO')}</div>
+              
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+                <div>
+                  <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--az-text-muted);margin-bottom:4px;display:block;">Stock</label>
+                  <input type="number" class="inv-field" id="stock-${p.id}" value="${p.stock}" min="0">
+                </div>
+                <div>
+                  <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--az-text-muted);margin-bottom:4px;display:block;">Precio (COP)</label>
+                  <input type="text" class="inv-field" id="precio-${p.id}" value="${p.precio}">
+                </div>
+                <div>
+                  <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--az-text-muted);margin-bottom:4px;display:block;">Descripción</label>
+                  <textarea class="inv-field" id="desc-${p.id}" rows="2">${p.descripcion || ''}</textarea>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <button class="btn-gold-az" onclick="guardarProducto(${p.id})" style="width:100%;justify-content:center;font-size:13px;padding:10px;">
+                  <i class="fas fa-save me-1"></i>Guardar cambios
+                </button>
+                <button onclick="eliminarProducto(${p.id})" style="width:100%;padding:10px;border-radius:var(--r-pill);border:1.5px solid rgba(220,53,69,0.3);background:transparent;color:#dc3545;font-family:var(--font-ui);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='#dc3545';this.style.color='white';" onmouseout="this.style.background='transparent';this.style.color='#dc3545';">
+                  <i class="fas fa-trash me-1"></i>Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function actualizarFoto(id, event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('imagen', file);
+      try {
+        const res = await fetch(`${API_URL}/inventario/${id}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: formData
+        });
+        mostrarNotif(res.ok ? '✅ Foto actualizada' : '❌ Error al subir foto');
+        if (res.ok) cargarProductos();
+      } catch (err) { mostrarNotif('❌ Error al subir foto'); }
+    }
+
+    async function guardarProducto(id) {
+      const stock = document.getElementById(`stock-${id}`).value;
+      const precio = document.getElementById(`precio-${id}`).value;
+      const descripcion = document.getElementById(`desc-${id}`).value;
+      try {
+        const res = await fetch(`${API_URL}/inventario/${id}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stock, precio, descripcion })
+        });
+        mostrarNotif(res.ok ? '✅ Producto actualizado' : '❌ Error al actualizar');
+        if (res.ok) cargarProductos();
+      } catch (err) { mostrarNotif('❌ Error'); }
+    }
+
+    async function eliminarProducto(id) {
+      if (!confirm('¿Eliminar producto? Esta acción no se puede deshacer.')) return;
+      try {
+        const res = await fetch(`${API_URL}/inventario/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        mostrarNotif(res.ok ? '✅ Producto eliminado' : '❌ Error al eliminar');
+        if (res.ok) cargarProductos();
+      } catch (err) { mostrarNotif('❌ Error'); }
+    }
+
+    function mostrarNotif(msg) {
+      const notif = document.getElementById('inv-notif');
+      notif.textContent = msg;
+      notif.style.transform = 'translateX(0)';
+      clearTimeout(notif._t);
+      notif._t = setTimeout(() => { notif.style.transform = 'translateX(150%)'; }, 3000);
+    }
+
+    function logout() {
+      if (confirm('¿Cerrar sesión?')) {
+        ['token', 'rol', 'nombre', 'email'].forEach(k => localStorage.removeItem(k));
+        window.location.href = 'index.html';
+      }
+    }
+
+    let modalProducto;
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const rol = localStorage.getItem('rol');
+      if (!token || rol !== 'admin') {
+        document.getElementById('admin-check').classList.remove('d-none');
+        document.getElementById('inventario-section').style.display = 'none';
+        return;
+      }
+      modalProducto = new bootstrap.Modal(document.getElementById('modal-producto'));
+      cargarProductos();
+    });
+
+    function abrirModalProducto() {
+      document.getElementById('form-producto').reset();
+      modalProducto.show();
+    }
+
+    async function crearProducto(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-crear-producto');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+      btn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('nombre', document.getElementById('new-nombre').value);
+      formData.append('precio', document.getElementById('new-precio').value);
+      formData.append('stock', document.getElementById('new-stock').value);
+      formData.append('categoria', document.getElementById('new-categoria').value);
+      formData.append('descripcion', document.getElementById('new-desc').value);
+      const imgFile = document.getElementById('new-img').files[0];
+      if (imgFile) formData.append('imagen', imgFile);
+
+      try {
+        const res = await fetch(`${API_URL}/inventario`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: formData
+        });
+        if (!res.ok) throw new Error('Error al crear producto');
+        mostrarNotif('✅ Producto creado con éxito');
+        modalProducto.hide();
+        cargarProductos();
+      } catch (err) {
+        mostrarNotif('❌ ' + err.message);
+      } finally {
+        btn.innerHTML = 'Guardar Producto';
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+</body>
+
+</html>

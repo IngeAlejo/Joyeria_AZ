@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios — Admin | Joyería AZ</title>
+  <meta name="description" content="Panel de administración — gestión de usuarios registrados.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" aria-label="Joyería AZ — Inicio">
+        <img src="img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div class="d-flex gap-2 align-items-center">
+            <a class="nav-link" href="cuenta.html"><i class="fas fa-user-circle me-1"></i><span
+                id="nav-user-name">Administrador</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section style="background:var(--az-navy);padding-top:15px;position:relative;overflow:hidden;min-height:360px;display:flex;align-items:center;">
+    <!-- Decorative background elements -->
+    <div style="position:absolute;inset:0;pointer-events:none;">
+      <!-- Radial ambient glow -->
+      <div style="position:absolute;top:-100px;left:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(184,150,90,0.06) 0%,transparent 65%);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,106,79,0.06) 0%,transparent 65%);pointer-events:none;"></div>
+      <!-- Animated rings -->
+      <div style="position:absolute;top:-120px;left:-120px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(184,150,90,0.07);animation:heroRotate 35s linear infinite;"></div>
+      <div style="position:absolute;top:-60px;left:-60px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(184,150,90,0.1);animation:heroRotate 20s linear infinite reverse;"></div>
+      <!-- Fine horizontal divider line -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,150,90,0.15),transparent);"></div>
+    </div>
+    <div class="container" style="padding-top:clamp(56px,7vw,90px);padding-bottom:clamp(56px,7vw,90px);position:relative;z-index:1;">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span
+            style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:16px;">
+            <span style="display:block;width:24px;height:1px;background:var(--az-gold);"></span>
+            Panel Admin
+          </span>
+          <h1
+            style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:white;line-height:1.1;letter-spacing:-0.02em;margin:0;">
+            Gestión de <em style="font-style:italic;color:var(--az-gold);">Usuarios</em>
+          </h1>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.55);margin-top:16px;max-width:440px;line-height:1.7;">
+            Administra los usuarios registrados, cambia roles y gestiona accesos.
+          </p>
+        </div>
+        <div class="col-lg-5 d-flex gap-3 justify-content-lg-end align-items-center flex-wrap">
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;flex:1;min-width:100px;">
+            <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);" id="stat-total">—</div>
+            <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px;">Total</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;flex:1;min-width:100px;">
+            <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;" id="stat-clientes">—</div>
+            <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px;">Clientes</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;flex:1;min-width:100px;">
+            <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;" id="stat-admins">—</div>
+            <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px;">Admins</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO -->
+  <section class="section-az section-light">
+    <div class="container">
+
+      <!-- Acceso denegado -->
+      <div id="admin-check" class="text-center py-5 d-none">
+        <div
+          style="width:80px;height:80px;border-radius:50%;background:var(--az-surface-2);border:1.5px solid var(--az-border);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+          <i class="fas fa-lock" style="font-size:28px;color:var(--az-text-muted);"></i>
+        </div>
+        <h3 style="font-family:var(--font-display);font-weight:300;color:var(--az-navy);margin-bottom:12px;">Acceso
+          Restringido</h3>
+        <p style="font-family:var(--font-ui);color:var(--az-text-muted);margin-bottom:28px;">Solo los administradores
+          pueden gestionar usuarios.</p>
+        <a href="index.html" class="btn-gold-az">Volver al inicio</a>
+      </div>
+
+      <!-- Admin content -->
+      <div id="admin-content">
+
+        <!-- Filtros -->
+        <div
+          style="background:var(--az-surface-2);border-radius:var(--r-card);padding:20px 24px;margin-bottom:32px;border:1px solid var(--az-border);">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+              <div style="position:relative;">
+                <i class="fas fa-search"
+                  style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--az-text-muted);font-size:13px;pointer-events:none;"></i>
+                <input type="text" id="buscar-usuario"
+                  style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px 10px 38px;color:var(--az-navy);background:var(--az-surface);outline:none;"
+                  placeholder="Buscar por nombre o email..." oninput="filtrarUsuarios()">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <select id="filtro-rol"
+                style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface);outline:none;"
+                onchange="filtrarUsuarios()">
+                <option value="">Todos los roles</option>
+                <option value="cliente">Clientes</option>
+                <option value="admin">Administradores</option>
+              </select>
+            </div>
+            <div class="col-md-3" style="display:flex;justify-content:flex-end;align-items:center;gap:15px;">
+              <span id="contador-usuarios"
+                style="font-family:var(--font-ui);font-size:13px;color:var(--az-text-muted);">Cargando...</span>
+              <button class="btn-gold-az" onclick="abrirModalUsuario()" style="padding:10px 18px;font-size:13px;">
+                <i class="fas fa-plus me-1"></i>Nuevo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div
+          style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);overflow:hidden;">
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;padding:24px 28px;border-bottom:1px solid var(--az-border);flex-wrap:wrap;gap:12px;">
+            <h4 style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);margin:0;">Lista de Usuarios
+            </h4>
+            <div style="display:flex;gap:8px;">
+              <span id="badge-clientes"
+                style="display:inline-block;padding:4px 14px;border-radius:var(--r-pill);background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);font-family:var(--font-ui);font-size:11px;font-weight:700;color:#16A34A;">--
+                clientes</span>
+              <span id="badge-admins"
+                style="display:inline-block;padding:4px 14px;border-radius:var(--r-pill);background:rgba(184,150,90,0.12);border:1px solid rgba(184,150,90,0.3);font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-gold);">--
+                admins</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table" style="margin:0;">
+              <thead>
+                <tr style="background:var(--az-surface-2);">
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 20px;border-color:var(--az-border);">
+                    Usuario</th>
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 8px;border-color:var(--az-border);">
+                    Email</th>
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 8px;border-color:var(--az-border);">
+                    Teléfono</th>
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 8px;border-color:var(--az-border);">
+                    Rol</th>
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 8px;border-color:var(--az-border);">
+                    Registro</th>
+                  <th
+                    style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-text-muted);padding:12px 20px;border-color:var(--az-border);text-align:right;">
+                    Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usuarios-tbody">
+                <tr>
+                  <td colspan="6" class="text-center py-5"
+                    style="font-family:var(--font-ui);color:var(--az-text-muted);border-color:var(--az-border);">
+                    <div class="spinner-border spinner-border-sm me-2" style="color:var(--az-gold);"></div>Cargando
+                    usuarios...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL CONFIRMACIÓN -->
+  <div class="modal fade" id="confirm-modal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content"
+        style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
+        <div class="modal-header border-0" style="padding:20px 24px 12px;">
+          <h5 class="modal-title" id="confirm-title"
+            style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">Confirmar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:0 24px 20px;">
+          <p id="confirm-text" style="font-family:var(--font-ui);font-size:14px;color:var(--az-text-muted);margin:0;">
+          </p>
+        </div>
+        <div class="modal-footer border-0" style="padding:0 24px 24px;gap:10px;">
+          <button class="btn-nav-login" data-bs-dismiss="modal" style="font-size:13px;">Cancelar</button>
+          <button id="confirm-btn"
+            style="padding:10px 20px;border-radius:var(--r-pill);background:#dc3545;color:white;border:none;font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AGREGAR USUARIO -->
+  <div class="modal fade" id="modal-usuario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
+        <div class="modal-header border-0" style="padding:24px 28px 16px;">
+          <h5 class="modal-title" style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">Agregar Nuevo Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:0 28px 24px;">
+          <form id="form-usuario" onsubmit="crearUsuario(event)">
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Nombre</label>
+                <input type="text" id="new-usu-nombre" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;" required>
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Apellidos</label>
+                <input type="text" id="new-usu-apellidos" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Email</label>
+              <input type="email" id="new-usu-email" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;" required>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Contraseña</label>
+              <input type="password" id="new-usu-pass" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;" required>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Teléfono (Opcional)</label>
+              <input type="text" id="new-usu-tel" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;">
+            </div>
+            <div class="mb-4">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Rol</label>
+              <select id="new-usu-rol" style="width:100%;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);background:var(--az-surface-2);outline:none;" required>
+                <option value="cliente">Cliente</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button type="button" class="btn-nav-login" data-bs-dismiss="modal" style="font-size:14px;padding:10px 20px;">Cancelar</button>
+              <button type="submit" class="btn-gold-az" style="font-size:14px;padding:10px 24px;" id="btn-crear-usuario">Guardar Usuario</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="az-footer">
+    <div class="container text-center">
+      <p style="font-family:var(--font-ui);font-size:13px;color:rgba(255,255,255,0.35);margin:0;">© 2026 Joyería AZ —
+        Panel de Administración</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API = 'http://localhost:5000';
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    let todosUsuarios = [];
+    let confirmModal;
+    let modalUsuario;
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('navbar-scrolled', window.scrollY > 50);
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      confirmModal = new bootstrap.Modal(document.getElementById('confirm-modal'));
+      modalUsuario = new bootstrap.Modal(document.getElementById('modal-usuario'));
+      if (!token || rol !== 'admin') {
+        document.getElementById('admin-check').classList.remove('d-none');
+        document.getElementById('admin-content').style.display = 'none';
+        return;
+      }
+      await cargarUsuarios();
+    });
+
+    async function cargarUsuarios() {
+      try {
+        const res = await fetch(`${API}/api/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        todosUsuarios = data.users || data.usuarios || data || [];
+        filtrarUsuarios();
+        actualizarStats();
+      } catch (e) {
+        document.getElementById('usuarios-tbody').innerHTML =
+          `<tr><td colspan="6" class="text-center py-4" style="font-family:var(--font-ui);color:var(--az-text-muted);border-color:var(--az-border);"><i class="fas fa-exclamation-triangle me-2"></i>No se pudo cargar usuarios. Verifica el servidor.</td></tr>`;
+      }
+    }
+
+    function actualizarStats() {
+      const clientes = todosUsuarios.filter(u => u.rol === 'cliente').length;
+      const admins = todosUsuarios.filter(u => u.rol === 'admin').length;
+      document.getElementById('stat-total').textContent = todosUsuarios.length;
+      document.getElementById('stat-clientes').textContent = clientes;
+      document.getElementById('stat-admins').textContent = admins;
+      document.getElementById('badge-clientes').textContent = `${clientes} cliente${clientes !== 1 ? 's' : ''}`;
+      document.getElementById('badge-admins').textContent = `${admins} admin${admins !== 1 ? 's' : ''}`;
+    }
+
+    function filtrarUsuarios() {
+      const buscar = (document.getElementById('buscar-usuario')?.value || '').toLowerCase();
+      const rolFiltro = document.getElementById('filtro-rol')?.value || '';
+      const filtrados = todosUsuarios.filter(u => {
+        const nombre = ((u.nombre || '') + ' ' + (u.apellidos || '')).toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        return (!buscar || nombre.includes(buscar) || email.includes(buscar)) && (!rolFiltro || u.rol === rolFiltro);
+      });
+      document.getElementById('contador-usuarios').textContent = `${filtrados.length} usuario${filtrados.length !== 1 ? 's' : ''}`;
+      renderTabla(filtrados);
+    }
+
+    function renderTabla(lista) {
+      const tbody = document.getElementById('usuarios-tbody');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5" style="font-family:var(--font-ui);color:var(--az-text-muted);border-color:var(--az-border);">No se encontraron usuarios</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = lista.map(u => {
+        const nombre = [u.nombre, u.apellidos].filter(Boolean).join(' ') || 'Sin nombre';
+        const fecha = u.createdAt ? new Date(u.createdAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }) : '--';
+        return `
+          <tr>
+            <td style="padding:12px 20px;border-color:var(--az-border);vertical-align:middle;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--az-navy),#153322);display:flex;align-items:center;justify-content:center;color:var(--az-gold);font-weight:700;font-size:13px;flex-shrink:0;">${nombre.charAt(0).toUpperCase()}</div>
+                <span style="font-family:var(--font-ui);font-size:14px;font-weight:600;color:var(--az-navy);">${nombre}</span>
+              </div>
+            </td>
+            <td style="padding:12px 8px;border-color:var(--az-border);vertical-align:middle;font-family:var(--font-ui);font-size:13px;color:var(--az-text-muted);">${u.email}</td>
+            <td style="padding:12px 8px;border-color:var(--az-border);vertical-align:middle;font-family:var(--font-ui);font-size:13px;color:var(--az-text-muted);">${u.telefono || '--'}</td>
+            <td style="padding:12px 8px;border-color:var(--az-border);vertical-align:middle;">
+              <span style="display:inline-block;padding:3px 10px;border-radius:var(--r-pill);font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;${u.rol === 'admin' ? 'background:rgba(184,150,90,0.12);border:1px solid rgba(184,150,90,0.3);color:var(--az-gold);' : 'background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);color:#16A34A;'}">${u.rol === 'admin' ? 'Admin' : 'Cliente'}</span>
+            </td>
+            <td style="padding:12px 8px;border-color:var(--az-border);vertical-align:middle;font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);">${fecha}</td>
+            <td style="padding:12px 20px;border-color:var(--az-border);vertical-align:middle;text-align:right;">
+              <div style="display:flex;gap:6px;justify-content:flex-end;">
+                <button onclick="cambiarRol(${u.id}, '${u.rol}')" title="Cambiar rol" style="width:32px;height:32px;border-radius:var(--r-badge);border:1.5px solid var(--az-border-strong);background:transparent;color:var(--az-text-muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;" onmouseover="this.style.borderColor='var(--az-gold)';this.style.color='var(--az-gold)';" onmouseout="this.style.borderColor='var(--az-border-strong)';this.style.color='var(--az-text-muted)';">
+                  <i class="fas fa-user-shield"></i>
+                </button>
+                <button onclick="confirmarEliminar(${u.id}, '${nombre}')" title="Eliminar" style="width:32px;height:32px;border-radius:var(--r-badge);border:1.5px solid rgba(220,53,69,0.3);background:transparent;color:#dc3545;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;" onmouseover="this.style.background='#dc3545';this.style.color='white';" onmouseout="this.style.background='transparent';this.style.color='#dc3545';">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    async function cambiarRol(id, rolActual) {
+      const nuevoRol = rolActual === 'admin' ? 'cliente' : 'admin';
+      if (!confirm(`¿Cambiar rol a "${nuevoRol}"?`)) return;
+      try {
+        const res = await fetch(`${API}/api/admin/users/${id}/role`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ rol: nuevoRol })
+        });
+        if (res.ok) { await cargarUsuarios(); mostrarToast(`Rol cambiado a ${nuevoRol}`); }
+        else { const err = await res.json(); alert(err.error || 'Error al cambiar rol'); }
+      } catch (e) { alert('Error de conexión'); }
+    }
+
+    let idEliminar = null;
+    function confirmarEliminar(id, nombre) {
+      idEliminar = id;
+      document.getElementById('confirm-title').textContent = 'Eliminar Usuario';
+      document.getElementById('confirm-text').textContent = `¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`;
+      document.getElementById('confirm-btn').onclick = eliminarUsuario;
+      confirmModal.show();
+    }
+
+    async function eliminarUsuario() {
+      if (!idEliminar) return;
+      confirmModal.hide();
+      try {
+        const res = await fetch(`${API}/api/admin/users/${idEliminar}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) { await cargarUsuarios(); mostrarToast('Usuario eliminado'); }
+        else { const err = await res.json(); alert(err.error || 'Error al eliminar'); }
+      } catch (e) { alert('Error de conexión'); }
+      idEliminar = null;
+    }
+
+    function mostrarToast(msg) {
+      let t = document.getElementById('toast-usuarios');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast-usuarios';
+        t.style.cssText = 'position:fixed;bottom:30px;right:20px;background:linear-gradient(135deg,var(--az-navy),#153322);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-weight:600;font-size:14px;z-index:99999;box-shadow:var(--shadow-lg);border:1px solid rgba(184,150,90,0.3);transform:translateX(150%);transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.transform = 'translateX(0)';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.transform = 'translateX(150%)'; }, 2500);
+    }
+
+    function abrirModalUsuario() {
+      document.getElementById('form-usuario').reset();
+      modalUsuario.show();
+    }
+
+    async function crearUsuario(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-crear-usuario');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+      btn.disabled = true;
+
+      const body = {
+        nombre: document.getElementById('new-usu-nombre').value,
+        apellidos: document.getElementById('new-usu-apellidos').value,
+        email: document.getElementById('new-usu-email').value,
+        password: document.getElementById('new-usu-pass').value,
+        telefono: document.getElementById('new-usu-tel').value,
+        rol: document.getElementById('new-usu-rol').value
+      };
+
+      try {
+        const res = await fetch(`${API}/api/admin/users`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al crear usuario');
+        
+        mostrarToast('✅ Usuario creado exitosamente');
+        modalUsuario.hide();
+        cargarUsuarios();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.innerHTML = 'Guardar Usuario';
+        btn.disabled = false;
+      }
+    }
+
+    function logout() {
+      if (confirm('¿Cerrar sesión?')) {
+        ['token', 'rol', 'nombre', 'email'].forEach(k => localStorage.removeItem(k));
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+
+</html>
