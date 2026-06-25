@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { API_URL } from '../../config';
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
@@ -24,7 +25,7 @@ export default function Inventory() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/inventario', {
+      const res = await fetch(`${API_URL}/api/inventario`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -41,8 +42,8 @@ export default function Inventory() {
     try {
       const isEditing = !!editingProduct;
       const url = isEditing 
-        ? `http://localhost:5000/api/inventario/${editingProduct.id}`
-        : 'http://localhost:5000/api/inventario';
+        ? `${API_URL}/api/inventario/${editingProduct.id}`
+        : `${API_URL}/api/inventario`;
 
       const submitData = new FormData();
       Object.keys(formData).forEach(key => submitData.append(key, formData[key]));
@@ -68,7 +69,7 @@ export default function Inventory() {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Seguro de que quieres eliminar este producto?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/inventario/${id}`, {
+      const res = await fetch(`${API_URL}/api/inventario/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

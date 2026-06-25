@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Truck, CheckCircle, Package, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { API_URL } from '../../config';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -13,7 +14,7 @@ export default function Orders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/historial', {
+      const res = await fetch(`${API_URL}/api/historial`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -27,7 +28,7 @@ export default function Orders() {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/historial/${orderId}/status`, {
+      const res = await fetch(`${API_URL}/api/historial/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

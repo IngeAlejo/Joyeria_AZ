@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Package, DollarSign, ShoppingBag, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { API_URL } from '../../config';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0, revenue: 0 });
@@ -14,7 +15,7 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/stats', {
+      const res = await fetch(`${API_URL}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

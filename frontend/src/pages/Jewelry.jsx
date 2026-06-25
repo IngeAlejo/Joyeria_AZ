@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { API_URL } from '../config';
 
 export default function Jewelry() {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,7 @@ export default function Jewelry() {
       try {
         setLoading(true);
         // Assuming your backend is running on 5000 as per app.js
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch(`${API_URL}/api/products`);
         if (!response.ok) throw new Error('Error fetching products');
         
         const data = await response.json();

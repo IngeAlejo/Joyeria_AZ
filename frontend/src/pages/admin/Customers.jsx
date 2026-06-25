@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserCog, Loader2, Edit2, ShieldAlert } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { API_URL } from '../../config';
 
 const EMPTY_FORM = {
   nombre: '', apellidos: '', email: '', telefono: '', telefonoFijo: '',
@@ -21,7 +22,7 @@ export default function Customers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/users', {
+      const res = await fetch(`${API_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -31,7 +32,7 @@ export default function Customers() {
   };
 
   const handleRoleChange = async (userId, newRole) => {
-    const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+    const res = await fetch(`${API_URL}/api/admin/users/${userId}/role`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ rol: newRole })
@@ -57,7 +58,7 @@ export default function Customers() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const res = await fetch(`http://localhost:5000/api/admin/users/${editingUser.id}`, {
+    const res = await fetch(`${API_URL}/api/admin/users/${editingUser.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(formData)

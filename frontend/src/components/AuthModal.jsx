@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { API_URL } from '../config';
 
 const INITIAL_FORM = {
   nombre: '',
@@ -45,7 +46,7 @@ export default function AuthModal() {
         ? { email: formData.email, contraseña: formData.contraseña }
         : { ...formData };
 
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
