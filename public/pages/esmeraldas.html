@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esmeraldas Colombianas Auténticas — Joyería AZ</title>
+  <meta name="description"
+    content="Esmeraldas colombianas certificadas de las minas de Muzo y Chivor. Verde intenso, pureza excepcional y origen garantizado. Joyería AZ.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+  <!-- =========================================================
+     NAVBAR UNIVERSAL
+     ========================================================= -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link active" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi
+                Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <span class="carrito-title">Tu Bolsa</span>
+      <button class="carrito-close" onclick="toggleCarrito()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="carrito-contenido">
+      <p style="color:var(--az-text-muted);font-size:14px;text-align:center;padding:40px 0;">Tu bolsa está vacía.</p>
+    </div>
+    <div id="carrito-total-wrap" class="d-none"
+      style="margin-top:20px;padding-top:20px;border-top:1px solid var(--az-border);">
+      <div class="d-flex justify-content-between mb-3">
+        <span
+          style="font-family:var(--font-ui);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--az-text-muted);">Total</span>
+        <span id="carrito-total"
+          style="font-family:var(--font-display);font-size:1.6rem;font-weight:500;color:var(--az-navy);">$0</span>
+      </div>
+      <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az w-100"
+        style="display:flex;justify-content:center;">
+        <i class="fab fa-whatsapp"></i>Pedir por WhatsApp
+      </a>
+    </div>
+  </div>
+  <div id="carrito-overlay" onclick="toggleCarrito()"
+    style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.3);z-index:1099;backdrop-filter:blur(2px);">
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="modal-title-lbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="padding:8px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="modal-title-lbl">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <form id="auth-form" onsubmit="manejarAuth(event)">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="auth-email" class="form-control" placeholder="tu@email.com" required
+                autocomplete="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required
+                autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none;">
+              <div class="mb-3">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" id="auth-nombre" class="form-control" placeholder="Tu nombre" autocomplete="name">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
+              <span id="btn-auth-text">Iniciar Sesión</span>
+            </button>
+          </form>
+          <div id="auth-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+          <hr style="border-color:var(--az-border);margin:16px 0;">
+          <p class="text-center mb-0" style="font-size:13px;color:var(--az-text-muted);">
+            <span id="auth-toggle-text">¿No tienes cuenta?</span>
+            <a href="#" onclick="toggleAuth(event)" id="auth-toggle-link"
+              style="color:var(--az-gold);font-weight:600;margin-left:4px;">Regístrate aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+     HERO — Cinematográfico
+     ========================================================= -->
+  <section style="position:relative;overflow:hidden;min-height:88vh;display:flex;align-items:center;">
+    <div style="
+    position:absolute;inset:0;
+    background-image:url('../img/paralax.jpg');
+    background-size:cover;
+    background-position:center;
+    transform:scale(1.05);
+    transition:transform 8s ease;
+  " id="hero-parallax-bg"></div>
+    <div
+      style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,26,46,0.85) 0%,rgba(26,26,46,0.55) 60%,rgba(45,106,79,0.3) 100%);">
+    </div>
+
+    <div class="container"
+      style="position:relative;z-index:1;padding-top:clamp(60px,8vw,100px);padding-bottom:clamp(60px,8vw,100px);">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7" data-reveal>
+          <span
+            style="display:inline-flex;align-items:center;gap:10px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:24px;">
+            <span style="display:block;width:32px;height:1px;background:var(--az-gold);"></span>
+            Colombia · Muzo y Chivor
+          </span>
+          <h1
+            style="font-family:var(--font-display);font-size:clamp(3rem,6vw,5.5rem);font-weight:300;color:white;line-height:1.05;letter-spacing:-0.02em;margin-bottom:24px;">
+            La esmeralda<br>más pura del <em style="font-style:italic;color:var(--az-gold);">mundo</em>
+          </h1>
+          <p
+            style="font-family:var(--font-ui);font-size:16px;color:rgba(255,255,255,0.65);max-width:480px;line-height:1.8;margin-bottom:40px;">
+            Colombia produce el 70% de las esmeraldas del mundo. Nuestras gemas provienen directamente
+            de las minas de Muzo y Chivor — reconocidas por su verde intenso e incomparable pureza.
+          </p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="joyeria.html" class="btn-primary-az">
+              <i class="fas fa-gem"></i>Ver Joyería
+            </a>
+            <a href="https://wa.me/573142056065?text=Hola!%20Quiero%20información%20sobre%20esmeraldas" target="_blank"
+              class="btn-whatsapp-az">
+              <i class="fab fa-whatsapp"></i>Consultar
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-5 d-flex justify-content-lg-end" data-reveal="right">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:340px;width:100%;">
+            <div
+              style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-card);padding:24px 20px;backdrop-filter:blur(8px);">
+              <div
+                style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
+                70%</div>
+              <div
+                style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:8px;">
+                Producción mundial</div>
+            </div>
+            <div
+              style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-card);padding:24px 20px;backdrop-filter:blur(8px);">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">
+                AAA</div>
+              <div
+                style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:8px;">
+                Calidad máxima</div>
+            </div>
+            <div
+              style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-card);padding:24px 20px;backdrop-filter:blur(8px);">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">
+                500+</div>
+              <div
+                style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:8px;">
+                Años de mina</div>
+            </div>
+            <div
+              style="background:rgba(184,150,90,0.15);border:1px solid rgba(184,150,90,0.3);border-radius:var(--r-card);padding:24px 20px;backdrop-filter:blur(8px);">
+              <div
+                style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
+                100%</div>
+              <div
+                style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:8px;">
+                Certificadas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     ORIGEN — Las minas
+     ========================================================= -->
+  <section class="section-az" style="background:var(--az-bg);">
+    <div class="container">
+      <div class="text-center section-header" data-reveal>
+        <span class="section-label">Origen garantizado</span>
+        <h2 class="section-title">Las minas más famosas<br>del <em
+            style="font-style:italic;color:var(--az-gold);">mundo</em></h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6" data-reveal="left">
+          <div
+            style="background:var(--az-navy);border-radius:var(--r-card);padding:clamp(32px,4vw,48px);height:100%;position:relative;overflow:hidden;">
+            <div
+              style="position:absolute;top:-20px;right:-20px;width:140px;height:140px;background:rgba(184,150,90,0.06);border-radius:50%;">
+            </div>
+            <span
+              style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);">Boyacá
+              · Colombia</span>
+            <h3
+              style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.5rem);font-weight:300;color:white;margin:16px 0 20px;letter-spacing:-0.01em;">
+              Mina de <em style="font-style:italic;color:var(--az-gold);">Muzo</em></h3>
+            <p
+              style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:28px;max-width:420px;">
+              La mina de Muzo produce las esmeraldas más codiciadas del planeta. Su verde intenso con tinte azulado,
+              conocido como <strong style="color:rgba(255,255,255,0.9);">"verde Muzo"</strong>, es el estándar de
+              calidad
+              mundial. En uso continuo desde el siglo XVI.
+            </p>
+            <div style="display:flex;gap:24px;">
+              <div>
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:var(--az-gold);">XVI
+                </div>
+                <div
+                  style="font-family:var(--font-ui);font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:.1em;text-transform:uppercase;">
+                  Siglo</div>
+              </div>
+              <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+              <div>
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:white;">Verde intenso
+                </div>
+                <div
+                  style="font-family:var(--font-ui);font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:.1em;text-transform:uppercase;">
+                  Tono único</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6" data-reveal="right">
+          <div
+            style="background:var(--az-surface-2);border-radius:var(--r-card);padding:clamp(32px,4vw,48px);height:100%;border:1px solid var(--az-border);position:relative;overflow:hidden;">
+            <div
+              style="position:absolute;top:-20px;right:-20px;width:140px;height:140px;background:rgba(26,26,46,0.04);border-radius:50%;">
+            </div>
+            <span
+              style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);">Boyacá
+              · Colombia</span>
+            <h3
+              style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.5rem);font-weight:300;color:var(--az-navy);margin:16px 0 20px;letter-spacing:-0.01em;">
+              Mina de <em style="font-style:italic;color:var(--az-gold);">Chivor</em></h3>
+            <p
+              style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;margin-bottom:28px;max-width:420px;">
+              Chivor produce esmeraldas con características únicas: su verde más claro y transparente,
+              con alta saturación, las convierte en las favoritas para coleccionistas. Conocidas también como
+              <strong style="color:var(--az-navy);">"esmeraldas azul-verde"</strong>.
+            </p>
+            <div style="display:flex;gap:24px;">
+              <div>
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:var(--az-gold);">1537
+                </div>
+                <div
+                  style="font-family:var(--font-ui);font-size:11px;color:var(--az-text-light);font-weight:600;letter-spacing:.1em;text-transform:uppercase;">
+                  Descubierta</div>
+              </div>
+              <div style="width:1px;background:var(--az-border-strong);"></div>
+              <div>
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:var(--az-navy);">
+                  Azul-verde</div>
+                <div
+                  style="font-family:var(--font-ui);font-size:11px;color:var(--az-text-light);font-weight:600;letter-spacing:.1em;text-transform:uppercase;">
+                  Tono único</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     CARACTERÍSTICAS — Cómo identificar una buena esmeralda
+     ========================================================= -->
+  <section class="section-az" style="background:var(--az-navy);">
+    <div class="container">
+      <div class="text-center section-header" data-reveal>
+        <span
+          style="display:inline-flex;align-items:center;gap:10px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:16px;">
+          <span style="display:block;width:24px;height:1px;background:var(--az-gold);"></span>
+          Las 4 C's
+        </span>
+        <h2
+          style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:white;letter-spacing:-0.02em;">
+          Cómo evaluar una esmeralda</h2>
+        <p
+          style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.5);max-width:480px;margin:16px auto 0;line-height:1.7;">
+          Los mismos criterios que usan los gemólogos del mundo.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="1">
+          <div style="border-top:2px solid var(--az-gold);padding-top:24px;">
+            <div
+              style="font-family:var(--font-display);font-size:3rem;font-weight:300;color:var(--az-gold);line-height:1;margin-bottom:16px;">
+              C</div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">Color
+            </h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">El factor
+              más importante. Las mejores esmeraldas tienen un verde intenso y vibrante con tono ligeramente azulado.
+              Saturación alta sin oscurecerse.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="2">
+          <div style="border-top:2px solid rgba(255,255,255,0.2);padding-top:24px;">
+            <div
+              style="font-family:var(--font-display);font-size:3rem;font-weight:300;color:white;line-height:1;margin-bottom:16px;">
+              C</div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">
+              Claridad</h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Las
+              inclusiones son normales en esmeraldas — se llaman "jardín". A diferencia de diamantes, pequeñas
+              inclusiones no reducen significativamente el valor.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="3">
+          <div style="border-top:2px solid rgba(255,255,255,0.2);padding-top:24px;">
+            <div
+              style="font-family:var(--font-display);font-size:3rem;font-weight:300;color:white;line-height:1;margin-bottom:16px;">
+              C</div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">Corte
+            </h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">El corte
+              esmeralda (octagonal) maximiza el color y protege las esquinas. Nuestros lapidarios colombianos son los
+              mejores del mundo en este corte.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="4">
+          <div style="border-top:2px solid rgba(255,255,255,0.2);padding-top:24px;">
+            <div
+              style="font-family:var(--font-display);font-size:3rem;font-weight:300;color:white;line-height:1;margin-bottom:16px;">
+              C</div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">
+              Quilates</h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">El peso
+              en quilates determina el tamaño. Las esmeraldas finas de más de 2ct son extraordinariamente raras y su
+              valor puede superar al de los diamantes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     CERTIFICACIÓN
+     ========================================================= -->
+  <section class="section-az section-gray">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <div class="col-lg-6" data-reveal="left">
+          <span class="section-label">Garantía de autenticidad</span>
+          <h2 class="section-title">Cada esmeralda,<br><em
+              style="font-style:italic;color:var(--az-gold);">certificada</em></h2>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:480px;margin-bottom:32px;">
+            Trabajamos con laboratorios gemológicos certificados para garantizar la autenticidad de cada piedra.
+            Cada esmeralda que vendemos incluye un certificado de origen colombiano y análisis gemológico.
+          </p>
+          <div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fas fa-certificate"></i></div>
+              <div>
+                <h6>Certificado de origen</h6>
+                <p style="max-width:none;">Documento oficial que certifica la procedencia colombiana de cada gema.</p>
+              </div>
+            </div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fas fa-microscope"></i></div>
+              <div>
+                <h6>Análisis gemológico</h6>
+                <p style="max-width:none;">Reporte técnico con color, claridad, quilates y tratamientos aplicados.</p>
+              </div>
+            </div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fas fa-shield-alt"></i></div>
+              <div>
+                <h6>Garantía de autenticidad</h6>
+                <p style="max-width:none;">Si no es auténtica, la devolvemos sin preguntas. Siempre.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6" data-reveal="right">
+          <div
+            style="background:var(--az-navy);border-radius:var(--r-card);padding:clamp(32px,4vw,48px);text-align:center;">
+            <i class="fas fa-gem" style="font-size:3rem;color:var(--az-gold);margin-bottom:24px;display:block;"></i>
+            <h3
+              style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:white;margin-bottom:16px;">
+              ¿Quieres una esmeralda?</h3>
+            <p
+              style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:32px;max-width:360px;margin-left:auto;margin-right:auto;">
+              Cuéntanos qué buscas y te ayudamos a encontrar la esmeralda perfecta: tamaño, corte, presupuesto.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <a href="https://wa.me/573142056065?text=Hola!%20Quiero%20información%20sobre%20esmeraldas"
+                target="_blank" class="btn-whatsapp-az" style="justify-content:center;">
+                <i class="fab fa-whatsapp"></i>Consultar por WhatsApp
+              </a>
+              <a href="joyeria.html" class="btn-secondary-az"
+                style="justify-content:center;border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);">
+                <i class="fas fa-gem"></i>Ver Joyería con Esmeraldas
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo"
+              style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.
+          </p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i
+                class="fab fa-whatsapp"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="joyeria.html">Joyería</a></li>
+            <li><a href="esmeraldas.html">Esmeraldas</a></li>
+            <li><a href="joyeria.html?cat=anillo">Anillos</a></li>
+            <li><a href="joyeria.html?cat=collar">Collares</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Páginas</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="../index.html#nosotros">Nosotros</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Atención</h6>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2"
+                  style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
+            <li><a href="mailto:info@joyeriaaz.com"><i class="fas fa-envelope me-2"
+                  style="color:var(--az-gold);"></i>info@joyeriaaz.com</a></li>
+            <li><a href="#"><i class="fas fa-map-marker-alt me-2" style="color:var(--az-gold);"></i>Bogotá, Colombia</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div id="toast-cart"
+    style="position:fixed;bottom:30px;right:20px;background:var(--az-navy);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-size:14px;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);transform:translateX(150%);transition:transform 0.4s var(--ease-out);display:flex;align-items:center;gap:10px;pointer-events:none;">
+    <i class="fas fa-check" style="color:var(--az-gold);"></i>
+    <span id="toast-text">Añadido al bolso</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/reveal.js"></script>
+  <script src="../js/app.js"></script>
+  <script>window.API_BASE_URL = 'http://localhost:5000';</script>
+  <script src="../js/auth.js"></script>
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('scrolled', window.scrollY > 50);
+      const bg = document.getElementById('hero-parallax-bg');
+      if (bg) bg.style.transform = `scale(1.05) translateY(${window.scrollY * 0.15}px)`;
+    }, { passive: true });
+  </script>
+
+</body>
+
+</html>

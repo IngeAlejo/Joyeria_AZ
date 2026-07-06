@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiénes Somos — Joyería AZ | Artesanos Colombianos</title>
+  <meta name="description"
+    content="Más de 25 años de tradición artesanal. Conoce la historia de Joyería AZ, familia colombiana dedicada a llevar esmeraldas y joyería fina al mundo.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+  <!-- =========================================================
+     NAVBAR UNIVERSAL
+     ========================================================= -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link active" href="nosotros.html">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi
+                Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <span class="carrito-title">Tu Bolsa</span>
+      <button class="carrito-close" onclick="toggleCarrito()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="carrito-contenido">
+      <p style="color:var(--az-text-muted);font-size:14px;text-align:center;padding:40px 0;">Tu bolsa está vacía.</p>
+    </div>
+    <div id="carrito-total-wrap" class="d-none"
+      style="margin-top:20px;padding-top:20px;border-top:1px solid var(--az-border);">
+      <div class="d-flex justify-content-between mb-3">
+        <span
+          style="font-family:var(--font-ui);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--az-text-muted);">Total</span>
+        <span id="carrito-total"
+          style="font-family:var(--font-display);font-size:1.6rem;font-weight:500;color:var(--az-navy-2);">$0</span>
+      </div>
+      <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az w-100"
+        style="display:flex;justify-content:center;">
+        <i class="fab fa-whatsapp"></i>Pedir por WhatsApp
+      </a>
+    </div>
+  </div>
+  <div id="carrito-overlay" onclick="toggleCarrito()"
+    style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.3);z-index:1099;backdrop-filter:blur(2px);">
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="modal-title-lbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="padding:8px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="modal-title-lbl">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <form id="auth-form" onsubmit="manejarAuth(event)">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="auth-email" class="form-control" placeholder="tu@email.com" required
+                autocomplete="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required
+                autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none;">
+              <div class="mb-3">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" id="auth-nombre" class="form-control" placeholder="Tu nombre" autocomplete="name">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
+              <span id="btn-auth-text">Iniciar Sesión</span>
+            </button>
+          </form>
+          <div id="auth-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+          <hr style="border-color:var(--az-border);margin:16px 0;">
+          <p class="text-center mb-0" style="font-size:13px;color:var(--az-text-muted);">
+            <span id="auth-toggle-text">¿No tienes cuenta?</span>
+            <a href="#" onclick="toggleAuth(event)" id="auth-toggle-link"
+              style="color:var(--az-gold);font-weight:600;margin-left:4px;">Regístrate aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+     HERO — Nosotros
+     ========================================================= -->
+  <section style="background:var(--az-navy-2);padding-top:0;position:relative;overflow:hidden;min-height:380px;display:flex;align-items:center;">
+    <!-- Decorative layer -->
+    <div style="position:absolute;inset:0;pointer-events:none;">
+      <!-- Ambient glows -->
+      <div style="position:absolute;top:-60px;right:-80px;width:500px;height:500px;border-radius:50%;background:radial-gradient(ellipse,rgba(184,150,90,0.07) 0%,transparent 65%);"></div>
+      <div style="position:absolute;bottom:-40px;left:-60px;width:350px;height:350px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,106,79,0.07) 0%,transparent 65%);"></div>
+      <!-- Animated rings -->
+      <div style="position:absolute;top:-140px;right:-140px;width:550px;height:550px;border-radius:50%;border:1px solid rgba(184,150,90,0.06);animation:heroRotate 50s linear infinite;"></div>
+      <div style="position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(184,150,90,0.1);animation:heroRotate 30s linear infinite reverse;"></div>
+      <!-- Bottom golden line -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,150,90,0.25),transparent);"></div>
+      <!-- Decorative diamond icon -->
+      <div style="position:absolute;right:3%;top:20%;opacity:0.06;font-size:120px;color:white;"><i class="fas fa-gem"></i></div>
+    </div>
+    <div class="container" style="padding-top:clamp(56px,7vw,96px);padding-bottom:clamp(56px,7vw,96px);position:relative;z-index:1;">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7" data-reveal>
+          <span
+            style="display:inline-flex;align-items:center;gap:10px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:20px;">
+            <span style="display:block;width:32px;height:1px;background:var(--az-gold);"></span>
+            Familia colombiana · Desde 1998
+          </span>
+          <h1
+            style="font-family:var(--font-display);font-size:clamp(2.8rem,5.5vw,5rem);font-weight:300;color:white;line-height:1.05;letter-spacing:-0.02em;margin:0;">
+            Artesanos de <em style="font-style:italic;color:var(--az-gold);">corazón</em>
+          </h1>
+          <p
+            style="font-family:var(--font-ui);font-size:16px;color:rgba(255,255,255,0.55);max-width:520px;line-height:1.8;margin-top:20px;margin-bottom:32px;">
+            Más de 25 años conectando la riqueza de las minas colombianas con
+            quienes valoran la autenticidad y el trabajo hecho a mano.
+          </p>
+          <!-- Timeline milestones -->
+          <div style="display:flex;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;margin-right:0;">
+              <div style="width:10px;height:10px;border-radius:50%;background:var(--az-gold);flex-shrink:0;"></div>
+              <div style="width:1px;flex:1;background:linear-gradient(180deg,rgba(184,150,90,0.5),rgba(184,150,90,0.1));min-height:40px;"></div>
+            </div>
+            <div style="margin-left:16px;">
+              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">1998 — Fundación</div>
+              <div style="font-family:var(--font-ui);font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;">Primera joya artesanal en Yopal, Colombia</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5 d-flex gap-3 justify-content-lg-end" data-reveal="right">
+          <!-- Stat cards -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.18);border-radius:var(--r-card);padding:22px 26px;backdrop-filter:blur(8px);">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">1998</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">Fundados</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.18);border-radius:var(--r-card);padding:22px 26px;backdrop-filter:blur(8px);">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">+25</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">Años</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;align-self:center;">
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(45,106,79,0.25);border-radius:var(--r-card);padding:22px 26px;backdrop-filter:blur(8px);">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-emerald);line-height:1;">+500</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">Clientes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     HISTORIA
+     ========================================================= -->
+  <section class="section-az">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <div class="col-lg-6" data-reveal="left">
+          <div style="position:relative;">
+            <img src="../img/IMG_1.png" alt="Historia de Joyería AZ" class="nosotros-img">
+            <div
+              style="position:absolute;bottom:-20px;right:-20px;background:var(--az-navy-2);border-radius:var(--r-card);padding:24px 28px;box-shadow:var(--shadow-lg);">
+              <div
+                style="font-family:var(--font-display);font-size:2rem;font-weight:300;color:var(--az-gold);line-height:1;">
+                25+</div>
+              <div
+                style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:4px;">
+                Años</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6" data-reveal="right">
+          <span class="section-label">Nuestra historia</span>
+          <h2 class="section-title">Nacimos de la<br><em style="font-style:italic;color:var(--az-gold);">pasión</em>
+          </h2>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.85;max-width:480px;margin-bottom:24px;">
+            Todo comenzó en 1998 cuando nuestra familia estableció contacto directo con los mineros de Muzo.
+            Vimos en esas gemas algo que el mundo merecía conocer: la esmeralda colombiana auténtica, sin
+            intermediarios, con su historia completa.
+          </p>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.85;max-width:480px;margin-bottom:36px;">
+            Hoy, cada pieza que sale de nuestro taller lleva décadas de conocimiento, respeto por la tradición
+            artesanal colombiana y el compromiso de que cada cliente reciba algo genuino.
+          </p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="joyeria.html" class="btn-primary-az">
+              <i class="fas fa-gem"></i>Ver Colección
+            </a>
+            <a href="../index.html#contacto" class="btn-secondary-az">
+              Contáctanos
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     VALORES
+     ========================================================= -->
+  <section class="section-az" style="background:var(--az-navy-2);">
+    <div class="container">
+      <div class="text-center section-header" data-reveal>
+        <span
+          style="display:inline-flex;align-items:center;gap:10px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:16px;">
+          <span style="display:block;width:24px;height:1px;background:var(--az-gold);"></span>
+          Lo que nos mueve
+        </span>
+        <h2
+          style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:white;letter-spacing:-0.02em;">
+          Nuestros valores</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="1">
+          <div
+            style="border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-card);padding:32px 28px;height:100%;transition:border-color 0.3s ease;"
+            onmouseenter="this.style.borderColor='rgba(184,150,90,0.4)'"
+            onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div
+              style="width:48px;height:48px;background:rgba(184,150,90,0.12);border-radius:var(--r-card);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+              <i class="fas fa-certificate" style="color:var(--az-gold);font-size:18px;"></i>
+            </div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">
+              Autenticidad</h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin:0;">
+              Cada gema tiene certificado de origen. Nunca vendemos sintéticos o tratados sin declararlo.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="2">
+          <div
+            style="border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-card);padding:32px 28px;height:100%;transition:border-color 0.3s ease;"
+            onmouseenter="this.style.borderColor='rgba(184,150,90,0.4)'"
+            onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div
+              style="width:48px;height:48px;background:rgba(184,150,90,0.12);border-radius:var(--r-card);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+              <i class="fas fa-hands" style="color:var(--az-gold);font-size:18px;"></i>
+            </div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">
+              Artesanía</h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin:0;">
+              Cada pieza es elaborada a mano por artesanos colombianos con décadas de experiencia.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="3">
+          <div
+            style="border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-card);padding:32px 28px;height:100%;transition:border-color 0.3s ease;"
+            onmouseenter="this.style.borderColor='rgba(184,150,90,0.4)'"
+            onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div
+              style="width:48px;height:48px;background:rgba(184,150,90,0.12);border-radius:var(--r-card);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+              <i class="fas fa-leaf" style="color:var(--az-gold);font-size:18px;"></i>
+            </div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">
+              Responsabilidad</h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin:0;">
+              Trabajamos con proveedores que respetan el medio ambiente y las comunidades mineras.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="4">
+          <div
+            style="border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-card);padding:32px 28px;height:100%;transition:border-color 0.3s ease;"
+            onmouseenter="this.style.borderColor='rgba(184,150,90,0.4)'"
+            onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div
+              style="width:48px;height:48px;background:rgba(184,150,90,0.12);border-radius:var(--r-card);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+              <i class="fas fa-heart" style="color:var(--az-gold);font-size:18px;"></i>
+            </div>
+            <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:white;margin-bottom:12px;">Pasión
+            </h4>
+            <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin:0;">
+              Amamos lo que hacemos. Esa pasión se refleja en cada detalle de cada joya que creamos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     ESTADÍSTICAS
+     ========================================================= -->
+  <section class="section-az section-gray">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <div class="col-lg-5" data-reveal="left">
+          <span class="section-label">En números</span>
+          <h2 class="section-title">25 años<br>hablan por <em style="font-style:italic;color:var(--az-gold);">sí
+              solos</em></h2>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:400px;margin-bottom:32px;">
+            Cada número representa un cliente satisfecho, una promesa cumplida y una joya creada con el corazón.
+          </p>
+          <a href="joyeria.html" class="btn-primary-az">
+            <i class="fas fa-gem"></i>Ver Colección
+          </a>
+        </div>
+        <div class="col-lg-7" data-reveal="right">
+          <div class="row g-4">
+            <div class="col-6">
+              <div class="nosotros-stat-item">
+                <span class="nosotros-num">+500</span>
+                <span class="nosotros-label">Clientes satisfechos en Colombia y el mundo</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nosotros-stat-item">
+                <span class="nosotros-num">25+</span>
+                <span class="nosotros-label">Años de experiencia artesanal ininterrumpida</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nosotros-stat-item">
+                <span class="nosotros-num">100%</span>
+                <span class="nosotros-label">Piezas elaboradas a mano, sin excepción</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nosotros-stat-item">
+                <span class="nosotros-num">2</span>
+                <span class="nosotros-label">Minas de origen: Muzo y Chivor, certificadas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     CTA FINAL
+     ========================================================= -->
+  <section style="background:var(--az-navy-2);padding:clamp(48px,7vw,96px) 0;">
+    <div class="container text-center" data-reveal>
+      <i class="fas fa-gem" style="font-size:2.5rem;color:var(--az-gold);margin-bottom:24px;display:block;"></i>
+      <h2
+        style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:white;letter-spacing:-0.02em;margin-bottom:16px;">
+        ¿Listo para encontrar tu joya?
+      </h2>
+      <p
+        style="font-family:var(--font-ui);font-size:16px;color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto 36px;line-height:1.7;">
+        Explora nuestra colección o cuéntanos qué buscas. Creamos piezas únicas a medida.
+      </p>
+      <div style="display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <a href="joyeria.html" class="btn-gold-az">
+          <i class="fas fa-gem"></i>Ver Joyería
+        </a>
+        <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az">
+          <i class="fab fa-whatsapp"></i>WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo"
+              style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.
+          </p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i
+                class="fab fa-whatsapp"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="joyeria.html">Joyería</a></li>
+            <li><a href="esmeraldas.html">Esmeraldas</a></li>
+            <li><a href="joyeria.html?cat=anillo">Anillos</a></li>
+            <li><a href="joyeria.html?cat=collar">Collares</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Páginas</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nosotros</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Atención</h6>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2"
+                  style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
+            <li><a href="mailto:info@joyeriaaz.com"><i class="fas fa-envelope me-2"
+                  style="color:var(--az-gold);"></i>info@joyeriaaz.com</a></li>
+            <li><a href="#"><i class="fas fa-map-marker-alt me-2" style="color:var(--az-gold);"></i>Bogotá, Colombia</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div id="toast-cart"
+    style="position:fixed;bottom:30px;right:20px;background:var(--az-navy);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-size:14px;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);transform:translateX(150%);transition:transform 0.4s var(--ease-out);display:flex;align-items:center;gap:10px;pointer-events:none;">
+    <i class="fas fa-check" style="color:var(--az-gold);"></i>
+    <span id="toast-text">Añadido al bolso</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/reveal.js"></script>
+  <script src="../js/app.js"></script>
+  <script>window.API_BASE_URL = 'http://localhost:5000';</script>
+  <script src="../js/auth.js"></script>
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+  </script>
+
+</body>
+
+</html>

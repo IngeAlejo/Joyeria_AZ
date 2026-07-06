@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --gold: #D4AF37;
+  --dark-gold: #B8860B;
+  --emerald: #2D7A4A;
+  --light-green: #E8F4F0;
+}
+
+@theme {
+  --color-gold: var(--gold);
+  --color-dark-gold: var(--dark-gold);
+  --color-emerald: var(--emerald);
+  --color-light-green: var(--light-green);
+  --font-sans: 'Montserrat', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #1a1a1a;
+  background-color: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+/* Base custom classes to replicate existing styling */
+@layer utilities {
+  .text-gold {
+    color: var(--color-gold);
+  }
+  .bg-emerald {
+    background-color: var(--color-emerald);
+  }
+}

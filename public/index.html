@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joyería AZ — Esmeraldas Colombianas Auténticas</title>
+  <meta name="description"
+    content="Joyería AZ: esmeraldas colombianas certificadas, anillos, collares y pulseras artesanales en oro 18k y plata 925. Directo desde Muzo y Chivor.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- =========================================================
+     NAVBAR UNIVERSAL
+     ========================================================= -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" aria-label="Joyería AZ — Inicio">
+        <img src="img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link active" href="#inicio">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="pages/joyeria.html">Joyería</a></li>
+
+
+          <!-- Admin extras — ocultos por JS -->
+
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <!-- Sin sesión -->
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <!-- Con sesión -->
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi
+                Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <!-- Carrito -->
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+     CARRITO SIDEBAR
+     ========================================================= -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <span class="carrito-title">Tu Bolsa</span>
+      <button class="carrito-close" onclick="toggleCarrito()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="carrito-contenido">
+      <p style="color:var(--az-text-muted);font-size:14px;text-align:center;padding:40px 0;">Tu bolsa está vacía.</p>
+    </div>
+    <div id="carrito-total-wrap" class="d-none"
+      style="margin-top:20px;padding-top:20px;border-top:1px solid var(--az-border);">
+      <div class="d-flex justify-content-between mb-3">
+        <span
+          style="font-family:var(--font-ui);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--az-text-muted);">Total</span>
+        <span id="carrito-total"
+          style="font-family:var(--font-display);font-size:1.6rem;font-weight:500;color:var(--az-navy);">$0</span>
+      </div>
+      <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az w-100"
+        style="display:flex;justify-content:center;">
+        <i class="fab fa-whatsapp"></i>Pedir por WhatsApp
+      </a>
+    </div>
+  </div>
+  <div id="carrito-overlay" onclick="toggleCarrito()"
+    style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.3);z-index:1099;backdrop-filter:blur(2px);">
+  </div>
+
+  <!-- =========================================================
+     AUTH MODAL
+     ========================================================= -->
+  <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="modal-title-lbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="padding:8px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="modal-title-lbl">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <form id="auth-form" onsubmit="manejarAuth(event)">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="auth-email" class="form-control" placeholder="tu@email.com" required
+                autocomplete="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required
+                autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none;">
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label">Nombre</label>
+                  <input type="text" id="auth-nombre" class="form-control" placeholder="Nombre" autocomplete="given-name">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Apellidos</label>
+                  <input type="text" id="auth-apellidos" class="form-control" placeholder="Apellidos" autocomplete="family-name">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="auth-telefono" class="form-control" placeholder="Opcional" autocomplete="tel">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
+              <span id="btn-auth-text">Iniciar Sesión</span>
+            </button>
+          </form>
+          <div id="auth-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+          <hr style="border-color:var(--az-border);margin:16px 0;">
+          <p class="text-center mb-0" style="font-size:13px;color:var(--az-text-muted);">
+            <span id="auth-toggle-text">¿No tienes cuenta?</span>
+            <a href="#" onclick="toggleAuth(event)" id="auth-toggle-link"
+              style="color:var(--az-gold);font-weight:600;margin-left:4px;">Regístrate aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+     HERO — Split layout profesional
+     ========================================================= -->
+  <section class="hero-section" id="inicio">
+    <div class="hero-content" data-reveal>
+      <span class="hero-eyebrow">Colombia · Desde 2025</span>
+      <h1 class="hero-headline">
+        Joyería fina<br>
+        <em>hecha a mano</em>
+      </h1>
+      <p class="hero-subtext">
+        Esmeraldas colombianas de las minas de Muzo y Chivor.
+        Oro 18k, plata 925 y piedras preciosas con historia.
+      </p>
+      <div class="hero-ctas">
+        <a href="pages/joyeria.html" class="btn-primary-az">
+          <i class="fas fa-gem"></i>Ver Colección
+        </a>
+        <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az">
+          <i class="fab fa-whatsapp"></i>WhatsApp
+        </a>
+      </div>
+    </div>
+    <div class="hero-image-col">
+      <img src="img/IMG_2.PNG" alt="Esmeraldas colombianas auténticas — Joyería AZ">
+      <div class="hero-image-overlay"></div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     STATS STRIP
+     ========================================================= -->
+  <section style="background:var(--az-navy);padding:28px 0;">
+    <div class="container">
+      <div class="row g-0 text-center">
+        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
+          <div
+            style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
+            +50</div>
+          <div
+            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            Clientes</div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">5+
+          </div>
+          <div
+            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            Años</div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
+          <div
+            style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
+            18k</div>
+          <div
+            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            Oro puro</div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:12px 0;">
+          <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">Muzo
+            | Chivor
+          </div>
+          <div
+            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            Origen</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     PRODUCTOS DESTACADOS
+     ========================================================= -->
+  <section class="section-az" id="productos" style="padding-top:30px;">
+    <div class="container">
+      <div class="section-header text-center" data-reveal>
+        <span class="section-label">Colección</span>
+        <h2 class="section-title">Nuestros <em style="font-style:italic;color:var(--az-gold);">Tesoros</em></h2>
+        <p class="section-subtitle mx-auto">Selección exclusiva de joyería fina artesanal. Cada pieza es única.</p>
+      </div>
+
+      <div class="row g-4" id="productos-grid">
+        <!-- Skeletons iniciales -->
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+      </div>
+
+      <div id="estado-error-home" class="d-none text-center py-5">
+        <i class="fas fa-exclamation-triangle fa-2x mb-3" style="color:#f59e0b;display:block;"></i>
+        <p style="color:var(--az-text-muted);font-size:15px;">No se pudo conectar al servidor.</p>
+        <button class="btn-primary-az mt-2" onclick="cargarProductosHome()">
+          <i class="fas fa-refresh"></i>Reintentar
+        </button>
+      </div>
+
+      <div class="text-center mt-5" data-reveal>
+        <a href="pages/joyeria.html" class="btn-secondary-az">
+          <i class="fas fa-gem"></i>Ver toda la colección
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     PARALLAX — Esmeraldas
+     ========================================================= -->
+  <section style="position:relative;overflow:hidden;">
+    <div style="
+    min-height:480px;
+    background-image:url('img/paralax.jpg');
+    background-attachment:fixed;
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:center;
+    position:relative;
+  ">
+      <div style="position:absolute;inset:0;background:rgba(26,26,46,0.72);"></div>
+      <div class="container"
+        style="position:relative;z-index:1;text-align:center;padding-top:clamp(48px,7vw,80px);padding-bottom:clamp(48px,7vw,80px);">
+        <span
+          style="display:inline-block;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:20px;">Colombia
+          produce el 70% de las esmeraldas del mundo</span>
+        <h2
+          style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:white;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px;">
+          Gemas auténticas de <em style="color:var(--az-gold);font-style:italic;">Muzo y Chivor</em>
+        </h2>
+        <p
+          style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.6);max-width:520px;margin:0 auto 36px;line-height:1.8;">
+          Verde intenso, pureza excepcional y origen certificado.
+          Cada esmeralda tiene su propia historia geológica.
+        </p>
+        <a href="pages/esmeraldas.html" class="btn-gold-az">
+          <i class="fas fa-gem"></i>Descubrir Esmeraldas
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     NOSOTROS
+     ========================================================= -->
+  <section class="section-az section-gray" id="nosotros">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <div class="col-lg-6" data-reveal="left">
+          <img src="img/IMG_1.png" alt="Joyería AZ — artesanía colombiana" class="nosotros-img">
+        </div>
+        <div class="col-lg-6" data-reveal="right">
+          <span class="section-label">Nuestra historia</span>
+          <h2 class="section-title">Más de 25 años<br>de <em
+              style="font-style:italic;color:var(--az-gold);">tradición</em></h2>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:480px;margin-bottom:32px;">
+            Desde 1998 trabajamos directamente con las minas de Muzo y Chivor para traerte
+            esmeraldas colombianas con certificado de origen. Cada joya es elaborada a mano
+            por artesanos con décadas de experiencia.
+          </p>
+          <div>
+            <div class="nosotros-stat-item">
+              <span class="nosotros-num">+500</span>
+              <span class="nosotros-label">Clientes satisfechos en Colombia y el mundo</span>
+            </div>
+            <div class="nosotros-stat-item">
+              <span class="nosotros-num">100%</span>
+              <span class="nosotros-label">Certificado de autenticidad en cada esmeralda</span>
+            </div>
+            <div class="nosotros-stat-item">
+              <span class="nosotros-num">Artesanal</span>
+              <span class="nosotros-label">Cada pieza elaborada a mano, sin excepción</span>
+            </div>
+          </div>
+          <a href="pages/nosotros.html" class="btn-secondary-az mt-4" style="display:inline-flex;">
+            Conocer más <i class="fas fa-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     CONTACTO
+     ========================================================= -->
+  <section class="section-az" id="contacto">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-5" data-reveal="left">
+          <span class="section-label">Contáctanos</span>
+          <h2 class="section-title">Hablemos de <em style="font-style:italic;color:var(--az-gold);">tu joya</em></h2>
+          <p
+            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:400px;margin-bottom:36px;">
+            ¿Buscas una pieza especial? Creamos joyería a medida con las piedras y el metal que elijas.
+          </p>
+          <div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+              <div>
+                <h6>WhatsApp</h6>
+                <a href="https://wa.me/573142056065" target="_blank">+57 314 205 6065</a>
+              </div>
+            </div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+              <div>
+                <h6>Email</h6>
+                <a href="mailto:joyeri.az925@gmail.com">joyeri.az925@gmail.com</a>
+              </div>
+            </div>
+            <div class="contact-info-block">
+              <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <h6>Ubicación</h6>
+                <p>Yopal, Colombia</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7" data-reveal="right">
+          <div class="contact-form-wrap"
+            style="background:var(--az-surface-2);border-radius:var(--r-card);padding:clamp(24px,4vw,48px);border:1px solid var(--az-border);">
+            <form id="contact-form" onsubmit="enviarContacto(event)">
+              <div class="row g-3">
+                <div class="col-md-6 mb-1">
+                  <label class="form-label">Nombre</label>
+                  <input type="text" class="form-control" id="contact-nombre" placeholder="Tu nombre" required>
+                </div>
+                <div class="col-md-6 mb-1">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" id="contact-email" placeholder="tu@email.com" required>
+                </div>
+                <div class="col-12 mb-1">
+                  <label class="form-label">Interés</label>
+                  <select class="form-select" id="contact-tipo">
+                    <option value="">Selecciona...</option>
+                    <option value="joyeria">Joyería personalizada</option>
+                    <option value="esmeralda">Esmeraldas sueltas</option>
+                    <option value="cotizacion">Cotización</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                </div>
+                <div class="col-12 mb-1">
+                  <label class="form-label">Mensaje</label>
+                  <textarea class="form-control" id="contact-mensaje" rows="4" placeholder="Cuéntanos qué buscas..."
+                    required></textarea>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn-primary-az w-100 py-3">
+                    <i class="fas fa-paper-plane"></i>
+                    <span id="contact-btn-text">Enviar mensaje</span>
+                  </button>
+                  <div id="contact-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     FOOTER
+     ========================================================= -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="img/ALE.png" alt="Logo"
+              style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.
+          </p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i
+                class="fab fa-whatsapp"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="pages/joyeria.html">Joyería</a></li>
+            <li><a href="pages/esmeraldas.html">Esmeraldas</a></li>
+            <li><a href="pages/joyeria.html?cat=anillo">Anillos</a></li>
+            <li><a href="pages/joyeria.html?cat=collar">Collares</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Páginas</h6>
+          <ul class="footer-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="pages/nosotros.html">Nosotros</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+            <li><a href="cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Atención</h6>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2"
+                  style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
+            <li><a href="mailto:info@joyeriaaz.com"><i class="fas fa-envelope me-2"
+                  style="color:var(--az-gold);"></i>info@joyeriaaz.com</a></li>
+            <li><a href="#"><i class="fas fa-map-marker-alt me-2" style="color:var(--az-gold);"></i>Bogotá, Colombia</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div id="toast-cart"
+    style="position:fixed;bottom:30px;right:20px;background:var(--az-navy);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-size:14px;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);transform:translateX(150%);transition:transform 0.4s var(--ease-out);display:flex;align-items:center;gap:10px;pointer-events:none;">
+    <i class="fas fa-check" style="color:var(--az-gold);"></i>
+    <span id="toast-text">Añadido al bolso</span>
+  </div>
+
+  <!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/reveal.js"></script>
+  <script>
+    window.API_BASE_URL = 'http://localhost:5000';
+  </script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const API = window.API_BASE_URL || 'http://localhost:5000';
+
+    /* Navbar scroll effect */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+
+    /* Admin extras visibility */
+    document.addEventListener('DOMContentLoaded', () => {
+      const rol = localStorage.getItem('rol');
+      if (rol === 'admin') {
+        document.getElementById('admin-extras')?.classList.remove('d-none');
+      }
+      cargarProductosHome();
+    });
+
+    /* Cargar productos en la home (máx 8) */
+    async function cargarProductosHome() {
+      mostrarSkeletonsHome();
+      try {
+        const res = await fetch(`${API}/api/products`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const lista = (data.productos || data || []).slice(0, 8);
+        renderProductosHome(lista);
+      } catch (e) {
+        ocultarSkeletonsHome();
+        document.getElementById('estado-error-home')?.classList.remove('d-none');
+      }
+    }
+
+    function renderProductosHome(lista) {
+      ocultarSkeletonsHome();
+      const grid = document.getElementById('productos-grid');
+      if (!grid) return;
+
+      if (!lista.length) {
+        grid.innerHTML = '<div class="col-12 text-center py-5"><p style="color:var(--az-text-muted);">No hay productos disponibles.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = lista.map((p, i) => {
+        const precio = Number(p.precio || 0);
+        const stock = p.stock != null ? Number(p.stock) : 1;
+        const nombre = p.nombre || p.name || 'Joya';
+        const desc = p.descripcion || p.description || '';
+        const cat = p.categoria || p.category || '';
+        const img = p.imagen || p.image || '';
+        const imgSrc = img
+          ? (img.startsWith('http') ? img : `${API}${img}`)
+          : `https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400`;
+        const featured = p.destacado || p.featured;
+        const catIsEsmeralda = cat.toLowerCase().includes('esmeralda');
+        const itemJson = JSON.stringify({ id: p.id, nombre, precio, imagen: imgSrc }).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `<div class="col-lg-3 col-md-6" data-reveal data-delay="${(i % 4) + 1}">
+        <article class="product-card">
+          <div class="product-img-wrap">
+            <img src="${imgSrc}" alt="${nombre}" loading="lazy"
+                 onerror="this.src='https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400'">
+            ${featured ? `<span class="product-badge badge-featured">Destacado</span>` : ''}
+            ${stock <= 0 ? `<div class="badge-no-stock">Sin Stock</div>` : ''}
+          </div>
+          <div class="product-body">
+            ${cat ? `<span class="badge-category ${catIsEsmeralda ? 'badge-emerald-cat' : ''}">${cat}</span>` : ''}
+            <h3 class="product-name">${nombre}</h3>
+            ${desc ? `<p class="product-desc">${desc}</p>` : ''}
+            <div class="product-footer">
+              <div>
+                <div class="product-price">$${precio.toLocaleString('es-CO')}</div>
+                <span class="product-price-label">COP</span>
+              </div>
+              <button class="btn-add-cart"
+                      onclick="agregarCarrito('${itemJson}')"
+                      ${stock <= 0 ? 'disabled aria-disabled="true"' : ''}
+                      aria-label="Agregar ${nombre} al carrito">
+                <i class="fas fa-shopping-bag"></i>
+                ${stock > 0 ? 'Agregar' : 'Agotado'}
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>`;
+      }).join('');
+
+      if (window.initReveal) window.initReveal();
+    }
+
+    function mostrarSkeletonsHome() {
+      const grid = document.getElementById('productos-grid');
+      if (grid) grid.innerHTML = [1, 2, 3, 4].map(() =>
+        `<div class="col-lg-3 col-md-6"><div class="skeleton skeleton-card"></div></div>`
+      ).join('');
+    }
+
+    function ocultarSkeletonsHome() {
+      const grid = document.getElementById('productos-grid');
+      if (grid) grid.querySelectorAll('.skeleton').forEach(s => s.parentElement?.remove());
+    }
+
+    /* Formulario de contacto → WhatsApp */
+    function enviarContacto(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('contact-nombre')?.value.trim();
+      const email = document.getElementById('contact-email')?.value.trim();
+      const tipo = document.getElementById('contact-tipo')?.value;
+      const mensaje = document.getElementById('contact-mensaje')?.value.trim();
+      const msg = document.getElementById('contact-msg');
+      const btn = document.getElementById('contact-btn-text');
+
+      const texto = `Hola Joyería AZ! 👋%0ASoy *${nombre}* (${email}).%0AInterés: *${tipo || 'consulta'}*%0A%0A${mensaje}`;
+      if (btn) btn.textContent = 'Abriendo WhatsApp...';
+      setTimeout(() => {
+        window.open(`https://wa.me/573142056065?text=${texto}`, '_blank');
+        if (msg) { msg.style.color = 'var(--az-emerald)'; msg.textContent = '¡Mensaje enviado por WhatsApp!'; }
+        if (btn) btn.textContent = 'Enviar mensaje';
+        document.getElementById('contact-form')?.reset();
+      }, 400);
+    }
+  </script>
+
+</body>
+
+</html>

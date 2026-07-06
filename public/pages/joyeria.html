@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Joyería — Oro, Plata y Esmeraldas | Joyería AZ</title>
+  <meta name="description"
+    content="Descubre nuestra colección completa: anillos, collares, pulseras y aretes en oro 18k, plata 925 y esmeraldas colombianas certificadas.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+  <!-- =========================================================
+     NAVBAR UNIVERSAL
+     ========================================================= -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link active" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi
+                Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <span class="carrito-title">Tu Bolsa</span>
+      <button class="carrito-close" onclick="toggleCarrito()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="carrito-contenido">
+      <p style="color:var(--az-text-muted);font-size:14px;text-align:center;padding:40px 0;">Tu bolsa está vacía.</p>
+    </div>
+    <div id="carrito-total-wrap" class="d-none"
+      style="margin-top:20px;padding-top:20px;border-top:1px solid var(--az-border);">
+      <div class="d-flex justify-content-between mb-3">
+        <span
+          style="font-family:var(--font-ui);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--az-text-muted);">Total</span>
+        <span id="carrito-total"
+          style="font-family:var(--font-display);font-size:1.6rem;font-weight:500;color:var(--az-navy);">$0</span>
+      </div>
+      <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az w-100"
+        style="display:flex;justify-content:center;">
+        <i class="fab fa-whatsapp"></i>Pedir por WhatsApp
+      </a>
+    </div>
+  </div>
+  <div id="carrito-overlay" onclick="toggleCarrito()"
+    style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.3);z-index:1099;backdrop-filter:blur(2px);">
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="modal-title-lbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="padding:8px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="modal-title-lbl">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <form id="auth-form" onsubmit="manejarAuth(event)">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="auth-email" class="form-control" placeholder="tu@email.com" required
+                autocomplete="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required
+                autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none;">
+              <div class="mb-3">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" id="auth-nombre" class="form-control" placeholder="Tu nombre" autocomplete="name">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
+              <span id="btn-auth-text">Iniciar Sesión</span>
+            </button>
+          </form>
+          <div id="auth-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+          <hr style="border-color:var(--az-border);margin:16px 0;">
+          <p class="text-center mb-0" style="font-size:13px;color:var(--az-text-muted);">
+            <span id="auth-toggle-text">¿No tienes cuenta?</span>
+            <a href="#" onclick="toggleAuth(event)" id="auth-toggle-link"
+              style="color:var(--az-gold);font-weight:600;margin-left:4px;">Regístrate aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+     PAGE HERO — Catálogo
+     ========================================================= -->
+  <section style="background:var(--az-navy);padding-top:0;position:relative;overflow:hidden;min-height:360px;display:flex;align-items:center;">
+    <!-- Decorative layer -->
+    <div style="position:absolute;inset:0;pointer-events:none;">
+      <!-- Radial ambient glow -->
+      <div style="position:absolute;top:-100px;right:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(184,150,90,0.07) 0%,transparent 65%);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,106,79,0.08) 0%,transparent 65%);pointer-events:none;"></div>
+      <!-- Rotating rings -->
+      <div style="position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(184,150,90,0.08);animation:heroRotate 40s linear infinite;"></div>
+      <div style="position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(184,150,90,0.12);animation:heroRotate 25s linear infinite reverse;"></div>
+      <!-- Fine horizontal divider line -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,150,90,0.2),transparent);"></div>
+      <!-- Floating gem accents -->
+      <div style="position:absolute;top:30%;left:5%;opacity:0.15;font-size:10px;color:var(--az-gold);animation:floatGem 6s ease-in-out infinite;"><i class="fas fa-gem"></i></div>
+      <div style="position:absolute;top:55%;right:8%;opacity:0.1;font-size:8px;color:white;animation:floatGem 8s ease-in-out infinite 2s;"><i class="fas fa-star"></i></div>
+      <div style="position:absolute;top:20%;right:25%;opacity:0.08;font-size:14px;color:var(--az-gold);animation:floatGem 9s ease-in-out infinite 1s;"><i class="fas fa-gem"></i></div>
+    </div>
+    <div class="container" style="padding-top:clamp(56px,7vw,90px);padding-bottom:clamp(56px,7vw,90px);position:relative;z-index:1;">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span style="display:inline-flex;align-items:center;gap:10px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:20px;">
+            <span style="display:block;width:32px;height:1px;background:var(--az-gold);"></span>
+            Catálogo Oficial &middot; Joyeria AZ
+          </span>
+          <h1 style="font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:white;line-height:1.1;letter-spacing:-0.02em;margin:0;">
+            Colección <em style="font-style:italic;color:var(--az-gold);">Artesanal</em>
+          </h1>
+          <p style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.55);margin-top:16px;max-width:420px;line-height:1.7;">
+            Joyería fina en oro 18k, plata 925 y esmeraldas colombianas certificadas. Cada pieza, elaborada a mano.
+          </p>
+          <!-- Badges -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-pill);border:1px solid rgba(184,150,90,0.25);background:rgba(184,150,90,0.08);font-family:var(--font-ui);font-size:11px;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,0.65);"><i class="fas fa-gem" style="color:var(--az-gold);font-size:9px;"></i>Oro 18k</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-pill);border:1px solid rgba(184,150,90,0.25);background:rgba(184,150,90,0.08);font-family:var(--font-ui);font-size:11px;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,0.65);"><i class="fas fa-certificate" style="color:var(--az-gold);font-size:9px;"></i>Certificadas</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-pill);border:1px solid rgba(184,150,90,0.25);background:rgba(184,150,90,0.08);font-family:var(--font-ui);font-size:11px;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,0.65);"><i class="fas fa-hands" style="color:var(--az-gold);font-size:9px;"></i>Artesanal</span>
+          </div>
+        </div>
+        <div class="col-lg-5 d-flex gap-4 justify-content-lg-end align-items-center">
+          <!-- Stat cards -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+              <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:var(--az-gold);" id="hero-count">—</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Piezas</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+              <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:white;">Muzo</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Origen</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(184,150,90,0.15);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+              <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:white;">18k</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Oro</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(45,106,79,0.25);border-radius:var(--r-card);padding:16px 22px;backdrop-filter:blur(8px);text-align:center;">
+              <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:300;color:var(--az-emerald);">925</div>
+              <div style="font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Plata</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     FILTROS + CATÁLOGO
+     ========================================================= -->
+  <section class="section-az section-light" id="catalogo">
+    <div class="container">
+
+      <!-- FILTROS -->
+      <div
+        style="background:var(--az-surface-2);border-radius:var(--r-card);padding:20px 24px;margin-bottom:36px;border:1px solid var(--az-border);">
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-4 col-md-6">
+            <div style="position:relative;">
+              <i class="fas fa-search"
+                style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--az-text-light);font-size:13px;pointer-events:none;"></i>
+              <input type="text" id="buscar-input" class="form-control"
+                style="border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px 10px 38px;color:var(--az-navy);"
+                placeholder="Buscar joya..." oninput="aplicarFiltros()" aria-label="Buscar joyas">
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <select id="orden-select" class="form-select"
+              style="border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);font-family:var(--font-ui);font-size:14px;padding:10px 14px;color:var(--az-navy);"
+              onchange="aplicarFiltros()" aria-label="Ordenar">
+              <option value="relevancia">Relevancia</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+              <option value="nombre-az">Nombre A–Z</option>
+            </select>
+          </div>
+          <div class="col-lg-5">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;" role="group" aria-label="Categorías">
+              <button class="cat-pill active" data-cat="" onclick="setCat(this,'')">Todo</button>
+              <button class="cat-pill" data-cat="anillo" onclick="setCat(this,'anillo')">
+                <i class="fas fa-ring"></i> Anillos
+              </button>
+              <button class="cat-pill" data-cat="collar" onclick="setCat(this,'collar')">Collares</button>
+              <button class="cat-pill" data-cat="aretes" onclick="setCat(this,'aretes')">Aretes</button>
+              <button class="cat-pill" data-cat="pulsera" onclick="setCat(this,'pulsera')">Pulseras</button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3"
+          style="border-top:1px solid var(--az-border);">
+          <span id="contador-resultados"
+            style="font-family:var(--font-ui);font-size:13px;color:var(--az-text-muted);">Cargando...</span>
+          <div style="display:flex;gap:4px;">
+            <button id="btn-grid" onclick="setVista('grid')" aria-pressed="true"
+              style="width:32px;height:32px;border:1.5px solid var(--az-navy);border-radius:var(--r-badge);background:var(--az-navy);color:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;"
+              title="Vista cuadrícula" aria-label="Vista cuadrícula">
+              <i class="fas fa-th"></i>
+            </button>
+            <button id="btn-list" onclick="setVista('list')" aria-pressed="false"
+              style="width:32px;height:32px;border:1.5px solid var(--az-border-strong);border-radius:var(--r-badge);background:transparent;color:var(--az-text-muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;"
+              title="Vista lista" aria-label="Vista lista">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           BANNER ESMERALDAS (Elegante)
+           ========================================================= -->
+      <div style="background: linear-gradient(135deg, var(--az-navy) 0%, #153322 100%); border-radius: var(--r-card); padding: clamp(24px, 4vw, 40px); margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); border: 1px solid rgba(184,150,90,0.2);" data-reveal>
+        <!-- Decoración de fondo -->
+        <div style="position: absolute; right: -50px; top: -50px; width: 250px; height: 250px; background: rgba(184,150,90,0.15); filter: blur(50px); border-radius: 50%;"></div>
+        <div style="position: absolute; left: 10%; bottom: -30px; width: 150px; height: 150px; background: rgba(21,51,34,0.5); filter: blur(30px); border-radius: 50%;"></div>
+        
+        <div style="position: relative; z-index: 1;">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:12px;">
+            <span style="display:block;width:24px;height:1px;background:var(--az-gold);"></span>
+            Colección Exclusiva
+          </span>
+          <h3 style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.5rem);font-weight:300;color:white;margin:0;letter-spacing:-0.01em;">
+            Esmeraldas <em style="font-style:italic;color:var(--az-gold);">Colombianas</em>
+          </h3>
+          <p style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.65);margin:12px 0 0;max-width:480px;line-height:1.7;">
+            Descubre nuestra selección premium de esmeraldas extraídas directamente de las legendarias minas de Muzo y Chivor, con certificación de origen y autenticidad.
+          </p>
+        </div>
+        
+        <div style="position: relative; z-index: 1;">
+          <a href="esmeraldas.html" class="btn-gold-az" style="padding: 14px 32px; font-size: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-radius: var(--r-pill);">
+            Explorar Colección <i class="fas fa-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- GRID -->
+      <div class="row g-4" id="productos-grid">
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div id="estado-vacio" class="d-none text-center py-5">
+        <i class="fas fa-search fa-2x mb-3" style="color:var(--az-text-light);display:block;"></i>
+        <h5 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);">Sin resultados</h5>
+        <p style="color:var(--az-text-muted);font-size:14px;">Intenta con otro término o categoría.</p>
+        <button class="btn-secondary-az mt-2" onclick="limpiarFiltros()">Limpiar filtros</button>
+      </div>
+
+      <!-- Estado error -->
+      <div id="estado-error" class="d-none text-center py-5">
+        <i class="fas fa-exclamation-triangle fa-2x mb-3" style="color:#f59e0b;display:block;"></i>
+        <h5 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);">Sin conexión</h5>
+        <p style="color:var(--az-text-muted);font-size:14px;">No se pudo conectar al servidor.</p>
+        <button class="btn-primary-az mt-2" onclick="cargarProductos()">
+          <i class="fas fa-refresh"></i>Reintentar
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo"
+              style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.
+          </p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i
+                class="fab fa-whatsapp"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Categorías</h6>
+          <ul class="footer-links">
+            <li><a href="#" onclick="setCatUrl('anillo')">Anillos</a></li>
+            <li><a href="#" onclick="setCatUrl('collar')">Collares</a></li>
+            <li><a href="#" onclick="setCatUrl('aretes')">Aretes</a></li>
+            <li><a href="#" onclick="setCatUrl('pulsera')">Pulseras</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Páginas</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="../index.html#nosotros">Nosotros</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Atención</h6>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2"
+                  style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
+            <li><a href="mailto:info@joyeriaaz.com"><i class="fas fa-envelope me-2"
+                  style="color:var(--az-gold);"></i>info@joyeriaaz.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div id="toast-cart"
+    style="position:fixed;bottom:30px;right:20px;background:var(--az-navy);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-size:14px;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);transform:translateX(150%);transition:transform 0.4s var(--ease-out);display:flex;align-items:center;gap:10px;pointer-events:none;">
+    <i class="fas fa-check" style="color:var(--az-gold);"></i>
+    <span id="toast-text">Añadido al bolso</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/reveal.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    window.API_BASE_URL = 'http://localhost:5000';
+    const API = window.API_BASE_URL || 'http://localhost:5000';
+    let todosProductos = [];
+    let categoriaActual = '';
+    let vistaActual = 'grid';
+
+    /* ---- NAVBAR ---- */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar-main')?.classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+
+    /* ---- URL PARAM ---- */
+    const urlParams = new URLSearchParams(window.location.search);
+    const catParam = urlParams.get('cat');
+    if (catParam) categoriaActual = catParam;
+
+    /* ---- INITIALIZATION ---- */
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarProductos();
+      // Aplicar categoría de URL
+      if (categoriaActual) {
+        const btn = document.querySelector(`.cat-pill[data-cat="${categoriaActual}"]`);
+        if (btn) { document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+      }
+    });
+
+    /* ---- PRODUCTOS ---- */
+    async function cargarProductos() {
+      mostrarSkeletons();
+      try {
+        const res = await fetch(`${API}/api/products`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        todosProductos = data.productos || data || [];
+        const countEl = document.getElementById('hero-count');
+        if (countEl) countEl.textContent = todosProductos.length;
+        aplicarFiltros();
+      } catch (e) {
+        ocultarSkeletons();
+        const errEl = document.getElementById('estado-error');
+        if (errEl) errEl.classList.remove('d-none');
+        const counter = document.getElementById('contador-resultados');
+        if (counter) counter.textContent = '0 resultados';
+      }
+    }
+
+    function aplicarFiltros() {
+      const buscar = (document.getElementById('buscar-input')?.value || '').toLowerCase().trim();
+      const orden = document.getElementById('orden-select')?.value || 'relevancia';
+      let lista = [...todosProductos];
+      if (categoriaActual) lista = lista.filter(p => (p.categoria || '').toLowerCase().includes(categoriaActual));
+      if (buscar) lista = lista.filter(p => (p.nombre || '').toLowerCase().includes(buscar) || (p.descripcion || '').toLowerCase().includes(buscar));
+      if (orden === 'precio-asc') lista.sort((a, b) => Number(a.precio) - Number(b.precio));
+      if (orden === 'precio-desc') lista.sort((a, b) => Number(b.precio) - Number(a.precio));
+      if (orden === 'nombre-az') lista.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+      renderProductos(lista);
+    }
+
+    function setCat(btn, cat) {
+      categoriaActual = cat;
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      aplicarFiltros();
+    }
+
+    function setCatUrl(cat) {
+      categoriaActual = cat;
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      const btn = document.querySelector(`.cat-pill[data-cat="${cat}"]`);
+      if (btn) btn.classList.add('active');
+      aplicarFiltros();
+      document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
+      return false;
+    }
+
+    function limpiarFiltros() {
+      categoriaActual = '';
+      const buscarEl = document.getElementById('buscar-input');
+      if (buscarEl) buscarEl.value = '';
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      const defBtn = document.querySelector('.cat-pill[data-cat=""]');
+      if (defBtn) defBtn.classList.add('active');
+      aplicarFiltros();
+    }
+
+    function setVista(v) {
+      vistaActual = v;
+      const gBtn = document.getElementById('btn-grid');
+      const lBtn = document.getElementById('btn-list');
+      if (v === 'grid') {
+        if (gBtn) gBtn.style.cssText = 'width:32px;height:32px;border:1.5px solid var(--az-navy);border-radius:var(--r-badge);background:var(--az-navy);color:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;';
+        if (lBtn) lBtn.style.cssText = 'width:32px;height:32px;border:1.5px solid var(--az-border-strong);border-radius:var(--r-badge);background:transparent;color:var(--az-text-muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;';
+      } else {
+        if (lBtn) lBtn.style.cssText = 'width:32px;height:32px;border:1.5px solid var(--az-navy);border-radius:var(--r-badge);background:var(--az-navy);color:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;';
+        if (gBtn) gBtn.style.cssText = 'width:32px;height:32px;border:1.5px solid var(--az-border-strong);border-radius:var(--r-badge);background:transparent;color:var(--az-text-muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;';
+      }
+      aplicarFiltros();
+    }
+
+    function renderProductos(lista) {
+      ocultarSkeletons();
+      document.getElementById('estado-vacio')?.classList.add('d-none');
+      document.getElementById('estado-error')?.classList.add('d-none');
+      const counter = document.getElementById('contador-resultados');
+      if (counter) counter.textContent = `${lista.length} resultado${lista.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById('productos-grid');
+      if (!grid) return;
+
+      if (!lista.length) {
+        grid.innerHTML = '';
+        document.getElementById('estado-vacio')?.classList.remove('d-none');
+        return;
+      }
+
+      const cols = vistaActual === 'list' ? 'col-12' : 'col-lg-3 col-md-6';
+
+      grid.innerHTML = lista.map((p, i) => {
+        const precio = Number(p.precio || 0);
+        const stock = p.stock != null ? Number(p.stock) : 1;
+        const nombre = p.nombre || p.name || 'Joya';
+        const desc = p.descripcion || p.description || '';
+        const cat = p.categoria || p.category || '';
+        const img = p.imagen || p.image || '';
+        const imgSrc = img ? (img.startsWith('http') ? img : `${API}${img}`) : `https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400`;
+        const featured = p.destacado || p.featured;
+        const catIsEsmeralda = cat.toLowerCase().includes('esmeralda');
+        const itemJson = JSON.stringify({ id: p.id, nombre, precio, imagen: imgSrc }).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `<div class="${cols}" data-reveal data-delay="${(i % 4) + 1}">
+        <article class="product-card">
+          <div class="product-img-wrap">
+            <img src="${imgSrc}" alt="${nombre}" loading="lazy"
+                 onerror="this.src='https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400'">
+            ${featured ? `<span class="product-badge badge-featured">Destacado</span>` : ''}
+            ${stock <= 0 ? `<div class="badge-no-stock">Sin Stock</div>` : ''}
+          </div>
+          <div class="product-body">
+            ${cat ? `<span class="badge-category ${catIsEsmeralda ? 'badge-emerald-cat' : ''}">${cat}</span>` : ''}
+            <h3 class="product-name">${nombre}</h3>
+            ${desc ? `<p class="product-desc">${desc}</p>` : ''}
+            <div class="product-footer">
+              <div>
+                <div class="product-price">$${precio.toLocaleString('es-CO')}</div>
+                <span class="product-price-label">COP</span>
+              </div>
+              <button class="btn-add-cart"
+                      onclick="agregarCarrito('${itemJson}')"
+                      ${stock <= 0 ? 'disabled aria-disabled="true"' : ''}
+                      aria-label="Agregar ${nombre} al carrito">
+                <i class="fas fa-shopping-bag"></i>
+                ${stock > 0 ? 'Agregar' : 'Agotado'}
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>`;
+      }).join('');
+      if (window.initReveal) window.initReveal();
+    }
+
+    function mostrarSkeletons() {
+      const grid = document.getElementById('productos-grid');
+      if (grid) grid.innerHTML = [1, 2, 3, 4].map(() => `<div class="col-lg-3 col-md-6"><div class="skeleton skeleton-card"></div></div>`).join('');
+    }
+
+    function ocultarSkeletons() {
+      const grid = document.getElementById('productos-grid');
+      if (grid) grid.querySelectorAll('.skeleton').forEach(s => s.parentElement?.remove());
+    }
+  </script>
+</body>
+
+</html>
