@@ -20,6 +20,8 @@ function actualizarBadgeCarrito() {
   const total = carrito.reduce((s, i) => s + (i.cantidad || 1), 0);
   const badge = document.getElementById('badge-carrito');
   if (badge) badge.textContent = total;
+  const badgeFloat = document.getElementById('badge-carrito-float');
+  if (badgeFloat) badgeFloat.textContent = total;
 }
 
 // Abrir/cerrar el sidebar del carrito
@@ -80,7 +82,7 @@ function renderCarritoSidebar() {
 
 function cambiarCantidad(id, delta) {
   let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-  const idx = carrito.findIndex(i => i.id === id);
+  const idx = carrito.findIndex(i => String(i.id) === String(id));
   if (idx < 0) return;
   carrito[idx].cantidad = Math.max(1, (carrito[idx].cantidad || 1) + delta);
   localStorage.setItem('carrito', JSON.stringify(carrito));
@@ -90,7 +92,7 @@ function cambiarCantidad(id, delta) {
 
 function quitarDelCarrito(id) {
   let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-  carrito = carrito.filter(i => i.id !== id);
+  carrito = carrito.filter(i => String(i.id) !== String(id));
   localStorage.setItem('carrito', JSON.stringify(carrito));
   actualizarBadgeCarrito();
   renderCarritoSidebar();
@@ -103,7 +105,7 @@ function agregarCarrito(item) {
   }
 
   let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-  const i = carrito.findIndex(x => x.id === item.id);
+  const i = carrito.findIndex(x => String(x.id) === String(item.id));
   if (i >= 0) {
     carrito[i].cantidad = (carrito[i].cantidad || 1) + 1;
   } else {

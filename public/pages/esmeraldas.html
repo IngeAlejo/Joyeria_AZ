@@ -134,6 +134,7 @@
     background-image:url('../img/paralax.jpg');
     background-size:cover;
     background-position:center;
+    background-repeat:no-repeat;
     transform:scale(1.05);
     transition:transform 8s ease;
   " id="hero-parallax-bg"></div>
@@ -507,10 +508,14 @@
   <script>
     window.addEventListener('scroll', () => {
       document.getElementById('navbar-main')?.classList.toggle('scrolled', window.scrollY > 50);
-      const bg = document.getElementById('hero-parallax-bg');
-      if (bg) bg.style.transform = `scale(1.05) translateY(${window.scrollY * 0.15}px)`;
     }, { passive: true });
   </script>
+
+  <!-- Floating cart button (mobile) -->
+  <button class="btn-cart-float" onclick="toggleCarrito()" aria-label="Ver carrito">
+    <i class="fas fa-shopping-bag"></i>
+    <span class="cart-badge-float" id="badge-carrito-float">0</span>
+  </button>
 
 </body>
 

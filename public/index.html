@@ -186,14 +186,14 @@
             style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
             +50</div>
           <div
-            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
             Clientes</div>
         </div>
         <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
           <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">5+
           </div>
           <div
-            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
             Años</div>
         </div>
         <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
@@ -201,7 +201,7 @@
             style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
             18k</div>
           <div
-            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
             Oro puro</div>
         </div>
         <div class="col-6 col-md-3" style="padding:12px 0;">
@@ -209,7 +209,7 @@
             | Chivor
           </div>
           <div
-            style="font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
+            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
             Origen</div>
         </div>
       </div>
@@ -269,6 +269,7 @@
     background-attachment:fixed;
     background-size:cover;
     background-position:center;
+    background-repeat:no-repeat;
     display:flex;
     align-items:center;
     position:relative;
@@ -608,6 +609,12 @@
       }, 400);
     }
   </script>
+
+  <!-- Floating cart button (mobile) -->
+  <button class="btn-cart-float" onclick="toggleCarrito()" aria-label="Ver carrito">
+    <i class="fas fa-shopping-bag"></i>
+    <span class="cart-badge-float" id="badge-carrito-float">0</span>
+  </button>
 
 </body>
 
