@@ -1463,3 +1463,640 @@ footer {
   background: var(--az-gold);
   margin: 0;
 }
+
+/* =====================================================
+   RESPONSIVE — Mobile-First Media Queries
+   ===================================================== */
+
+/* ---------- TOUCH TARGETS (all devices) ---------- */
+button,
+a,
+input,
+select,
+textarea,
+.nav-link,
+.btn-nav-login,
+.btn-nav-cta,
+.btn-cart,
+.btn-add-cart,
+.btn-primary-az,
+.btn-secondary-az,
+.btn-gold-az,
+.btn-whatsapp-az,
+.cat-pill {
+  touch-action: manipulation;
+}
+
+/* ---------- TABLETS (max-width: 991px) ---------- */
+@media (max-width: 991px) {
+  .hero-headline {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+  }
+
+  .section-header {
+    margin-bottom: 36px;
+  }
+
+  .nosotros-img {
+    height: 360px;
+  }
+
+  footer {
+    padding: 48px 0 32px;
+  }
+
+  .carrito-flotante {
+    width: 340px;
+  }
+}
+
+/* ---------- MOBILE (max-width: 767px) ---------- */
+@media (max-width: 767px) {
+
+  /* --- Body & Spacing --- */
+  body {
+    padding-top: 56px;
+  }
+
+  .section-az {
+    padding: clamp(24px, 5vw, 48px) 0;
+  }
+
+  .section-header {
+    margin-bottom: 28px;
+  }
+
+  /* --- Hero Home --- */
+  .hero-section {
+    min-height: auto;
+    padding-top: 0;
+  }
+
+  .hero-content {
+    padding: 24px 20px 32px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .hero-headline {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+  }
+
+  .hero-subtext {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+
+  .hero-ctas {
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-ctas .btn-primary-az,
+  .hero-ctas .btn-whatsapp-az,
+  .hero-ctas .btn-gold-az {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-image-col {
+    height: 50vw;
+    min-height: 220px;
+  }
+
+  /* --- Stats Strip (Home) --- */
+  .row.g-0 .col-6 {
+    padding: 12px 8px !important;
+    border-right: none !important;
+  }
+
+  .row.g-0 .col-6 > div {
+    font-size: 1.6rem !important;
+  }
+
+  /* --- Product Grid --- */
+  .product-img-wrap {
+    height: 200px;
+  }
+
+  .product-body {
+    padding: 16px;
+  }
+
+  .product-name {
+    font-size: 1rem;
+  }
+
+  .product-price {
+    font-size: 1.3rem;
+  }
+
+  .btn-add-cart {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  /* --- Product Filters (Catálogo) --- */
+  .cat-pill {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* --- Nosotros --- */
+  .nosotros-img {
+    height: 280px;
+  }
+
+  .nosotros-num {
+    font-size: 2rem;
+  }
+
+  /* --- Contact Form --- */
+  .contact-form-wrap {
+    padding: clamp(16px, 4vw, 32px) !important;
+  }
+
+  /* --- Footer --- */
+  footer {
+    padding: 36px 0 24px;
+    text-align: center;
+  }
+
+  .footer-brand-name {
+    font-size: 1.4rem;
+  }
+
+  .footer-tagline {
+    max-width: 100%;
+    margin: 8px auto 0;
+  }
+
+  .footer-social {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .footer-heading {
+    margin-top: 20px;
+  }
+
+  footer .col-6,
+  footer .col-lg-2,
+  footer .col-lg-4 {
+    text-align: center;
+  }
+
+  footer .d-flex.gap-2 {
+    justify-content: center;
+  }
+
+  footer ul {
+    padding: 0;
+  }
+
+  /* --- Carrito Sidebar --- */
+  .carrito-flotante {
+    width: 100%;
+    right: -100%;
+  }
+
+  /* --- Modal Auth --- */
+  .modal-dialog {
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  /* --- Tables (admin) --- */
+  .table-responsive {
+    font-size: 13px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px !important;
+  }
+
+  /* --- Buttons full width on mobile --- */
+  .btn-primary-az,
+  .btn-secondary-az,
+  .btn-gold-az,
+  .btn-whatsapp-az {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  /* --- Inputs full width --- */
+  .form-control,
+  .form-select,
+  .inv-field {
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+
+  /* --- Section spacing for subpages heroes --- */
+  section[style*="min-height: 360px"],
+  section[style*="min-height: 380px"],
+  section[style*="min-height: 88vh"] {
+    min-height: auto !important;
+  }
+
+  /* --- Inline-styled hero sections --- */
+  section[style*="padding-top:clamp(56px"] {
+    padding-top: 24px !important;
+    padding-bottom: 32px !important;
+  }
+
+  /* --- Admin stats cards --- */
+  [style*="backdrop-filter:blur(8px)"] {
+    padding: 12px 14px !important;
+  }
+
+  [style*="font-size:2.2rem"] {
+    font-size: 1.6rem !important;
+  }
+
+  /* --- Admin toolbar --- */
+  [style*="justify-content:flex-end"][style*="margin-bottom:24px"] {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* --- Inventory cards --- */
+  .inv-img-wrap {
+    height: 180px;
+  }
+
+  .inv-body {
+    padding: 16px;
+  }
+
+  /* --- WhatsApp float button --- */
+  .btn-whatsapp-az[style*="fixed"] {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: 24px !important;
+  }
+}
+
+/* ---------- SMALL PHONES (max-width: 480px) ---------- */
+@media (max-width: 480px) {
+
+  /* --- Body --- */
+  body {
+    font-size: 15px;
+    padding-top: 52px;
+  }
+
+  /* --- Navbar --- */
+  .navbar {
+    min-height: 52px;
+  }
+
+  .logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-text {
+    font-size: 1.3rem;
+  }
+
+  .brand-sub {
+    font-size: 8px;
+  }
+
+  /* --- Hero --- */
+  .hero-headline {
+    font-size: 1.8rem;
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+
+  .hero-subtext {
+    font-size: 14px;
+  }
+
+  .hero-image-col {
+    height: 55vw;
+    min-height: 180px;
+  }
+
+  /* --- Product Grid --- */
+  .product-img-wrap {
+    height: 180px;
+  }
+
+  .product-body {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 0.9rem;
+  }
+
+  .product-desc {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+  }
+
+  .product-price {
+    font-size: 1.1rem;
+  }
+
+  .btn-add-cart {
+    font-size: 11px;
+    padding: 7px 12px;
+  }
+
+  /* --- Sections --- */
+  .section-az {
+    padding: 20px 0;
+  }
+
+  /* --- Buttons --- */
+  .btn-primary-az,
+  .btn-secondary-az,
+  .btn-gold-az,
+  .btn-whatsapp-az {
+    font-size: 13px;
+    padding: 12px 20px;
+    min-height: 44px;
+  }
+
+  /* --- Contact info blocks --- */
+  .contact-info-block {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .contact-icon {
+    margin: 0 auto;
+  }
+
+  /* --- Nosotros stats --- */
+  .nosotros-num {
+    font-size: 1.6rem;
+  }
+
+  .nosotros-label {
+    font-size: 12px;
+  }
+
+  /* --- Modal full screen on tiny phones --- */
+  .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    height: 100%;
+  }
+
+  .modal-content {
+    height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  /* --- Footer compact --- */
+  footer {
+    padding: 28px 0 16px;
+  }
+
+  .footer-copy {
+    font-size: 11px;
+  }
+
+  /* --- Carrito sidebar full screen --- */
+  .carrito-flotante {
+    padding: 16px;
+  }
+
+  .carrito-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE — Inline Style Overrides (HTML pages)
+   ===================================================== */
+
+/* --- Parallax fix for iOS (background-attachment: fixed doesn't work) --- */
+@media (max-width: 767px) {
+  [style*="background-attachment:fixed"],
+  [style*="background-attachment: fixed"] {
+    background-attachment: scroll !important;
+  }
+}
+
+/* --- Hero sections with min-height inline styles --- */
+@media (max-width: 767px) {
+  section[style*="min-height"] {
+    min-height: auto !important;
+  }
+
+  section[style*="min-height:88vh"] {
+    min-height: auto !important;
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+}
+
+/* --- Footer responsive (all footer sections across pages) --- */
+@media (max-width: 767px) {
+  footer .row.g-4 > [class*="col-"] {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  footer .d-flex.gap-2.mt-4 {
+    justify-content: center;
+  }
+
+  footer .footer-links {
+    display: inline-block;
+    text-align: left;
+  }
+}
+
+/* --- Contact section responsive --- */
+@media (max-width: 767px) {
+  #contacto .row.g-5 {
+    gap: 2rem !important;
+  }
+
+  #contacto .col-lg-5,
+  #contacto .col-lg-7 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* --- Nosotros section responsive --- */
+@media (max-width: 767px) {
+  #nosotros .row.g-5 {
+    gap: 2rem !important;
+  }
+
+  #nosotros .col-lg-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* --- Admin pages: filter bars, stat cards, toolbars --- */
+@media (max-width: 767px) {
+  .row.g-3.align-items-center {
+    gap: 12px !important;
+  }
+
+  .row.g-3.align-items-center > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 4px;
+  }
+
+  /* Admin stat cards in hero */
+  .col-lg-5.d-flex.gap-3 {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+
+  .col-lg-5.d-flex.gap-3 > div {
+    flex: 1;
+    min-width: 45%;
+  }
+}
+
+/* --- Inventory grid responsive --- */
+@media (max-width: 767px) {
+  #productosGrid .col-lg-3,
+  #productosGrid .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  #productosGrid .col-lg-3,
+  #productosGrid .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* --- Usuarios table responsive --- */
+@media (max-width: 767px) {
+  #usuarios-tbody td {
+    font-size: 12px;
+    padding: 8px 10px !important;
+  }
+
+  /* Hide less important columns on mobile */
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3) {
+    display: none;
+  }
+
+  .table thead th:nth-child(5),
+  .table tbody td:nth-child(5) {
+    display: none;
+  }
+}
+
+/* --- Cuenta page responsive --- */
+@media (max-width: 767px) {
+  #con-sesion .row.g-4 {
+    gap: 1.5rem !important;
+  }
+
+  #con-sesion .col-lg-4,
+  #con-sesion .col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Profile card */
+  #con-sesion .col-lg-4 > div {
+    padding: 24px 20px !important;
+  }
+
+  /* Carrito table responsive */
+  .table-responsive {
+    border-radius: var(--r-card);
+  }
+
+  .table th,
+  .table td {
+    font-size: 13px;
+  }
+}
+
+/* --- Emeralds page responsive --- */
+@media (max-width: 767px) {
+  /* Hero stats grid */
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    max-width: 200px !important;
+  }
+
+  /* Mine cards */
+  .col-lg-6 {
+    margin-bottom: 16px;
+  }
+
+  /* 4 C's grid */
+  .col-lg-3.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .col-lg-3.col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* --- Nosotros page responsive --- */
+@media (max-width: 767px) {
+  /* Timeline steps */
+  [style*="display:flex"][style*="flex-direction:column"][style*="align-items:center"] {
+    margin-right: 0 !important;
+  }
+
+  /* Values grid */
+  .col-lg-3.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Stats grid */
+  .col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .col-lg-3.col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
