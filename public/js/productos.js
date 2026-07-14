@@ -12,7 +12,7 @@ async function cargarProductos() {
   ).join('');
 
   try {
-    const res = await fetch(`${window.API_BASE_URL || 'http://localhost:5000'}/api/products`);
+    const res = await fetch(`${window.API_BASE_URL}/api/products`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const lista = (data.productos || data || []).slice(0, 8);
@@ -25,7 +25,7 @@ async function cargarProductos() {
       return;
     }
 
-    const API = window.API_BASE_URL || 'http://localhost:5000';
+    const API = window.API_BASE_URL;
     grid.innerHTML = lista.map((p, i) => {
       const precio  = Number(p.precio || 0);
       const stock   = p.stock != null ? Number(p.stock) : 1;

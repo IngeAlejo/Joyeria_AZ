@@ -1,4 +1,4 @@
-const API_URL = window.API_BASE_URL || 'http://localhost:5000';
+const API_URL = window.API_BASE_URL;
 let authModal = null;
 let modoLogin = true;
 
