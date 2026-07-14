@@ -193,7 +193,7 @@ app.get('/api/products', async (req, res) => {
   try {
     const connection = await db.getConnection();
     const { rows } = await connection.query(
-      'SELECT * FROM products WHERE activo = 1 ORDER BY createdAt DESC'
+      'SELECT * FROM products WHERE activo = true ORDER BY createdAt DESC'
     );
     connection.release();
     res.json({ productos: rows });
@@ -325,18 +325,6 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
   }
 });
 
-// ============ PRODUCTOS ============
-app.get('/api/products', async (req, res) => {
-  try {
-    const connection = await db.getConnection();
-    const { rows } = await connection.query('SELECT * FROM products WHERE activo = 1 ORDER BY createdAt DESC');
-    connection.release();
-
-    res.json({ productos: rows });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // ============ ADMINISTRACIÓN EXTRA ============
 
@@ -458,7 +446,7 @@ app.get('/api/admin/stats', auth, async (req, res) => {
     const connection = await db.getConnection();
 
     const usersResult = await connection.query('SELECT COUNT(*) as total_users FROM users');
-    const productsResult = await connection.query('SELECT COUNT(*) as total_products FROM products WHERE activo=1');
+    const productsResult = await connection.query('SELECT COUNT(*) as total_products FROM products WHERE activo = true');
     const ordersResult = await connection.query('SELECT COUNT(*) as total_orders FROM orders');
     const revenueResult = await connection.query("SELECT COALESCE(SUM(totalPrecio), 0) as total_revenue FROM orders WHERE estado != 'cancelada'");
 
