@@ -116,9 +116,9 @@ app.post('/api/register', async (req, res) => {
       const result = await connection.query(
         `INSERT INTO users (
           email, password, nombre, apellidos,
-          telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa,
-          pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia,
-          rol, createdAt, updatedAt
+          telefono, "telefonoFijo", dni, "fechaNacimiento", genero, empresa,
+          pais, departamento, ciudad, direccion, "direccion2", "codigoPostal", referencia,
+          rol, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'cliente', NOW(), NOW()) RETURNING id`,
         [
           email, hash, nombre || 'Cliente', apellidos || '',
@@ -177,7 +177,7 @@ app.put('/api/users/profile', auth, async (req, res) => {
     const { nombre, apellidos, telefono } = req.body;
     const connection = await db.getConnection();
     await connection.query(
-      'UPDATE users SET nombre=$1, apellidos=$2, telefono=$3, updatedAt=NOW() WHERE id=$4',
+      'UPDATE users SET nombre=$1, apellidos=$2, telefono=$3, "updatedAt"=NOW() WHERE id=$4',
       [nombre, apellidos || '', telefono || '', req.user.id]
     );
     connection.release();
@@ -193,7 +193,7 @@ app.get('/api/products', async (req, res) => {
   try {
     const connection = await db.getConnection();
     const { rows } = await connection.query(
-      'SELECT * FROM products WHERE activo = true ORDER BY createdAt DESC'
+      'SELECT * FROM products WHERE activo = true ORDER BY "createdAt" DESC'
     );
     connection.release();
     res.json({ productos: rows });
@@ -209,7 +209,7 @@ app.get('/api/inventario', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const { rows } = await connection.query('SELECT * FROM products ORDER BY createdAt DESC');
+    const { rows } = await connection.query('SELECT * FROM products ORDER BY "createdAt" DESC');
     connection.release();
 
     res.json({ productos: rows });
@@ -227,7 +227,7 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
     const connection = await db.getConnection();
 
     await connection.query(
-      'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, 1, NOW(), NOW())',
+      'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())',
       [nombre, precio, stock, descripcion, categoria || 'General', imagenPath]
     );
     connection.release();
@@ -260,7 +260,7 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     const newImg = req.file ? `/uploads/${req.file.filename}` : p.imagen;
 
     await connection.query(
-      'UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6, updatedAt=NOW() WHERE id=$7',
+      'UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6, "updatedAt"=NOW() WHERE id=$7',
       [newNombre, newPrecio, newStock, newDesc, newCat, newImg, req.params.id]
     );
 
@@ -295,8 +295,8 @@ app.get('/api/historial', auth, async (req, res) => {
     const { rows } = await connection.query(`
       SELECT o.*, u.nombre as userName, u.email as userEmail 
       FROM orders o
-      LEFT JOIN users u ON o.userId = u.id
-      ORDER BY o.createdAt DESC
+      LEFT JOIN users u ON o."userId" = u.id
+      ORDER BY o."createdAt" DESC
     `);
     connection.release();
 
@@ -314,7 +314,7 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
     const connection = await db.getConnection();
 
     await connection.query(
-      'UPDATE orders SET estado=$1, updatedAt=NOW() WHERE id=$2',
+      'UPDATE orders SET estado=$1, "updatedAt"=NOW() WHERE id=$2',
       [estado, req.params.id]
     );
     connection.release();
@@ -342,7 +342,7 @@ app.post('/api/admin/users', auth, async (req, res) => {
 
     try {
       await connection.query(
-        `INSERT INTO users (nombre, apellidos, email, password, telefono, rol, createdAt, updatedAt) 
+        `INSERT INTO users (nombre, apellidos, email, password, telefono, rol, "createdAt", "updatedAt") 
          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
         [nombre, apellidos || '', email, hash, telefono || null, rol || 'cliente']
       );
@@ -364,7 +364,7 @@ app.get('/api/admin/users', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const { rows } = await connection.query('SELECT id, nombre, apellidos, email, telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa, pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia, rol, createdAt FROM users ORDER BY createdAt DESC');
+    const { rows } = await connection.query('SELECT id, nombre, apellidos, email, telefono, "telefonoFijo", dni, "fechaNacimiento", genero, empresa, pais, departamento, ciudad, direccion, "direccion2", "codigoPostal", referencia, rol, "createdAt" FROM users ORDER BY "createdAt" DESC');
     connection.release();
 
     res.json({ users: rows });
@@ -380,7 +380,7 @@ app.put('/api/admin/users/:id/role', auth, async (req, res) => {
 
     const { rol } = req.body;
     const connection = await db.getConnection();
-    await connection.query('UPDATE users SET rol=$1, updatedAt=NOW() WHERE id=$2', [rol, req.params.id]);
+    await connection.query('UPDATE users SET rol=$1, "updatedAt"=NOW() WHERE id=$2', [rol, req.params.id]);
     connection.release();
 
     res.json({ success: true, msg: 'Rol actualizado' });
@@ -415,10 +415,10 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
 
     await connection.query(
       `UPDATE users SET 
-        nombre=$1, apellidos=$2, email=$3, telefono=$4, telefonoFijo=$5,
-        dni=$6, fechaNacimiento=$7, genero=$8, empresa=$9,
-        pais=$10, departamento=$11, ciudad=$12, direccion=$13, direccion2=$14, codigoPostal=$15, referencia=$16,
-        rol=$17, updatedAt=NOW() WHERE id=$18`,
+        nombre=$1, apellidos=$2, email=$3, telefono=$4, "telefonoFijo"=$5,
+        dni=$6, "fechaNacimiento"=$7, genero=$8, empresa=$9,
+        pais=$10, departamento=$11, ciudad=$12, direccion=$13, "direccion2"=$14, "codigoPostal"=$15, referencia=$16,
+        rol=$17, "updatedAt"=NOW() WHERE id=$18`,
       [
         nombre, apellidos, email, telefono || null, telefonoFijo || null,
         dni || null, fechaNacimiento || null, genero || null, empresa || null,
@@ -448,7 +448,7 @@ app.get('/api/admin/stats', auth, async (req, res) => {
     const usersResult = await connection.query('SELECT COUNT(*) as total_users FROM users');
     const productsResult = await connection.query('SELECT COUNT(*) as total_products FROM products WHERE activo = true');
     const ordersResult = await connection.query('SELECT COUNT(*) as total_orders FROM orders');
-    const revenueResult = await connection.query("SELECT COALESCE(SUM(totalPrecio), 0) as total_revenue FROM orders WHERE estado != 'cancelada'");
+    const revenueResult = await connection.query("SELECT COALESCE(SUM(\"totalPrecio\"), 0) as total_revenue FROM orders WHERE estado != 'cancelada'");
 
     const totalUsers = usersResult.rows[0].total_users;
     const totalProducts = productsResult.rows[0].total_products;
