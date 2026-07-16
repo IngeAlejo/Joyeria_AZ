@@ -6,49 +6,168 @@ const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const multer = require('multer');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
 require('dotenv').config();
 
-// ============ CONFIGURACIÓN DE MULTER ============
+// ============ VALIDACIONES DE SEGURIDAD ============
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET no configurado o demasiado corto (min 32 caracteres).');
+  process.exit(1);
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRY = '30m';
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
+
+// ============ SANITIZACION DE INPUTS ============
+function sanitize(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function sanitizeObject(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const clean = {};
+  for (const [key, val] of Object.entries(obj)) {
+    clean[key] = typeof val === 'string' ? sanitize(val) : val;
+  }
+  return clean;
+}
+
+// ============ VALIDACION DE CONTRASENA ============
+function validatePassword(pw) {
+  if (!pw || typeof pw !== 'string') return 'La contraseña es obligatoria';
+  if (pw.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  if (!/[A-Z]/.test(pw)) return 'La contraseña debe tener al menos una mayúscula';
+  if (!/[a-z]/.test(pw)) return 'La contraseña debe tener al menos una minúscula';
+  if (!/[0-9]/.test(pw)) return 'La contraseña debe tener al menos un número';
+  return null;
+}
+
+// ============ VALIDACION DE ROLES ============
+const ROLES_VALIDOS = ['cliente', 'admin'];
+function validateRole(rol) {
+  return ROLES_VALIDOS.includes(rol) ? rol : 'cliente';
+}
+
+// ============ CONFIGURACION DE MULTER (VALIDADA) ============
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads/') // Asegúrate de crear esta carpeta
+    cb(null, 'public/uploads/');
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, uniqueSuffix + path.extname(file.originalname))
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: function (req, file, cb) {
+    if (ALLOWED_MIMES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de archivo no permitido. Solo se aceptan: JPG, PNG, WebP, GIF'));
+    }
+  }
+});
 
 const app = express();
 
-// ============ CONEXIÓN POSTGRESQL (SUPABASE) ============
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+// ============ SEGURIDAD: HELMET ============
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
+// ============ SEGURIDAD: HPP ============
+app.use(hpp());
+
+// ============ SEGURIDAD: RATE LIMITING ============
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
-// Polyfill for mysql2-like getConnection
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Demasiados intentos de autenticación. Intenta de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use(globalLimiter);
+
+// ============ CORS CONFIGURADO ============
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.length === 0) {
+      callback(null, true);
+    } else if (ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+
+app.use(bodyParser.json({ limit: '1mb' }));
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// ============ CONEXION POSTGRESQL ============
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DB_SSL !== 'false' ? {
+    rejectUnauthorized: process.env.DB_SSL_REJECT !== 'false'
+  } : false
+});
+
 db.getConnection = async () => {
   const client = await db.connect();
   return client;
 };
 
-// Middlewares
-app.use(cors());
-app.use(bodyParser.json());
-// Servir archivos estáticos incluyendo la carpeta de subidas
-app.use(express.static('public'));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// ============ MIDDLEWARE AUTH (UNIFICADO) ============
+const auth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token no proporcionado' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+};
 
 // ============ LOGIN ============
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
   try {
-    console.log('🔑 Login intentado:', req.body.email);
-    // Acepta 'password' (frontend) o 'contraseña' (legacy)
     const { email, password, contraseña } = req.body;
     const passInput = password || contraseña;
 
@@ -61,26 +180,23 @@ app.post('/api/login', async (req, res) => {
     connection.release();
 
     if (rows.length === 0) {
-      console.log('❌ Usuario no encontrado:', email);
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
     const user = rows[0];
     const passHash = user.password || '';
-    const esValida = bcrypt.compareSync(passInput, passHash);
+    const esValida = await bcrypt.compare(passInput, passHash);
 
     if (!esValida) {
-      console.log('❌ Contraseña incorrecta');
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
     const token = jwt.sign(
       { id: user.id, rol: user.rol },
-      'tu-secret-key-super-secreta',
-      { expiresIn: '7d' }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRY }
     );
 
-    console.log('✅ Login exitoso:', email);
     res.json({
       token,
       rol: user.rol,
@@ -88,28 +204,30 @@ app.post('/api/login', async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('❌ Error login completo:', error);
-    res.status(500).json({ error: error.message || 'Error interno del servidor' });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-
 // ============ REGISTER ============
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', authLimiter, async (req, res) => {
   try {
-    console.log('📝 Registro intentado:', req.body.email);
     const {
       email, password, nombre, apellidos,
       telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa,
       pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia
-    } = req.body;
+    } = sanitizeObject(req.body);
 
-    if (!password) {
-      return res.status(400).json({ error: 'La contraseña es obligatoria' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
+    const pwError = validatePassword(password);
+    if (pwError) {
+      return res.status(400).json({ error: pwError });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(password, salt);
     const connection = await db.getConnection();
 
     try {
@@ -126,55 +244,32 @@ app.post('/api/register', async (req, res) => {
           pais || null, departamento || null, ciudad || null, direccion || null, direccion2 || null, codigoPostal || null, referencia || null
         ]
       );
-      console.log('✅ Usuario registrado:', email);
-      res.json({
-        success: true,
-        token: jwt.sign(
-          { id: result.rows[0].id, rol: 'cliente' },
-          'tu-secret-key-super-secreta',
-          { expiresIn: '7d' }
-        ),
-        nombre: nombre,
-        rol: 'cliente'
-      });
+
+      const token = jwt.sign(
+        { id: result.rows[0].id, rol: 'cliente' },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRY }
+      );
+
+      res.json({ success: true, token, nombre: nombre || 'Cliente', rol: 'cliente' });
     } catch (dbError) {
       if (dbError.code === '23505') {
         res.status(400).json({ error: 'El email ya está registrado' });
       } else {
-        throw dbError;
+        res.status(500).json({ error: 'Error al registrar usuario' });
       }
     } finally {
       connection.release();
     }
   } catch (error) {
-    console.error('❌ Error register:', error.message);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
-
-// ============ MIDDLEWARE AUTH ============
-const auth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Sin token' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, 'tu-secret-key-super-secreta');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Token inválido' });
-  }
-};
 
 // ============ PERFIL DE USUARIO ============
 app.put('/api/users/profile', auth, async (req, res) => {
   try {
-    const { nombre, apellidos, telefono } = req.body;
+    const { nombre, apellidos, telefono } = sanitizeObject(req.body);
     const connection = await db.getConnection();
     await connection.query(
       'UPDATE users SET nombre=$1, apellidos=$2, telefono=$3, "updatedAt"=NOW() WHERE id=$4',
@@ -183,12 +278,11 @@ app.put('/api/users/profile', auth, async (req, res) => {
     connection.release();
     res.json({ success: true, msg: 'Perfil actualizado' });
   } catch (error) {
-    console.error('❌ Error actualizando perfil:', error);
     res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 });
 
-// ============ PRODUCTOS PÚBLICOS (sin auth) ============
+// ============ PRODUCTOS PUBLICOS ============
 app.get('/api/products', async (req, res) => {
   try {
     const connection = await db.getConnection();
@@ -198,12 +292,11 @@ app.get('/api/products', async (req, res) => {
     connection.release();
     res.json({ productos: rows });
   } catch (error) {
-    console.error('❌ Error /api/products:', error);
-    res.status(500).json({ error: error.message || 'Error al cargar productos' });
+    res.status(500).json({ error: 'Error al cargar productos' });
   }
 });
 
-// ============ INVENTARIO (solo admin) ============
+// ============ INVENTARIO (SOLO ADMIN) ============
 app.get('/api/inventario', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
@@ -214,7 +307,7 @@ app.get('/api/inventario', auth, async (req, res) => {
 
     res.json({ productos: rows });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al cargar inventario' });
   }
 });
 
@@ -222,7 +315,7 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
-    const { nombre, precio, stock, descripcion, categoria } = req.body;
+    const { nombre, precio, stock, descripcion, categoria } = sanitizeObject(req.body);
     const imagenPath = req.file ? `/uploads/${req.file.filename}` : null;
     const connection = await db.getConnection();
 
@@ -234,7 +327,7 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
 
     res.json({ success: true, msg: 'Producto agregado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al agregar producto' });
   }
 });
 
@@ -242,7 +335,7 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
-    const { nombre, precio, stock, descripcion, categoria } = req.body;
+    const { nombre, precio, stock, descripcion, categoria } = sanitizeObject(req.body);
     const connection = await db.getConnection();
 
     const { rows: existing } = await connection.query('SELECT * FROM products WHERE id=$1', [req.params.id]);
@@ -265,10 +358,9 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     );
 
     connection.release();
-
     res.json({ success: true, msg: 'Producto actualizado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al actualizar producto' });
   }
 });
 
@@ -282,18 +374,19 @@ app.delete('/api/inventario/:id', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Producto eliminado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al eliminar producto' });
   }
 });
 
-// ============ HISTORIAL VENTAS (solo admin) ============
+// ============ HISTORIAL VENTAS (SOLO ADMIN) ============
 app.get('/api/historial', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
     const { rows } = await connection.query(`
-      SELECT o.*, u.nombre as userName, u.email as userEmail 
+      SELECT o.id, o.numeroorden, o."totalPrecio", o.estado, o."createdAt",
+             u.nombre as userName, u.email as userEmail
       FROM orders o
       LEFT JOIN users u ON o."userId" = u.id
       ORDER BY o."createdAt" DESC
@@ -302,7 +395,7 @@ app.get('/api/historial', auth, async (req, res) => {
 
     res.json({ ordenes: rows });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al cargar historial' });
   }
 });
 
@@ -311,8 +404,11 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const { estado } = req.body;
-    const connection = await db.getConnection();
+    if (!['pendiente', 'procesando', 'enviada', 'entregada', 'cancelada'].includes(estado)) {
+      return res.status(400).json({ error: 'Estado no válido' });
+    }
 
+    const connection = await db.getConnection();
     await connection.query(
       'UPDATE orders SET estado=$1, "updatedAt"=NOW() WHERE id=$2',
       [estado, req.params.id]
@@ -321,88 +417,93 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Estado actualizado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al actualizar estado' });
   }
 });
 
+// ============ ADMINISTRACION ============
 
-// ============ ADMINISTRACIÓN EXTRA ============
-
-// Crear Usuario (Admin)
 app.post('/api/admin/users', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
-    const { nombre, apellidos, email, password, telefono, rol } = req.body;
+    const { nombre, apellidos, email, password, telefono, rol } = sanitizeObject(req.body);
     if (!password) return res.status(400).json({ error: 'La contraseña es obligatoria' });
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
+    const pwError = validatePassword(password);
+    if (pwError) return res.status(400).json({ error: pwError });
+
+    const salt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(password, salt);
     const connection = await db.getConnection();
 
     try {
       await connection.query(
-        `INSERT INTO users (nombre, apellidos, email, password, telefono, rol, "createdAt", "updatedAt") 
+        `INSERT INTO users (nombre, apellidos, email, password, telefono, rol, "createdAt", "updatedAt")
          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
-        [nombre, apellidos || '', email, hash, telefono || null, rol || 'cliente']
+        [nombre, apellidos || '', email, hash, telefono || null, validateRole(rol)]
       );
       res.json({ success: true, msg: 'Usuario creado exitosamente' });
     } catch (dbError) {
       if (dbError.code === '23505') res.status(400).json({ error: 'El email ya está registrado' });
-      else throw dbError;
+      else res.status(500).json({ error: 'Error al crear usuario' });
     } finally {
       connection.release();
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-// Obtener Usuarios
 app.get('/api/admin/users', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const connection = await db.getConnection();
-    const { rows } = await connection.query('SELECT id, nombre, apellidos, email, telefono, "telefonoFijo", dni, "fechaNacimiento", genero, empresa, pais, departamento, ciudad, direccion, "direccion2", "codigoPostal", referencia, rol, "createdAt" FROM users ORDER BY "createdAt" DESC');
+    const { rows } = await connection.query(
+      `SELECT id, nombre, apellidos, email, telefono, rol, "createdAt"
+       FROM users ORDER BY "createdAt" DESC`
+    );
     connection.release();
 
     res.json({ users: rows });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al cargar usuarios' });
   }
 });
 
-// Cambiar Rol
 app.put('/api/admin/users/:id/role', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const { rol } = req.body;
+    const validatedRol = validateRole(rol);
     const connection = await db.getConnection();
-    await connection.query('UPDATE users SET rol=$1, "updatedAt"=NOW() WHERE id=$2', [rol, req.params.id]);
+    await connection.query('UPDATE users SET rol=$1, "updatedAt"=NOW() WHERE id=$2', [validatedRol, req.params.id]);
     connection.release();
 
     res.json({ success: true, msg: 'Rol actualizado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al actualizar rol' });
   }
 });
 
-// Eliminar Usuario
 app.delete('/api/admin/users/:id', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
+    if (String(req.user.id) === String(req.params.id)) {
+      return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
+    }
+
     const connection = await db.getConnection();
     await connection.query('DELETE FROM users WHERE id=$1', [req.params.id]);
     connection.release();
     res.json({ success: true, msg: 'Usuario eliminado' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al eliminar usuario' });
   }
 });
 
-// Editar Usuario Completamente
 app.put('/api/admin/users/:id', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
@@ -410,11 +511,11 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
     const {
       nombre, apellidos, email, telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa,
       pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia, rol
-    } = req.body;
+    } = sanitizeObject(req.body);
     const connection = await db.getConnection();
 
     await connection.query(
-      `UPDATE users SET 
+      `UPDATE users SET
         nombre=$1, apellidos=$2, email=$3, telefono=$4, "telefonoFijo"=$5,
         dni=$6, "fechaNacimiento"=$7, genero=$8, empresa=$9,
         pais=$10, departamento=$11, ciudad=$12, direccion=$13, "direccion2"=$14, "codigoPostal"=$15, referencia=$16,
@@ -423,22 +524,21 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
         nombre, apellidos, email, telefono || null, telefonoFijo || null,
         dni || null, fechaNacimiento || null, genero || null, empresa || null,
         pais || null, departamento || null, ciudad || null, direccion || null, direccion2 || null, codigoPostal || null, referencia || null,
-        rol, req.params.id
+        validateRole(rol), req.params.id
       ]
     );
     connection.release();
 
-    res.json({ success: true, msg: 'Usuario actualizado completamente' });
+    res.json({ success: true, msg: 'Usuario actualizado' });
   } catch (error) {
     if (error.code === '23505') {
       res.status(400).json({ error: 'El email ya está en uso' });
     } else {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: 'Error al actualizar usuario' });
     }
   }
 });
 
-// Estadísticas para Dashboard
 app.get('/api/admin/stats', auth, async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
@@ -450,48 +550,171 @@ app.get('/api/admin/stats', auth, async (req, res) => {
     const ordersResult = await connection.query('SELECT COUNT(*) as total_orders FROM orders');
     const revenueResult = await connection.query("SELECT COALESCE(SUM(\"totalPrecio\"), 0) as total_revenue FROM orders WHERE estado != 'cancelada'");
 
-    const totalUsers = usersResult.rows[0].total_users;
-    const totalProducts = productsResult.rows[0].total_products;
-    const totalOrders = ordersResult.rows[0].total_orders;
-    const totalRevenue = revenueResult.rows[0].total_revenue;
-
     connection.release();
 
     res.json({
       stats: {
-        users: totalUsers,
-        products: totalProducts,
-        orders: totalOrders,
-        revenue: totalRevenue
+        users: usersResult.rows[0].total_users,
+        products: productsResult.rows[0].total_products,
+        orders: ordersResult.rows[0].total_orders,
+        revenue: revenueResult.rows[0].total_revenue
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Error al cargar estadísticas' });
   }
 });
 
-// Al FINAL de server.js, ANTES de app.listen()
+// ============ TEST-DB (PROTEGIDO) ============
+const DB_TEST_SECRET = process.env.DB_TEST_SECRET || 'cambiar-en-produccion';
+app.get('/api/test-db', (req, res) => {
+  if (req.headers['x-test-secret'] !== DB_TEST_SECRET) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  (async () => {
+    try {
+      const connection = await db.getConnection();
+      const { rows } = await connection.query('SELECT 1 as test');
+      connection.release();
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Error de conexion' });
+    }
+  })();
+});
 
-app.get('/api/test-db', async (req, res) => {
+// ============ MANEJO DE ERRORES ============
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'El archivo excede el limite de 5MB' });
+    }
+    return res.status(400).json({ error: 'Error al subir archivo' });
+  }
+  if (err.message && err.message.includes('Tipo de archivo')) {
+    return res.status(400).json({ error: err.message });
+  }
+  res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+// ============ ENDPOINT PARA INSERTAR PRODUCTOS DE PRUEBA ============
+app.post('/api/seed-products', auth, async (req, res) => {
   try {
+    if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
+
     const connection = await db.getConnection();
-    const { rows } = await connection.query('SELECT 1 as test');
+
+    const productos = [
+      {
+        nombre: 'Anillo Solitario Oro 18k con Esmeralda',
+        precio: 2850000,
+        stock: 5,
+        descripcion: 'Anillo de oro 18k con esmeralda colombiana de Muzo de 1.2 quilates. Diseño solitario clásico, elaborado completamente a mano por maestros joyeros.',
+        categoria: 'Anillos',
+        imagen: 'https://picsum.photos/seed/anillo-esmeralda/600/400',
+        destacado: true
+      },
+      {
+        nombre: 'Collar Cadena Oro 18k con Colgante Esmeralda',
+        precio: 4200000,
+        stock: 3,
+        descripcion: 'Collar de cadena de oro 18k de 45cm con colgante de esmeralda colombiana ovalada de 2.1 quilates. Cierre de seguridad tipo lobster.',
+        categoria: 'Collares',
+        imagen: 'https://picsum.photos/seed/collar-esmeralda/600/400',
+        destacado: true
+      },
+      {
+        nombre: 'Aretes Cascada Oro con Esmeraldas',
+        precio: 1950000,
+        stock: 8,
+        descripcion: 'Aretes tipo cascada en oro 18k con tres esmeraldas colombianas en escalera. Caída de 3.5cm, cierre de tornillo.',
+        categoria: 'Aretes',
+        imagen: 'https://picsum.photos/seed/aretes-cascada/600/400',
+        destacado: false
+      },
+      {
+        nombre: 'Pulsera Tennis Oro 18k con Esmeraldas',
+        precio: 6500000,
+        stock: 2,
+        descripcion: 'Pulsera tennis en oro 18k con 28 esmeraldas colombianas calibradas, total 8.4 quilates. Cierre de seguridad con doble seguro.',
+        categoria: 'Pulseras',
+        imagen: 'https://picsum.photos/seed/pulsera-tennis/600/400',
+        destacado: true
+      },
+      {
+        nombre: 'Esmeralda Suelta Muzo - Rectangular',
+        precio: 3800000,
+        stock: 4,
+        descripcion: 'Esmeralda colombiana de la mina de Muzo, corte rectangular (emerald cut), 3.2 quilates. Color verde intenso, claridad excellent. Incluye certificado de origen.',
+        categoria: 'Esmeraldas',
+        imagen: 'https://picsum.photos/seed/esmeralda-muzo/600/400',
+        destacado: true
+      },
+      {
+        nombre: 'Esmeralda Suelta Chivor - Oval',
+        precio: 2400000,
+        stock: 6,
+        descripcion: 'Esmeralda colombiana de la mina de Chivor, corte oval, 1.8 quilates. Tono verde azulado característico de Chivor. Certificado de autenticidad incluido.',
+        categoria: 'Esmeraldas',
+        imagen: 'https://picsum.photos/seed/esmeralda-chivor/600/400',
+        destacado: false
+      },
+      {
+        nombre: 'Alianza Matrimonial Oro 18k - Pareja',
+        precio: 1200000,
+        stock: 12,
+        descripcion: 'Par de alianzas matrimoniales en oro 18k, acabado mate cepillado. Disponibles en tallas 8 al 22. Grabado personalizado incluido.',
+        categoria: 'Anillos',
+        imagen: 'https://picsum.photos/seed/alianza-pareja/600/400',
+        destacado: false
+      },
+      {
+        nombre: 'Collar Plata 925 con Esmeralda',
+        precio: 890000,
+        stock: 7,
+        descripcion: 'Collar de plata sterling 925 con esmeralda colombiana cabujón de 0.8 quilates. Cadena de eslabón saltador de 50cm con cierre tipo cangrejo.',
+        categoria: 'Collares',
+        imagen: 'https://picsum.photos/seed/collar-plata/600/400',
+        destacado: false
+      },
+      {
+        nombre: 'Broche Flor de Oro con Esmeraldas',
+        precio: 1650000,
+        stock: 4,
+        descripcion: 'Broche flor en oro 18k con 5 esmeraldas colombianas como pétalos y un diamante central. Diámetro de 3.2cm, cierre de gancho.',
+        categoria: 'Broches',
+        imagen: 'https://picsum.photos/seed/broche-flor/600/400',
+        destacado: false
+      },
+      {
+        nombre: 'Conjunto Esmeralda: Aretes + Collar',
+        precio: 5800000,
+        stock: 2,
+        descripcion: 'Set de joyería en oro 18k con esmeraldas colombianas. Collar con esmeralda princess de 2.5ct y aretes a juego con esmeraldas de 0.8ct cada uno. Pieza única.',
+        categoria: 'Conjuntos',
+        imagen: 'https://picsum.photos/seed/conjunto-esmeralda/600/400',
+        destacado: true
+      }
+    ];
+
+    let insertados = 0;
+    for (const p of productos) {
+      await connection.query(
+        `INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, destacado, activo, "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, true, NOW(), NOW())`,
+        [p.nombre, p.precio, p.stock, p.descripcion, p.categoria, p.imagen, p.destacado || false]
+      );
+      insertados++;
+    }
+
     connection.release();
-    res.json({
-      success: true,
-      msg: '✅ Conexión BD funcionando perfectamente',
-      resultado: rows
-    });
+    res.json({ success: true, msg: `${insertados} productos insertados` });
   } catch (error) {
-    res.json({
-      success: false,
-      error: error.message,
-      msg: '❌ Error de conexión'
-    });
+    res.status(500).json({ error: 'Error al insertar productos' });
   }
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });

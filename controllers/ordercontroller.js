@@ -1,35 +1,34 @@
 const db = require('../models');
 
 exports.crearOrden = async (req, res) => {
+  const t = await db.sequelize.transaction();
   try {
-    console.log('Body:', req.body);
-    console.log('userId:', req.userId);
-
     const { productos } = req.body;
 
-    if (!productos || productos.length === 0) {
-      return res.status(400).json({ error: 'Sin productos' });
+    if (!productos || !Array.isArray(productos) || productos.length === 0) {
+      return res.status(400).json({ error: 'Debe incluir al menos un producto' });
     }
 
     let total = 0;
     let detalles = '';
 
-    // Procesa productos
     for (let item of productos) {
-      const prod = await db.Product.findByPk(item.productId);
-      if (!prod) return res.status(404).json({ error: 'Producto no existe' });
+      const prod = await db.Product.findByPk(item.productId, { transaction: t, lock: true });
+      if (!prod) {
+        await t.rollback();
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
       if (prod.stock < item.cantidad) {
+        await t.rollback();
         return res.status(400).json({ error: `Stock insuficiente: ${prod.nombre}` });
       }
 
       total += parseFloat(prod.precio) * item.cantidad;
       detalles += `${prod.nombre} x${item.cantidad} = $${prod.precio * item.cantidad}, `;
 
-      // Descuenta stock
-      await prod.update({ stock: prod.stock - item.cantidad });
+      await prod.update({ stock: prod.stock - item.cantidad }, { transaction: t });
     }
 
-    // Crea orden SIMPLE (sin OrderItem)
     const orden = await db.Order.create({
       userId: req.userId,
       numeroOrden: 'ORD-' + Date.now(),
@@ -37,30 +36,37 @@ exports.crearOrden = async (req, res) => {
       estado: 'pendiente',
       notasCliente: detalles,
       metodoPago: 'whatsapp',
-    });
+    }, { transaction: t });
+
+    await t.commit();
 
     res.status(201).json({
-      mensaje: '✅ ORDEN CREADA',
+      mensaje: 'Orden creada exitosamente',
       orden: orden.dataValues,
       whatsapp: `¡Nueva orden #${orden.numeroOrden}! Total: $${total}\n${detalles}`,
     });
-
   } catch (error) {
-    console.error('ERROR:', error);
-    res.status(500).json({ error: error.message });
+    await t.rollback();
+    res.status(500).json({ error: 'Error al crear la orden' });
   }
 };
 
 exports.obtenerMisOrdenes = async (req, res) => {
-  const ordenes = await db.Order.findAll({
-    where: { userId: req.userId },
-  });
-  res.json({ ordenes });
+  try {
+    const ordenes = await db.Order.findAll({ where: { userId: req.userId } });
+    res.json({ ordenes });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cargar las órdenes' });
+  }
 };
 
 exports.obtenerTodas = async (req, res) => {
-  const ordenes = await db.Order.findAll({
-    include: [{ model: db.User }],
-  });
-  res.json({ ordenes });
+  try {
+    const ordenes = await db.Order.findAll({
+      include: [{ model: db.User, attributes: ['id', 'nombre', 'email'] }],
+    });
+    res.json({ ordenes });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cargar las órdenes' });
+  }
 };
