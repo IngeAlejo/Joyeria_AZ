@@ -337,7 +337,14 @@
         return;
       }
 
-      grid.innerHTML = productos.map(p => `
+      const grupos = new Map();
+      productos.forEach(p => {
+        const cat = (p.categoria || 'General').toLowerCase();
+        if (!grupos.has(cat)) grupos.set(cat, []);
+        grupos.get(cat).push(p);
+      });
+
+      const card = p => `
         <div class="col-lg-3 col-md-6">
           <div class="inv-card">
             <div class="inv-img-wrap">
@@ -381,7 +388,18 @@
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+
+      let html = '';
+      grupos.forEach((items, cat) => {
+        const titulo = items[0].categoria || 'General';
+        html += `<div class="col-12" style="margin-top:${html ? '28px' : '0'};padding-bottom:12px;border-bottom:1px solid var(--az-border);display:flex;align-items:baseline;gap:12px;">
+          <span style="font-family:var(--font-ui);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--az-navy);">${titulo}</span>
+          <span style="font-family:var(--font-ui);font-size:11px;color:var(--az-text-muted);">${items.length} producto${items.length !== 1 ? 's' : ''}</span>
+        </div>`;
+        html += items.map(card).join('');
+      });
+      grid.innerHTML = html;
     }
 
     async function actualizarFoto(id, event) {
