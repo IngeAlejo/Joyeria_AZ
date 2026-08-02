@@ -111,6 +111,7 @@ async function eliminarDeSupabase(url) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ============ SEGURIDAD: HELMET ============
 app.use(helmet({
