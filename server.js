@@ -201,8 +201,32 @@ db.on('error', (err) => {
 });
 
 db.getConnection = async () => {
-  const client = await db.connect();
-  return client;
+  try {
+    console.log("Intentando conectar...");
+
+    const client = await db.connect();
+
+    console.log("Conectado correctamente");
+
+    const r = await client.query("SELECT current_user, version();");
+
+    console.log(r.rows);
+
+    return client;
+
+  } catch (err) {
+
+    console.error("========== PG ERROR ==========");
+    console.error("MESSAGE:", err.message);
+    console.error("CODE:", err.code);
+    console.error("DETAIL:", err.detail);
+    console.error("HINT:", err.hint);
+    console.error("SEVERITY:", err.severity);
+    console.error("STACK:", err.stack);
+    console.error("FULL ERROR:", err);
+
+    throw err;
+  }
 };
 
 // ============ MIDDLEWARE AUTH (UNIFICADO) ============
