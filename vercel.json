@@ -3,16 +3,6 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install",
-  "functions": {
-    "api/index.js": {
-      "includeFiles": [
-        "controllers/**",
-        "middleware/**",
-        "routes/**",
-        "config/**"
-      ]
-    }
-  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/tienda", "destination": "/www/index.html" },
