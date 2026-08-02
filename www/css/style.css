@@ -2109,11 +2109,11 @@ textarea,
 
 /* --- Emeralds page responsive --- */
 @media (max-width: 767px) {
-  /* Hero stats grid */
+  /* Hero stats grid: mantener 2x2 en móvil */
   [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-    max-width: 200px !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    max-width: 100% !important;
   }
 
   /* Mine cards */
