@@ -165,8 +165,13 @@ app.use(express.static('www'));
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DB_SSL !== 'false' ? {
-    rejectUnauthorized: process.env.DB_SSL_REJECT !== 'false'
+    rejectUnauthorized: false
   } : false
+});
+
+db.on('error', (err) => {
+  console.error('ERROR DB Pool:', err.message);
+  console.error(err.stack);
 });
 
 db.getConnection = async () => {
@@ -231,7 +236,9 @@ app.post('/api/login', authLimiter, async (req, res) => {
       success: true
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error("ERROR POST /api/login:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -289,7 +296,9 @@ app.post('/api/register', authLimiter, async (req, res) => {
       connection.release();
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error("ERROR POST /api/register:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -305,7 +314,9 @@ app.put('/api/users/profile', auth, async (req, res) => {
     connection.release();
     res.json({ success: true, msg: 'Perfil actualizado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar perfil' });
+    console.error("ERROR PUT /api/users/profile:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -319,7 +330,9 @@ app.get('/api/products', async (req, res) => {
     connection.release();
     res.json({ productos: rows });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cargar productos' });
+    console.error("ERROR GET /api/products:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -334,7 +347,9 @@ app.get('/api/inventario', auth, async (req, res) => {
 
     res.json({ productos: rows });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cargar inventario' });
+    console.error("ERROR GET /api/inventario:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -358,7 +373,9 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
 
     res.json({ success: true, msg: 'Producto agregado', imagen: imagenUrl });
   } catch (error) {
-    res.status(500).json({ error: 'Error al agregar producto' });
+    console.error("ERROR POST /api/inventario:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -398,7 +415,9 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     connection.release();
     res.json({ success: true, msg: 'Producto actualizado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar producto' });
+    console.error("ERROR PUT /api/inventario/:id:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -412,7 +431,9 @@ app.delete('/api/inventario/:id', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Producto eliminado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar producto' });
+    console.error("ERROR DELETE /api/inventario/:id:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -433,7 +454,9 @@ app.get('/api/historial', auth, async (req, res) => {
 
     res.json({ ordenes: rows });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cargar historial' });
+    console.error("ERROR GET /api/historial:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -455,7 +478,9 @@ app.put('/api/historial/:id/status', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Estado actualizado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar estado' });
+    console.error("ERROR PUT /api/historial/:id/status:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -489,7 +514,9 @@ app.post('/api/admin/users', auth, async (req, res) => {
       connection.release();
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error("ERROR POST /api/admin/users:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -506,7 +533,9 @@ app.get('/api/admin/users', auth, async (req, res) => {
 
     res.json({ users: rows });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cargar usuarios' });
+    console.error("ERROR GET /api/admin/users:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -522,7 +551,9 @@ app.put('/api/admin/users/:id/role', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Rol actualizado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar rol' });
+    console.error("ERROR PUT /api/admin/users/:id/role:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -538,7 +569,9 @@ app.delete('/api/admin/users/:id', auth, async (req, res) => {
     connection.release();
     res.json({ success: true, msg: 'Usuario eliminado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar usuario' });
+    console.error("ERROR DELETE /api/admin/users/:id:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -569,10 +602,12 @@ app.put('/api/admin/users/:id', auth, async (req, res) => {
 
     res.json({ success: true, msg: 'Usuario actualizado' });
   } catch (error) {
+    console.error("ERROR PUT /api/admin/users/:id:", error.message);
+    console.error(error.stack);
     if (error.code === '23505') {
       res.status(400).json({ error: 'El email ya está en uso' });
     } else {
-      res.status(500).json({ error: 'Error al actualizar usuario' });
+      res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
     }
   }
 });
@@ -599,7 +634,9 @@ app.get('/api/admin/stats', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cargar estadísticas' });
+    console.error("ERROR GET /api/admin/stats:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
@@ -616,13 +653,17 @@ app.get('/api/test-db', (req, res) => {
       connection.release();
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Error de conexion' });
+      console.error("ERROR GET /api/test-db:", error.message);
+      console.error(error.stack);
+      res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
     }
   })();
 });
 
 // ============ MANEJO DE ERRORES ============
 app.use((err, req, res, next) => {
+  console.error("ERROR MIDDLEWARE:", err.message);
+  console.error(err.stack);
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'El archivo excede el limite de 5MB' });
@@ -632,7 +673,7 @@ app.use((err, req, res, next) => {
   if (err.message && err.message.includes('Tipo de archivo')) {
     return res.status(400).json({ error: err.message });
   }
-  res.status(500).json({ error: 'Error interno del servidor' });
+  res.status(500).json({ success: false, message: error.message || 'Error interno del servidor', stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
 });
 
 // ============ ENDPOINT PARA INSERTAR PRODUCTOS DE PRUEBA ============
@@ -748,7 +789,9 @@ app.post('/api/seed-products', auth, async (req, res) => {
     connection.release();
     res.json({ success: true, msg: `${insertados} productos insertados` });
   } catch (error) {
-    res.status(500).json({ error: 'Error al insertar productos' });
+    console.error("ERROR POST /api/seed-products:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }
 });
 
