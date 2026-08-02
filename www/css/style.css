@@ -880,11 +880,7 @@ img {
   color: var(--az-text-muted);
   line-height: 1.6;
   flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  white-space: pre-line;
   margin-bottom: 16px;
 }
 
@@ -1815,7 +1811,6 @@ textarea,
 
   .product-desc {
     font-size: 12px;
-    -webkit-line-clamp: 2;
   }
 
   .product-price {

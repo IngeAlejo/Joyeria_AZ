@@ -888,11 +888,8 @@ html { scroll-behavior: smooth; }
   color: var(--text-light, #666);
   line-height: 1.6;
   flex: 1;
+  white-space: pre-line;
   margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .producto-footer {
