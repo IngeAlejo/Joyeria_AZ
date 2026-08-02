@@ -260,7 +260,11 @@ app.post('/api/login', authLimiter, async (req, res) => {
     const { email, password, contraseña } = req.body;
     const passInput = password || contraseña;
 
+    console.log("LOGIN DIAG: email recibido:", email);
+    console.log("LOGIN DIAG: password recibida:", passInput ? `[longitud ${passInput.length}]` : "VACIA");
+
     if (!email || !passInput) {
+      console.log("LOGIN DIAG: FALTAN CAMPOS → 400");
       return res.status(400).json({ error: 'Faltan email o contraseña' });
     }
 
@@ -268,15 +272,24 @@ app.post('/api/login', authLimiter, async (req, res) => {
     const { rows } = await connection.query('SELECT * FROM users WHERE email = $1', [email]);
     connection.release();
 
+    console.log("LOGIN DIAG: usuarios encontrados:", rows.length);
+
     if (rows.length === 0) {
+      console.log("LOGIN DIAG: NO EXISTE USUARIO con email:", email);
+      console.log("LOGIN DIAG: SQL usada: SELECT * FROM users WHERE email = $1");
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
     const user = rows[0];
     const passHash = user.password || '';
+    console.log("LOGIN DIAG: usuario id:", user.id, "| nombre:", user.nombre, "| rol:", user.rol);
+    console.log("LOGIN DIAG: hash DB:", passHash ? passHash.substring(0, 20) + "..." : "VACIO");
+
     const esValida = await bcrypt.compare(passInput, passHash);
+    console.log("LOGIN DIAG: bcrypt.compare:", esValida);
 
     if (!esValida) {
+      console.log("LOGIN DIAG: PASSWORD INCORRECTA para usuario id:", user.id);
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
@@ -286,6 +299,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
       { expiresIn: JWT_EXPIRY }
     );
 
+    console.log("LOGIN DIAG: LOGIN EXITOSO para usuario id:", user.id);
     res.json({
       token,
       rol: user.rol,
