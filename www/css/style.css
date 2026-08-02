@@ -460,14 +460,21 @@ img {
   }
 }
 
-/* Centrar las tarjetas de estadísticas del hero solo en móvil */
+/* Centrar y expandir las tarjetas de estadísticas del hero */
 .hero-stats {
   justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-stats > div {
+  flex: 1 1 0%;
+  min-width: 0;
 }
 
 @media (min-width: 992px) {
   .hero-stats {
-    justify-content: flex-end;
+    justify-content: center;
   }
 }
 
