@@ -187,6 +187,13 @@ if (process.env.DATABASE_URL) {
 }
 console.log("=== FIN DIAGNOSTICO ===");
 
+const dbUrl = process.env.DATABASE_URL;
+
+console.log(
+  "DATABASE_URL:",
+  dbUrl.replace(/:\/\/([^:]+):([^@]+)@/, "://$1:******@")
+);
+
 // ============ CONEXION POSTGRESQL ============
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
