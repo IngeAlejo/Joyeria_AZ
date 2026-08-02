@@ -426,8 +426,8 @@ img {
 
   .btn-nav-login,
   .btn-nav-cta {
-    width: 100%;
-    text-align: center;
+    width: auto;
+    text-align: left;
     margin-top: 6px;
   }
 
