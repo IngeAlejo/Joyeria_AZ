@@ -11,6 +11,7 @@ frontend/dist/
 
 # Uploads locales (ya no se usan, imagenes en Supabase Storage)
 www/uploads/
+*.msi
 
 # Logs
 npm-debug.log*
