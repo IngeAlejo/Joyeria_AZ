@@ -174,7 +174,7 @@
           </div>
         </div>
         <div class="col-lg-5 d-flex justify-content-lg-end hero-stats" data-reveal="right">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:340px;width:100%;">
             <div
               style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-card);padding:24px 20px;backdrop-filter:blur(8px);">
               <div
@@ -393,13 +393,13 @@
 
       <!-- Grid de esmeraldas -->
       <div id="esmeraldas-grid" class="row g-4">
-        <div class="col-6 col-lg-4">
+        <div class="col-12 col-md-6 col-lg-4">
           <div class="skeleton skeleton-card" style="height:240px;"></div>
         </div>
-        <div class="col-6 col-lg-4">
+        <div class="col-12 col-md-6 col-lg-4">
           <div class="skeleton skeleton-card" style="height:240px;"></div>
         </div>
-        <div class="col-6 col-lg-4">
+        <div class="col-12 col-md-6 col-lg-4">
           <div class="skeleton skeleton-card" style="height:240px;"></div>
         </div>
       </div>
@@ -544,7 +544,7 @@
           const itemJson = JSON.stringify({ id: p.id, nombre, precio, imagen: imgSrc }).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
           return `
-            <div class="col-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-4">
               <article class="product-card" style="border-radius:var(--r-card);overflow:hidden;background:var(--az-surface);border:1px solid var(--az-border);">
                 <div style="position:relative;height:200px;overflow:hidden;">
                   <img src="${imgSrc}" alt="${nombre}" loading="lazy"
