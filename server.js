@@ -161,6 +161,32 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '1mb' }));
 app.use(express.static('www'));
 
+// ============ DIAGNOSTICO DATABASE ============
+console.log("=== DIAGNOSTICO DATABASE ===");
+console.log("DATABASE_URL RAW:", JSON.stringify(process.env.DATABASE_URL));
+console.log("PGHOST:", process.env.PGHOST);
+console.log("PGUSER:", process.env.PGUSER);
+console.log("PGDATABASE:", process.env.PGDATABASE);
+console.log("PGPORT:", process.env.PGPORT);
+
+if (process.env.DATABASE_URL) {
+  const { URL } = require("url");
+  const parsed = new URL(process.env.DATABASE_URL);
+  console.log("PARSED URL:", {
+    protocol: parsed.protocol,
+    hostname: parsed.hostname,
+    username: parsed.username,
+    port: parsed.port,
+    pathname: parsed.pathname
+  });
+
+  const dns = require("dns").promises;
+  dns.lookup(parsed.hostname)
+    .then(r => console.log("DNS OK:", r))
+    .catch(e => console.error("DNS FAIL:", e.message));
+}
+console.log("=== FIN DIAGNOSTICO ===");
+
 // ============ CONEXION POSTGRESQL ============
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
