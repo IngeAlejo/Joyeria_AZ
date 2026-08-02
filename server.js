@@ -81,24 +81,48 @@ const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supaba
 const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'productos';
 
 async function subirASupabase(file) {
+  console.log("=== SUBIENDO A SUPABASE ===");
+
+  console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
+  console.log("SERVICE_ROLE:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  console.log("ANON_KEY:", !!process.env.SUPABASE_ANON_KEY);
+  console.log("SUPABASE_SERVICE_KEY:", !!process.env.SUPABASE_SERVICE_KEY);
+  console.log("supabase client:", !!supabase);
+
   if (!supabase) throw new Error('Supabase no configurado');
 
   const ext = path.extname(file.originalname).toLowerCase();
-  const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+  const nombre = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
 
-  const { error } = await supabase.storage
+  console.log("Bucket:", BUCKET_NAME);
+  console.log("Nombre:", nombre);
+  console.log("Mime:", file.mimetype);
+  console.log("Size:", file.size);
+
+  const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
-    .upload(filename, file.buffer, {
+    .upload(nombre, file.buffer, {
       contentType: file.mimetype,
       upsert: false
     });
 
-  if (error) throw error;
+  console.log("SUPABASE UPLOAD RESULT:", { data, error });
+
+  if (error) {
+    console.error("SUPABASE UPLOAD ERROR:", error);
+    console.error("MESSAGE:", error.message);
+    console.error("statusCode:", error.statusCode);
+    console.error("details:", error.details);
+    console.error("hint:", error.hint);
+    console.error("code:", error.code);
+    throw error;
+  }
 
   const { data: urlData } = supabase.storage
     .from(BUCKET_NAME)
-    .getPublicUrl(filename);
+    .getPublicUrl(nombre);
 
+  console.log("URL OBTENIDA:", urlData.publicUrl);
   return urlData.publicUrl;
 }
 
