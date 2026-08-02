@@ -431,6 +431,34 @@ img {
     margin-top: 6px;
   }
 
+  /* Apilar bloques de auth en columna (móvil) */
+  .navbar .d-flex[style*="flex-shrink:0"] {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 6px;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  #auth-anon,
+  #auth-logged {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 6px;
+  }
+
+  #auth-logged .nav-link {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Ocultar el carrito del menú en móvil (ya hay botón flotante) */
+  #btn-carrito-toggle {
+    display: none !important;
+  }
+
   body {
     padding-top: 64px;
   }
