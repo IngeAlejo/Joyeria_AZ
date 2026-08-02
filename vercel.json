@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": [
+        "controllers/**",
+        "middleware/**",
+        "routes/**",
+        "config/**"
+      ]
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/tienda", "destination": "/www/index.html" },
+    { "source": "/tienda/(.*)", "destination": "/www/index.html" },
+    { "source": "/pages/(.*)", "destination": "/www/pages/$1" },
+    { "source": "/css/(.*)", "destination": "/www/css/$1" },
+    { "source": "/js/(.*)", "destination": "/www/js/$1" },
+    { "source": "/img/(.*)", "destination": "/www/img/$1" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}

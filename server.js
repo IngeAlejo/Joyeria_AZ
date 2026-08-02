@@ -9,6 +9,7 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // ============ VALIDACIONES DE SEGURIDAD ============
@@ -57,22 +58,12 @@ function validateRole(rol) {
   return ROLES_VALIDOS.includes(rol) ? rol : 'cliente';
 }
 
-// ============ CONFIGURACION DE MULTER (VALIDADA) ============
+// ============ CONFIGURACION DE MULTER (MEMORY STORAGE) ============
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: function (req, file, cb) {
     if (ALLOWED_MIMES.includes(file.mimetype)) {
@@ -82,6 +73,42 @@ const upload = multer({
     }
   }
 });
+
+// ============ SUPABASE STORAGE ============
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'productos';
+
+async function subirASupabase(file) {
+  if (!supabase) throw new Error('Supabase no configurado');
+
+  const ext = path.extname(file.originalname).toLowerCase();
+  const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+
+  const { error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .upload(filename, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false
+    });
+
+  if (error) throw error;
+
+  const { data: urlData } = supabase.storage
+    .from(BUCKET_NAME)
+    .getPublicUrl(filename);
+
+  return urlData.publicUrl;
+}
+
+async function eliminarDeSupabase(url) {
+  if (!supabase || !url) return;
+  try {
+    const nombre = url.split('/').pop();
+    await supabase.storage.from(BUCKET_NAME).remove([nombre]);
+  } catch (e) { /* ignorar errores de borrado */ }
+}
 
 const app = express();
 
@@ -131,8 +158,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: '1mb' }));
-app.use(express.static('public'));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use(express.static('www'));
 
 // ============ CONEXION POSTGRESQL ============
 const db = new Pool({
@@ -316,16 +342,20 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
     const { nombre, precio, stock, descripcion, categoria } = sanitizeObject(req.body);
-    const imagenPath = req.file ? `/uploads/${req.file.filename}` : null;
-    const connection = await db.getConnection();
+    let imagenUrl = null;
 
+    if (req.file) {
+      imagenUrl = await subirASupabase(req.file);
+    }
+
+    const connection = await db.getConnection();
     await connection.query(
       'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())',
-      [nombre, precio, stock, descripcion, categoria || 'General', imagenPath]
+      [nombre, precio, stock, descripcion, categoria || 'General', imagenUrl]
     );
     connection.release();
 
-    res.json({ success: true, msg: 'Producto agregado' });
+    res.json({ success: true, msg: 'Producto agregado', imagen: imagenUrl });
   } catch (error) {
     res.status(500).json({ error: 'Error al agregar producto' });
   }
@@ -350,7 +380,14 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     const newStock = stock !== undefined ? stock : p.stock;
     const newDesc = descripcion !== undefined ? descripcion : p.descripcion;
     const newCat = categoria !== undefined ? categoria : p.categoria;
-    const newImg = req.file ? `/uploads/${req.file.filename}` : p.imagen;
+
+    let newImg = p.imagen;
+    if (req.file) {
+      if (p.imagen && p.imagen.includes('supabase')) {
+        await eliminarDeSupabase(p.imagen);
+      }
+      newImg = await subirASupabase(req.file);
+    }
 
     await connection.query(
       'UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6, "updatedAt"=NOW() WHERE id=$7',
@@ -715,6 +752,12 @@ app.post('/api/seed-products', auth, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+
+// Solo escuchar en local (en Vercel, la funcion serverless maneja las requests)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+  });
+}
+
+module.exports = app;
