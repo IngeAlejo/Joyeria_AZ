@@ -430,6 +430,8 @@
       const buscar = (document.getElementById('buscar-input')?.value || '').toLowerCase().trim();
       const orden = document.getElementById('orden-select')?.value || 'relevancia';
       let lista = [...todosProductos];
+      // Las esmeraldas solo se muestran en esmeraldas.html
+      lista = lista.filter(p => !(p.categoria || '').toLowerCase().includes('esmeralda'));
       if (categoriaActual) lista = lista.filter(p => (p.categoria || '').toLowerCase().includes(categoriaActual));
       if (buscar) lista = lista.filter(p => (p.nombre || '').toLowerCase().includes(buscar) || (p.descripcion || '').toLowerCase().includes(buscar));
       if (orden === 'precio-asc') lista.sort((a, b) => Number(a.precio) - Number(b.precio));
@@ -488,6 +490,9 @@
       const grid = document.getElementById('productos-grid');
       if (!grid) return;
 
+      const buscar = (document.getElementById('buscar-input')?.value || '').toLowerCase().trim();
+      const orden = document.getElementById('orden-select')?.value || 'relevancia';
+
       if (!lista.length) {
         grid.innerHTML = '';
         document.getElementById('estado-vacio')?.classList.remove('d-none');
@@ -495,8 +500,7 @@
       }
 
       const cols = vistaActual === 'list' ? 'col-12' : 'col-lg-3 col-md-6';
-
-      grid.innerHTML = lista.map((p, i) => {
+      const tarjeta = (p, i) => {
         const precio = Number(p.precio || 0);
         const stock = p.stock != null ? Number(p.stock) : 1;
         const nombre = p.nombre || p.name || 'Joya';
@@ -536,7 +540,39 @@
           </div>
         </article>
       </div>`;
-      }).join('');
+      };
+
+      // Agrupar por categoría cuando no hay filtro ni búsqueda activa
+      if (!categoriaActual && !buscar && orden === 'relevancia') {
+        const grupos = new Map();
+        lista.forEach(p => {
+          const cat = (p.categoria || p.category || 'General').toLowerCase();
+          if (!grupos.has(cat)) grupos.set(cat, []);
+          grupos.get(cat).push(p);
+        });
+        let html = '';
+        grupos.forEach((items, cat) => {
+          const titulo = items[0].categoria || items[0].category || 'General';
+          const icono = cat.includes('anillo') ? 'fa-ring'
+            : cat.includes('collar') ? 'fa-gem'
+            : cat.includes('arete') ? 'fa-ear-listen'
+            : cat.includes('pulsera') ? 'fa-hands'
+            : 'fa-gem';
+          html += `<div class="col-12" data-reveal>
+            <div class="category-group-header">
+              <div class="category-group-icon"><i class="fas ${icono}"></i></div>
+              <div>
+                <h4 class="category-group-title">${titulo}</h4>
+                <span class="category-group-count">${items.length} pieza${items.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+          </div>`;
+          html += items.map((p, i) => tarjeta(p, i)).join('');
+        });
+        grid.innerHTML = html;
+      } else {
+        grid.innerHTML = lista.map((p, i) => tarjeta(p, i)).join('');
+      }
       if (window.initReveal) window.initReveal();
     }
 
