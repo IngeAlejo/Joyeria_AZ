@@ -316,20 +316,26 @@ app.post('/api/login', authLimiter, async (req, res) => {
 // ============ REGISTER ============
 app.post('/api/register', authLimiter, async (req, res) => {
   try {
+    console.log("REGISTER DIAG: body raw:", JSON.stringify(req.body));
     const {
       email, password, nombre, apellidos,
       telefono, telefonoFijo, dni, fechaNacimiento, genero, empresa,
       pais, departamento, ciudad, direccion, direccion2, codigoPostal, referencia
     } = sanitizeObject(req.body);
 
+    console.log("REGISTER DIAG: email:", email, "| password:", password ? `[longitud ${password.length}]` : "VACIO");
+
     if (!email || !password) {
+      console.log("REGISTER DIAG: FALTAN CAMPOS → 400");
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
 
     const pwError = validatePassword(password);
     if (pwError) {
+      console.log("REGISTER DIAG: VALIDACION PASSWORD FALLÓ:", pwError);
       return res.status(400).json({ error: pwError });
     }
+    console.log("REGISTER DIAG: password OK, hasheando...");
 
     const salt = await bcrypt.genSalt(12);
     const hash = await bcrypt.hash(password, salt);
@@ -358,6 +364,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
 
       res.json({ success: true, token, nombre: nombre || 'Cliente', rol: 'cliente' });
     } catch (dbError) {
+      console.error("REGISTER DIAG: DB ERROR:", dbError.code, dbError.message);
       if (dbError.code === '23505') {
         res.status(400).json({ error: 'El email ya está registrado' });
       } else {
