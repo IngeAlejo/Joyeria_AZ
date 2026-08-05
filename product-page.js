@@ -161,7 +161,7 @@ function renderProductPage({ product, related = [] }) {
     body{margin:0;background:var(--p-bg);color:var(--p-navy);font-family:var(--font-ui);-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
-    .p-main{padding-top:96px}
+    .p-main{padding-top:0}
     .p-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
     .p-chip{font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r-pill);background:var(--az-surface-2);color:var(--az-navy);border:1px solid var(--az-border)}
     .p-chip-mat{background:rgba(184,150,90,.14);color:#8a6a33;border-color:rgba(184,150,90,.3)}
