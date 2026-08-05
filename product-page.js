@@ -90,7 +90,6 @@ function renderProductPage({ product, related = [] }) {
   const desc = ogDesc(p);
   const img = ogImage(p);
   const raw = decodeHtml(p.descripcion_completa || p.descripcion || '');
-  const short = decodeHtml(p.descripcion_corta || p.descripcion || '');
   const imgs = imagenesGaleria(p);
   const thumbHtml = imgs.map((u, i) =>
     `<button type="button" class="p-thumb${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="Imagen ${i + 1}">
@@ -162,16 +161,10 @@ function renderProductPage({ product, related = [] }) {
     body{margin:0;background:var(--p-bg);color:var(--p-navy);font-family:var(--font-ui);-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
-    .p-top{background:var(--p-navy);padding:14px 0;color:#fff}
-    .p-top .container{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-    .p-brand{display:flex;align-items:center;gap:12px}
-    .p-brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#fff}
-    .p-brand b{font-family:var(--font-display);font-size:1.35rem;font-weight:600;letter-spacing:.04em;color:var(--p-gold)}
-    .p-brand span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.55)}
-    .p-top-links{display:flex;gap:22px;align-items:center;font-size:13px}
-    .p-top-links a{color:rgba(255,255,255,.85);transition:color .2s}
-    .p-top-links a:hover{color:var(--p-gold)}
-    .container{max-width:1240px;margin:0 auto;padding:0 20px}
+    .p-main{padding-top:96px}
+    .p-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+    .p-chip{font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r-pill);background:var(--az-surface-2);color:var(--az-navy);border:1px solid var(--az-border)}
+    .p-chip-mat{background:rgba(184,150,90,.14);color:#8a6a33;border-color:rgba(184,150,90,.3)}
     .p-bread{font-size:12px;color:var(--p-muted);padding:18px 0 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
     .p-bread a:hover{color:var(--p-gold)}
     .p-bread .sep{opacity:.4}
@@ -245,22 +238,119 @@ function renderProductPage({ product, related = [] }) {
   </style>
 </head>
 <body>
-  <div class="p-top">
+  <!-- ===== NAVBAR UNIVERSAL ===== -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
     <div class="container">
-      <a class="p-brand" href="/">
-        <img src="/img/ALE.png" alt="Joyería AZ">
-        <div><b>AZ</b><span>Joyería Fina</span></div>
+      <a class="navbar-brand" href="/" aria-label="Joyería AZ — Inicio">
+        <img src="/img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
       </a>
-      <div class="p-top-links">
-        <a href="/">Inicio</a>
-        <a href="/pages/joyeria.html">Catálogo</a>
-        <a href="/pages/esmeraldas.html">Esmeraldas</a>
-        <a href="/#contacto">Contacto</a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#nosotros">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="/pages/joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="/cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== CARRITO SIDEBAR ===== -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <span class="carrito-title">Tu Bolsa</span>
+      <button class="carrito-close" onclick="toggleCarrito()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="carrito-contenido">
+      <p style="color:var(--az-text-muted);font-size:14px;text-align:center;padding:40px 0;">Tu bolsa está vacía.</p>
+    </div>
+    <div id="carrito-total-wrap" class="d-none"
+      style="margin-top:20px;padding-top:20px;border-top:1px solid var(--az-border);">
+      <div class="d-flex justify-content-between mb-3">
+        <span style="font-family:var(--font-ui);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--az-text-muted);">Total</span>
+        <span id="carrito-total" style="font-family:var(--font-display);font-size:1.6rem;font-weight:500;color:var(--az-navy);">$0</span>
+      </div>
+      <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az w-100" style="display:flex;justify-content:center;">
+        <i class="fab fa-whatsapp"></i>Pedir por WhatsApp
+      </a>
+    </div>
+  </div>
+  <div id="carrito-overlay" onclick="toggleCarrito()"
+    style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.3);z-index:1099;backdrop-filter:blur(2px);">
+  </div>
+
+  <!-- ===== AUTH MODAL ===== -->
+  <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="modal-title-lbl" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="padding:8px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="modal-title-lbl">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <form id="auth-form" onsubmit="manejarAuth(event)">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" id="auth-email" class="form-control" placeholder="tu@email.com" required autocomplete="email">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none;">
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label">Nombre</label>
+                  <input type="text" id="auth-nombre" class="form-control" placeholder="Nombre" autocomplete="given-name">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Apellidos</label>
+                  <input type="text" id="auth-apellidos" class="form-control" placeholder="Apellidos" autocomplete="family-name">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="auth-telefono" class="form-control" placeholder="Opcional" autocomplete="tel">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
+              <span id="btn-auth-text">Iniciar Sesión</span>
+            </button>
+          </form>
+          <div id="auth-msg" class="mt-3 text-center" style="font-size:14px;min-height:20px;"></div>
+          <hr style="border-color:var(--az-border);margin:16px 0;">
+          <p class="text-center mb-0" style="font-size:13px;color:var(--az-text-muted);">
+            <span id="auth-toggle-text">¿No tienes cuenta?</span>
+            <a href="#" onclick="toggleAuth(event)" id="auth-toggle-link" style="color:var(--az-gold);font-weight:600;margin-left:4px;">Regístrate aquí</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="container">
+  <div class="p-main container">
     <nav class="p-bread" aria-label="Migas de pan">
       <a href="/">Inicio</a>
       <span class="sep">/</span>
@@ -280,13 +370,16 @@ function renderProductPage({ product, related = [] }) {
       </div>
 
       <div>
-        <p class="p-cat">${esc(p.categoria || 'Joyería AZ')}</p>
         <h1 class="p-name">${esc(p.nombre)}</h1>
+        <div class="p-chips">
+          <span class="p-chip">${esc(p.categoria || 'General')}</span>
+          ${estadoBadge(p, p)}
+          ${p.materiales ? `<span class="p-chip p-chip-mat"><i class="fas fa-gem"></i> ${esc(p.materiales)}</span>` : ''}
+        </div>
         <div class="p-status">
           <span class="p-price">$${Number(p.precio || 0).toLocaleString('es-CO')}<small>COP</small></span>
-          ${estadoBadge(p, p)}
         </div>
-        ${short ? `<p class="p-short">${esc(short)}</p>` : ''}
+        ${raw ? `<p class="p-short">${esc(raw)}</p>` : ''}
 
         <div class="p-cta">
           <a class="p-btn p-btn-wa" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Joyería AZ, me interesa este producto: ' + decodeHtml(p.nombre) + ' (' + SITE_URL + '/p/' + esc(p.slug) + ')')}">
@@ -316,16 +409,9 @@ function renderProductPage({ product, related = [] }) {
               <button class="p-sbtn p-sbtn-copy" onclick="copiarEnlace()" title="Copiar enlace"><i class="fas fa-link"></i></button>
             </div>
           </div>
-          <p class="p-note">Si eres administrador verás aquí las opciones de difusión en redes sociales y correo.</p>
+          </div>
         </div>
       </div>
-    </div>
-
-    ${raw ? `
-    <div class="p-full" style="margin-bottom:48px">
-      <h3>Descripción</h3>
-      <p>${esc(raw)}</p>
-    </div>` : ''}
 
     ${related.length ? `
     <div class="p-related">
@@ -337,13 +423,75 @@ function renderProductPage({ product, related = [] }) {
   <div class="p-win" id="pWin" onclick="cerrarZoom()">
     <img id="pWinImg" src="${esc(imgs[0])}" alt="Ampliar imagen" onerror="this.src='/img/ALE.png'">
   </div>
+  <!-- TOAST (copiar/compartir) -->
   <div class="p-toast" id="pToast"><i class="fas fa-circle-check" style="color:var(--p-gold)"></i><span id="pToastTxt">Listo</span></div>
 
-  <footer class="p-footer">
-    <p style="margin:0 0 6px">Joyería AZ — Joyería fina en oro, plata y esmeraldas colombianas</p>
-    <span>&copy; 2026 Joyería AZ — Todos los derechos reservados</span>
+  <!-- ===== FOOTER UNIVERSAL ===== -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="/img/ALE.png" alt="Logo" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.</p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="/pages/joyeria.html">Joyería</a></li>
+            <li><a href="/pages/esmeraldas.html">Esmeraldas</a></li>
+            <li><a href="/pages/joyeria.html?cat=anillo">Anillos</a></li>
+            <li><a href="/pages/joyeria.html?cat=collar">Collares</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Páginas</h6>
+          <ul class="footer-links">
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/pages/nosotros.html">Nosotros</a></li>
+            <li><a href="/#contacto">Contacto</a></li>
+            <li><a href="/cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Atención</h6>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2" style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
+            <li><a href="mailto:joyeri.az925@gmail.com"><i class="fas fa-envelope me-2" style="color:var(--az-gold);"></i>joyeri.az925@gmail.com</a></li>
+            <li><a href="#"><i class="fas fa-map-marker-alt me-2" style="color:var(--az-gold);"></i>Yopal, Colombia</a></li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+    </div>
   </footer>
 
+  <!-- TOAST CART -->
+  <div id="toast-cart"
+    style="position:fixed;bottom:30px;right:20px;background:var(--az-navy);color:white;padding:14px 20px;border-radius:var(--r-card);font-family:var(--font-ui);font-size:14px;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);transform:translateX(150%);transition:transform 0.4s var(--ease-out);display:flex;align-items:center;gap:10px;pointer-events:none;">
+    <i class="fas fa-check" style="color:var(--az-gold);"></i>
+    <span id="toast-text">Añadido al bolso</span>
+  </div>
+
+  <!-- Floating cart button (mobile) -->
+  <button class="btn-cart-float" onclick="toggleCarrito()" aria-label="Ver carrito">
+    <i class="fas fa-shopping-bag"></i>
+    <span class="cart-badge-float" id="badge-carrito-float">0</span>
+  </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/reveal.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
   <script>
     var __PRODUCT__ = ${prodJson};
     var __URL__ = ${JSON.stringify(url)};
@@ -351,63 +499,65 @@ function renderProductPage({ product, related = [] }) {
     var __DESC__ = ${JSON.stringify(ogDesc(p))};
     var __IMG__ = ${JSON.stringify(img)};
 
-    function toast(msg){
-      var t=document.getElementById('pToast');
-      document.getElementById('pToastTxt').textContent=msg;
+    window.addEventListener('scroll', function () {
+      var nb = document.getElementById('navbar-main');
+      if (nb) nb.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    function toast(msg) {
+      var t = document.getElementById('pToast');
+      if (!t) return;
+      document.getElementById('pToastTxt').textContent = msg;
       t.classList.add('show');
       clearTimeout(t.__t);
-      t.__t=setTimeout(function(){t.classList.remove('show');},2600);
+      t.__t = setTimeout(function () { t.classList.remove('show'); }, 2600);
     }
-    function abrirZoom(){var w=document.getElementById('pWin');document.getElementById('pWinImg').src=document.getElementById('pMain').src;w.classList.add('active');document.body.style.overflow='hidden';}
-    function cerrarZoom(){document.getElementById('pWin').classList.remove('active');document.body.style.overflow='';}
-    document.querySelectorAll('.p-thumb').forEach(function(t){
-      t.addEventListener('click',function(){
-        document.querySelectorAll('.p-thumb').forEach(function(x){x.classList.remove('active')});
+
+    function abrirZoom() { var w = document.getElementById('pWin'); document.getElementById('pWinImg').src = document.getElementById('pMain').src; w.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function cerrarZoom() { document.getElementById('pWin').classList.remove('active'); document.body.style.overflow = ''; }
+    document.querySelectorAll('.p-thumb').forEach(function (t) {
+      t.addEventListener('click', function () {
+        document.querySelectorAll('.p-thumb').forEach(function (x) { x.classList.remove('active'); });
         t.classList.add('active');
-        document.getElementById('pMain').src=t.querySelector('img').src;
+        document.getElementById('pMain').src = t.querySelector('img').src;
       });
     });
 
-    function agregarAlBolsa(){
-      if(!__PRODUCT__||__PRODUCT__.id==null)return;
-      var c=JSON.parse(localStorage.getItem('carrito')||'[]');
-      var idx=c.findIndex(function(i){return String(i.id)===String(__PRODUCT__.id)});
-      if(idx>-1){c[idx].cantidad=(c[idx].cantidad||1)+1;}else{c.push({id:__PRODUCT__.id,nombre:__PRODUCT__.nombre,precio:__PRODUCT__.precio,imagen:__PRODUCT__.imagen,cantidad:1});}
-      localStorage.setItem('carrito',JSON.stringify(c));
-      toast('Agregado a la bolsa');
+    var b = document.getElementById('btnAddCart');
+    if (b && !b.disabled && typeof agregarCarrito === 'function') {
+      b.addEventListener('click', function () { agregarCarrito(__PRODUCT__); });
     }
-    var b=document.getElementById('btnAddCart');
-    if(b&&!b.disabled)b.addEventListener('click',agregarAlBolsa);
 
-    function copiarEnlace(){
-      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(__URL__).then(function(){toast('Enlace copiado')}).catch(function(){copiarFallback()});}
-      else copiarFallback();
+    function copiarEnlace() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(__URL__).then(function () { toast('Enlace copiado'); }).catch(function () { copiarFallback(); });
+      } else copiarFallback();
     }
-    function copiarFallback(){
-      var ta=document.createElement('textarea');ta.value=__URL__;document.body.appendChild(ta);ta.select();
-      try{document.execCommand('copy');toast('Enlace copiado');}catch(e){prompt('Copia el enlace:',__URL__);}
+    function copiarFallback() {
+      var ta = document.createElement('textarea'); ta.value = __URL__; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); toast('Enlace copiado'); } catch (e) { prompt('Copia el enlace:', __URL__); }
       document.body.removeChild(ta);
     }
-    function compartirNativo(){
-      if(navigator.share){
-        navigator.share({title:__TITLE__,text:__DESC__,url:__URL__}).catch(function(){});
-      } else { copiarEnlace(); }
-    }
-    function compartir(red){
-      var enc=encodeURIComponent(__URL__);
-      var txtE=encodeURIComponent(__TITLE__+'\n'+__DESC__);
-      var map={
-        wa:'https://wa.me/?text='+encodeURIComponent(__TITLE__+' '+__URL__),
-        fb:'https://www.facebook.com/sharer/sharer.php?u='+enc,
-        x:'https://twitter.com/intent/tweet?url='+enc+'&text='+txtE,
-        tg:'https://t.me/share/url?url='+enc+'&text='+txtE,
-        email:'mailto:?subject='+encodeURIComponent(__TITLE__)+'&body='+txtE+'%0A'+enc
-      };
-      if(map[red])window.open(map[red],'_blank','noopener,width=640,height=520');
+    function compartirNativo() {
+      if (navigator.share) { navigator.share({ title: __TITLE__, text: __DESC__, url: __URL__ }).catch(function () {}); }
       else copiarEnlace();
     }
-    if(localStorage.getItem('rol')==='admin'){
-      document.getElementById('pAdminShare').style.display='block';
+    function compartir(red) {
+      var enc = encodeURIComponent(__URL__);
+      var txtE = encodeURIComponent(__TITLE__ + '\n' + __DESC__);
+      var map = {
+        wa: 'https://wa.me/?text=' + encodeURIComponent(__TITLE__ + ' ' + __URL__),
+        fb: 'https://www.facebook.com/sharer/sharer.php?u=' + enc,
+        x: 'https://twitter.com/intent/tweet?url=' + enc + '&text=' + txtE,
+        tg: 'https://t.me/share/url?url=' + enc + '&text=' + txtE,
+        email: 'mailto:?subject=' + encodeURIComponent(__TITLE__) + '&body=' + txtE + '%0A' + enc
+      };
+      if (map[red]) window.open(map[red], '_blank', 'noopener,width=640,height=520');
+      else copiarEnlace();
+    }
+    if (localStorage.getItem('rol') === 'admin') {
+      var ad = document.getElementById('pAdminShare');
+      if (ad) ad.style.display = 'block';
     }
   </script>
 </body>

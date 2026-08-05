@@ -54,7 +54,6 @@ async function cargarProductos() {
           <div class="product-body">
             ${cat ? `<span class="badge-category ${catIsEsmeralda ? 'badge-emerald-cat' : ''}">${cat}</span>` : ''}
             <h3 class="product-name">${detalleUrl ? `<a href="${detalleUrl}" class="product-name-link">${nombre}</a>` : nombre}</h3>
-            ${desc ? `<p class="product-desc">${desc}</p>` : ''}
             <div class="product-footer">
               <div>
                 <div class="product-price">$${precio.toLocaleString('es-CO')}</div>
