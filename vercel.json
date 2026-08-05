@@ -11,6 +11,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/p/:slug", "destination": "/api" }
   ]
 }

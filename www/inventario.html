@@ -240,7 +240,7 @@
 
   <!-- MODAL AGREGAR PRODUCTO -->
   <div class="modal fade" id="modal-producto" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
         <div class="modal-header border-0" style="padding:24px 28px 16px;">
           <h5 class="modal-title" style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">Agregar Nuevo Producto</h5>
@@ -277,13 +277,215 @@
               <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción</label>
               <textarea class="inv-field" id="new-desc" rows="2"></textarea>
             </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción corta</label>
+                <input type="text" class="inv-field" id="new-descCorta" placeholder="Breve (aparece en la tarjeta)">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Estado</label>
+                <select class="inv-field" id="new-estado">
+                  <option value="disponible">Disponible</option>
+                  <option value="nuevo">Nuevo</option>
+                  <option value="pedido">Hecho a pedido</option>
+                  <option value="agotado">Agotado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción completa (página del producto)</label>
+              <textarea class="inv-field" id="new-descFull" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Slug (URL amigable) <span style="font-weight:400;color:var(--az-text-light);">— vacío = se genera solo del nombre</span></label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" class="inv-field" id="new-slug" placeholder="manilla-oro-925" style="font-family:monospace;font-size:13px;">
+                <button type="button" class="btn-nav-login" onclick="autoSlugDesdeNombre()" style="font-size:12px;padding:8px 12px;flex-shrink:0;">Auto</button>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Materiales</label>
+                <input type="text" class="inv-field" id="new-materiales" placeholder="Oro 18k">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Tipo de piedra</label>
+                <input type="text" class="inv-field" id="new-piedra" placeholder="Esmeralda colombiana">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Color</label>
+                <input type="text" class="inv-field" id="new-color">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Peso</label>
+                <input type="text" class="inv-field" id="new-peso" placeholder="3.2 g">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Medidas</label>
+                <input type="text" class="inv-field" id="new-medidas" placeholder="Est. 16 / caída 3.5cm">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Meta título (SEO)</label>
+                <input type="text" class="inv-field" id="new-metaTitle">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Meta descripción (SEO)</label>
+                <input type="text" class="inv-field" id="new-metaDesc">
+              </div>
+            </div>
+
             <div class="mb-4">
-              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen</label>
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen principal</label>
               <input type="file" class="inv-field" id="new-img" accept="image/*" style="padding:6px 12px;background:var(--az-surface);">
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imágenes adicionales (máx. 6)</label>
+              <input type="file" class="inv-field" id="new-imagenes" accept="image/*" multiple style="padding:6px 12px;background:var(--az-surface);">
+            </div>
+            <div class="mb-4">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen para compartir (previsualización en redes)</label>
+              <input type="file" class="inv-field" id="new-imgShare" accept="image/*" style="padding:6px 12px;background:var(--az-surface);">
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end;">
               <button type="button" class="btn-nav-login" data-bs-dismiss="modal" style="font-size:14px;padding:10px 20px;">Cancelar</button>
               <button type="submit" class="btn-gold-az" style="font-size:14px;padding:10px 24px;" id="btn-crear-producto">Guardar Producto</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR PRODUCTO -->
+  <div class="modal fade" id="modal-editar" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
+        <div class="modal-header border-0" style="padding:24px 28px 16px;">
+          <h5 class="modal-title" style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">Editar ficha del producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:0 28px 24px;">
+          <div style="margin-bottom:16px;padding:12px 14px;background:var(--az-surface-2);border:1px solid var(--az-border);border-radius:var(--r-card);font-family:var(--font-ui);font-size:13px;color:var(--az-navy);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-link" style="color:var(--az-gold);"></i>
+            <span id="edit-url-preview" style="font-family:monospace;font-size:12px;color:var(--az-text-muted);word-break:break-all;"></span>
+            <a href="#" target="_blank" id="edit-url-btn" style="margin-left:auto;font-size:12px;color:var(--az-emerald);font-weight:700;">Ver página <i class="fas fa-external-link-alt"></i></a>
+          </div>
+          <form id="form-editar" onsubmit="guardarEditar(event)">
+            <div class="row g-3 mb-3">
+              <div class="col-8">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Nombre del producto</label>
+                <input type="text" class="inv-field" id="edit-nombre" required>
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Estado</label>
+                <select class="inv-field" id="edit-estado">
+                  <option value="disponible">Disponible</option>
+                  <option value="nuevo">Nuevo</option>
+                  <option value="pedido">Hecho a pedido</option>
+                  <option value="agotado">Agotado</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Precio (COP)</label>
+                <input type="number" class="inv-field" id="edit-precio" required min="0">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Stock</label>
+                <input type="number" class="inv-field" id="edit-stock" required min="0">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Categoría</label>
+                <select class="inv-field" id="edit-categoria">
+                  <option>Anillos</option>
+                  <option>Collares</option>
+                  <option>Aretes</option>
+                  <option>Pulseras</option>
+                  <option>Esmeraldas</option>
+                  <option>General</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Slug (URL amigable) <span style="font-weight:400;color:var(--az-text-light);">— único; se agrega -2/-3 si ya existe</span></label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" class="inv-field" id="edit-slug" style="font-family:monospace;font-size:13px;">
+                <button type="button" class="btn-nav-login" onclick="autoSlugEditar()" style="font-size:12px;padding:8px 12px;flex-shrink:0;">Auto</button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción corta</label>
+              <input type="text" class="inv-field" id="edit-descCorta">
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción</label>
+              <textarea class="inv-field" id="edit-desc" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Descripción completa (página del producto)</label>
+              <textarea class="inv-field" id="edit-descFull" rows="3"></textarea>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Materiales</label>
+                <input type="text" class="inv-field" id="edit-materiales">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Tipo de piedra</label>
+                <input type="text" class="inv-field" id="edit-piedra">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Color</label>
+                <input type="text" class="inv-field" id="edit-color">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Peso</label>
+                <input type="text" class="inv-field" id="edit-peso">
+              </div>
+              <div class="col-4">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Medidas</label>
+                <input type="text" class="inv-field" id="edit-medidas">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Meta título (SEO)</label>
+                <input type="text" class="inv-field" id="edit-metaTitle">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Meta descripción (SEO)</label>
+                <input type="text" class="inv-field" id="edit-metaDesc">
+              </div>
+            </div>
+            <div class="mb-4">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen principal</label>
+              <input type="file" class="inv-field" id="edit-imagenMain" accept="image/*" style="padding:6px 12px;background:var(--az-surface);">
+            </div>
+            <div class="mb-3">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imágenes adicionales (selecciona nuevas para agregarlas)</label>
+              <input type="file" class="inv-field" id="edit-imagenes" accept="image/*" multiple style="padding:6px 12px;background:var(--az-surface);">
+              <div id="edit-galeria-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
+            </div>
+            <div class="mb-4">
+              <label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;display:block;">Imagen para compartir (previsualización en redes)</label>
+              <input type="file" class="inv-field" id="edit-imgShare" accept="image/*" style="padding:6px 12px;background:var(--az-surface);">
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button type="button" class="btn-nav-login" data-bs-dismiss="modal" style="font-size:14px;padding:10px 20px;">Cancelar</button>
+              <button type="submit" class="btn-gold-az" style="font-size:14px;padding:10px 24px;" id="btn-guardar-editar">Guardar Cambios</button>
             </div>
           </form>
         </div>
@@ -313,12 +515,13 @@
         const token = localStorage.getItem('token');
         if (!token) { mostrarNotif('❌ Sin autenticación'); return; }
 
-        const res = await fetch(`${API_URL}/products`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+const res = await fetch(`${API_URL}/products`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
         });
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
         const productos = data.productos || data || [];
+        productosCache = productos;
         renderProductos(productos);
 
         document.getElementById('stat-productos').textContent = productos.length;
@@ -378,7 +581,10 @@
               </div>
 
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <button class="btn-gold-az" onclick="guardarProducto(${p.id})" style="width:100%;justify-content:center;font-size:13px;padding:10px;">
+                <button class="btn-gold-az" onclick="abrirEditarProducto(${p.id})" style="width:100%;justify-content:center;font-size:13px;padding:10px;background:var(--az-emerald);">
+                  <i class="fas fa-pen me-1"></i>Editar ficha
+                </button>
+                <button class="btn-gold-az" onclick="guardarProducto(${p.id})" style="width:100%;justify-content:center;font-size:13px;padding:10px;background:var(--az-navy);">
                   <i class="fas fa-save me-1"></i>Guardar cambios
                 </button>
                 <button onclick="eliminarProducto(${p.id})" style="width:100%;padding:10px;border-radius:var(--r-pill);border:1.5px solid rgba(220,53,69,0.3);background:transparent;color:#dc3545;font-family:var(--font-ui);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='#dc3545';this.style.color='white';" onmouseout="this.style.background='transparent';this.style.color='#dc3545';">
@@ -445,6 +651,143 @@
       } catch (err) { mostrarNotif('❌ Error'); }
     }
 
+    /* ===== FICHA COMPLETA / EDICIÓN DETALLADA ===== */
+    let editandoId = null;
+    let productosCache = [];
+
+    function autoSlugEditar() {
+      const nombre = (document.getElementById('edit-nombre').value || '').trim();
+      document.getElementById('edit-slug').value = nombre
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+    }
+
+    function renderGaleriaPreview(producto) {
+      const cont = document.getElementById('edit-galeria-preview');
+      if (!cont) return;
+      const imgs = (Array.isArray(producto.imagenes) ? producto.imagenes : []);
+      cont.innerHTML = imgs.map((u, i) => `
+        <div style="position:relative;width:68px;height:68px;border-radius:var(--r-card);overflow:hidden;border:1px solid var(--az-border);">
+          <img src="${u}" alt="Img ${i + 1}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='img/ALE.png'">
+          <button type="button" onclick="eliminarImagenGaleria('${u.replace(/'/g, "\\'")}')" aria-label="Quitar" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:none;background:#dc3545;color:#fff;font-size:11px;line-height:1;cursor:pointer;">×</button>
+        </div>`).join('');
+    }
+
+    async function eliminarImagenGaleria(url) {
+      if (!confirm('¿Quitar esta imagen del producto?')) return;
+      try {
+        const res = await fetch(`${API_URL}/inventario/${editandoId}/galeria`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        if (res.ok) {
+          mostrarNotif('✅ Imagen eliminada');
+          const data = await res.json();
+          if (data.imagenes) renderGaleriaPreview({ imagenes: data.imagenes });
+        } else mostrarNotif('❌ No se pudo eliminar');
+      } catch (err) { mostrarNotif('❌ Error'); }
+    }
+
+    function abrirEditarProducto(id) {
+      const p = (productosCache || []).find(x => String(x.id) === String(id));
+      if (!p) { mostrarNotif('❌ Producto no disponible'); return; }
+      editandoId = p.id;
+      document.getElementById('edit-nombre').value = p.nombre || '';
+      document.getElementById('edit-precio').value = p.precio || '';
+      document.getElementById('edit-stock').value = p.stock ?? 0;
+      document.getElementById('edit-categoria').value = p.categoria || 'General';
+      document.getElementById('edit-estado').value = p.estado || 'disponible';
+      document.getElementById('edit-slug').value = p.slug || '';
+      document.getElementById('edit-descCorta').value = p.descripcion_corta || '';
+      document.getElementById('edit-desc').value = p.descripcion || '';
+      document.getElementById('edit-descFull').value = p.descripcion_completa || '';
+      document.getElementById('edit-materiales').value = p.materiales || '';
+      document.getElementById('edit-piedra').value = p.tipo_piedra || '';
+      document.getElementById('edit-color').value = p.color || '';
+      document.getElementById('edit-peso').value = p.peso || '';
+      document.getElementById('edit-medidas').value = p.medidas || '';
+      document.getElementById('edit-metaTitle').value = p.meta_title || '';
+      document.getElementById('edit-metaDesc').value = p.meta_descripcion || '';
+      document.getElementById('edit-imagenMain').value = '';
+      document.getElementById('edit-imagenes').value = '';
+      document.getElementById('edit-imgShare').value = '';
+
+      const base = window.location.origin;
+      const slug = p.slug || '';
+      document.getElementById('edit-url-preview').textContent = slug ? `${base}/p/${slug}` : 'No tiene slug asignado aún';
+      document.getElementById('edit-url-btn').href = slug ? `${base}/p/${slug}` : '#';
+      document.getElementById('edit-url-btn').style.pointerEvents = slug ? 'auto' : 'none';
+      document.getElementById('edit-url-btn').style.opacity = slug ? '1' : '0.4';
+      renderGaleriaPreview(p);
+      modalEditar.show();
+    }
+
+    async function guardarEditar(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-guardar-editar');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+      btn.disabled = true;
+      try {
+        const payload = {
+          nombre: document.getElementById('edit-nombre').value,
+          precio: document.getElementById('edit-precio').value,
+          stock: document.getElementById('edit-stock').value,
+          categoria: document.getElementById('edit-categoria').value,
+          estado: document.getElementById('edit-estado').value,
+          slug: document.getElementById('edit-slug').value.trim(),
+          descripcionCorta: document.getElementById('edit-descCorta').value,
+          descripcion: document.getElementById('edit-desc').value,
+          descripcionCompleta: document.getElementById('edit-descFull').value,
+          materiales: document.getElementById('edit-materiales').value,
+          tipoPiedra: document.getElementById('edit-piedra').value,
+          color: document.getElementById('edit-color').value,
+          peso: document.getElementById('edit-peso').value,
+          medidas: document.getElementById('edit-medidas').value,
+          metaTitle: document.getElementById('edit-metaTitle').value,
+          metaDescripcion: document.getElementById('edit-metaDesc').value
+        };
+
+        const files = new FormData();
+        const main = document.getElementById('edit-imagenMain').files[0];
+        const secs = document.getElementById('edit-imagenes').files;
+        const share = document.getElementById('edit-imgShare').files[0];
+        let hayArchivos = false;
+
+        const res = await fetch(`${API_URL}/inventario/${editandoId}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Error al guardar');
+
+        const galeria = new FormData();
+        if (main) { galeria.append('imagen', main); hayArchivos = true; }
+        if (secs && secs.length) { Array.from(secs).forEach(f => galeria.append('imagenes', f)); hayArchivos = true; }
+        if (share) { galeria.append('imagenCompartir', share); hayArchivos = true; }
+        if (hayArchivos) {
+          const gr = await fetch(`${API_URL}/inventario/${editandoId}/galeria`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: galeria
+          });
+          if (!gr.ok) throw new Error('Error al subir imágenes');
+        }
+
+        mostrarNotif('✅ Ficha actualizada');
+        modalEditar.hide();
+        cargarProductos();
+      } catch (err) {
+        mostrarNotif('❌ ' + err.message);
+      } finally {
+        btn.innerHTML = 'Guardar Cambios';
+        btn.disabled = false;
+      }
+    }
+
     function mostrarNotif(msg) {
       const notif = document.getElementById('inv-notif');
       notif.textContent = msg;
@@ -461,6 +804,7 @@
     }
 
     let modalProducto;
+    let modalEditar;
     document.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('token');
       const rol = localStorage.getItem('rol');
@@ -470,12 +814,23 @@
         return;
       }
       modalProducto = new bootstrap.Modal(document.getElementById('modal-producto'));
+      modalEditar = new bootstrap.Modal(document.getElementById('modal-editar'));
       cargarProductos();
     });
 
     function abrirModalProducto() {
       document.getElementById('form-producto').reset();
       modalProducto.show();
+    }
+
+    function autoSlugDesdeNombre() {
+      const nombre = (document.getElementById('new-nombre').value || '').trim();
+      document.getElementById('new-slug').value = nombre
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
     }
 
     async function crearProducto(e) {
@@ -490,6 +845,18 @@
       formData.append('stock', document.getElementById('new-stock').value);
       formData.append('categoria', document.getElementById('new-categoria').value);
       formData.append('descripcion', document.getElementById('new-desc').value);
+      formData.append('descripcionCorta', document.getElementById('new-descCorta').value);
+      formData.append('descripcionCompleta', document.getElementById('new-descFull').value);
+      formData.append('materiales', document.getElementById('new-materiales').value);
+      formData.append('tipoPiedra', document.getElementById('new-piedra').value);
+      formData.append('color', document.getElementById('new-color').value);
+      formData.append('peso', document.getElementById('new-peso').value);
+      formData.append('medidas', document.getElementById('new-medidas').value);
+      formData.append('estado', document.getElementById('new-estado').value);
+      formData.append('metaTitle', document.getElementById('new-metaTitle').value);
+      formData.append('metaDescripcion', document.getElementById('new-metaDesc').value);
+      formData.append('slug', document.getElementById('new-slug').value.trim());
+
       const imgFile = document.getElementById('new-img').files[0];
       if (imgFile) formData.append('imagen', imgFile);
 
@@ -500,6 +867,26 @@
           body: formData
         });
         if (!res.ok) throw new Error('Error al crear producto');
+        const data = await res.json();
+
+        // Subir galería (imágenes adicionales + imagen para compartir)
+        const galeria = new FormData();
+        const secs = document.getElementById('new-imagenes').files;
+        const share = document.getElementById('new-imgShare').files[0];
+        let hayGaleria = false;
+        if (secs && secs.length) {
+          for (const f of Array.from(secs)) { galeria.append('imagenes', f); }
+          hayGaleria = true;
+        }
+        if (share) { galeria.append('imagenCompartir', share); hayGaleria = true; }
+        if (hayGaleria && data.id) {
+          await fetch(`${API_URL}/inventario/${data.id}/galeria`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: galeria
+          });
+        }
+
         mostrarNotif('✅ Producto creado con éxito');
         modalProducto.hide();
         cargarProductos();

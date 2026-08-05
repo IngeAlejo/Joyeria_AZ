@@ -38,11 +38,14 @@ async function cargarProductos() {
         : `https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400`;
       const featured = p.destacado || p.featured;
       const catIsEsmeralda = cat.toLowerCase().includes('esmeralda');
+      const pSlug = (p.slug || '').toString().trim();
+      const detalleUrl = pSlug ? `/p/${encodeURIComponent(pSlug)}` : '';
       const itemJson = JSON.stringify({ id: p.id, nombre, precio, imagen: imgSrc }).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
       return `<div class="col-lg-3 col-md-6" data-reveal data-delay="${(i % 4) + 1}">
         <article class="product-card">
           <div class="product-img-wrap">
+            ${detalleUrl ? `<a href="${detalleUrl}" class="product-img-link" aria-label="Ver ${nombre}"><i class="fas fa-expand"></i></a>` : ''}
             <img src="${imgSrc}" alt="${nombre}" loading="lazy"
                  onerror="this.src='https://picsum.photos/seed/${encodeURIComponent(nombre)}/600/400'">
             ${featured ? `<span class="product-badge badge-featured">Destacado</span>` : ''}
@@ -50,7 +53,7 @@ async function cargarProductos() {
           </div>
           <div class="product-body">
             ${cat ? `<span class="badge-category ${catIsEsmeralda ? 'badge-emerald-cat' : ''}">${cat}</span>` : ''}
-            <h3 class="product-name">${nombre}</h3>
+            <h3 class="product-name">${detalleUrl ? `<a href="${detalleUrl}" class="product-name-link">${nombre}</a>` : nombre}</h3>
             ${desc ? `<p class="product-desc">${desc}</p>` : ''}
             <div class="product-footer">
               <div>

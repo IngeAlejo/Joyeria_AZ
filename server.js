@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const { createClient } = require('@supabase/supabase-js');
+const { renderProductPage, renderNotFound } = require('./product-page');
 require('dotenv').config();
 
 // ============ VALIDACIONES DE SEGURIDAD ============
@@ -37,9 +38,46 @@ function sanitizeObject(obj) {
   if (!obj || typeof obj !== 'object') return obj;
   const clean = {};
   for (const [key, val] of Object.entries(obj)) {
-    clean[key] = typeof val === 'string' ? sanitize(val) : val;
+    clean[key] = Array.isArray(val)
+      ? val.map(v => (typeof v === 'string' ? sanitize(v) : v))
+      : (typeof val === 'string' ? sanitize(val) : val);
   }
   return clean;
+}
+
+// ============ SLUGS (URL amigables y únicas) ============
+function slugify(str) {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+async function generarSlugUnico(connection, base, exceptId) {
+  let slug = slugify(base) || 'producto';
+  if (!slug) slug = 'producto';
+  let n = 2;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const { rows } = await connection.query(
+      'SELECT id FROM products WHERE slug = $1 AND ($2::bigint IS NULL OR id <> $2)',
+      [slug, exceptId || null]
+    );
+    if (rows.length === 0) return slug;
+    slug = `${slugify(base) || 'producto'}-${n++}`;
+  }
+}
+
+function normalizarArregloImagenes(val) {
+  if (Array.isArray(val)) return val.filter(u => typeof u === 'string' && u.trim()).map(u => sanitize(u.trim()));
+  if (typeof val === 'string' && val.trim()) {
+    return val.split(',').map(s => s.trim()).filter(Boolean).map(s => sanitize(s));
+  }
+  return [];
 }
 
 // ============ VALIDACION DE CONTRASENA ============
@@ -438,6 +476,44 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// ============ PAGINA DE PRODUCTO (SERVER-RENDERED CON SEO/OG) ============
+app.get('/p/:slug', async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+  try {
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!slug) return res.status(404).send(renderNotFound());
+
+    const connection = await db.getConnection();
+    const { rows } = await connection.query(
+      'SELECT * FROM products WHERE slug = $1 AND activo = true',
+      [slug]
+    );
+
+    if (rows.length === 0) {
+      connection.release();
+      return res.status(404).send(renderNotFound());
+    }
+
+    const product = rows[0];
+    const relatedRes = await connection.query(
+      `SELECT * FROM products WHERE activo = true AND id <> $1
+         AND categoria = $2 ORDER BY "createdAt" DESC LIMIT 4`,
+      [product.id, product.categoria || 'General']
+    );
+    connection.release();
+
+    const html = renderProductPage({
+      product,
+      related: relatedRes.rows || []
+    });
+    res.send(html);
+  } catch (error) {
+    console.error("ERROR GET /p/:slug:", error.message);
+    console.error(error.stack);
+    res.status(500).send(renderNotFound());
+  }
+});
+
 // ============ INVENTARIO (SOLO ADMIN) ============
 app.get('/api/inventario', auth, async (req, res) => {
   try {
@@ -459,7 +535,14 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
-    const { nombre, precio, stock, descripcion, categoria } = sanitizeObject(req.body);
+    const body = sanitizeObject(req.body);
+    const {
+      nombre, precio, stock, descripcion, categoria,
+      descripcionCorta, descripcionCompleta, materiales, tipoPiedra,
+      color, peso, medidas, estado, metaTitle, metaDescripcion, slug
+    } = body;
+    let imagenesSec = normalizarArregloImagenes(body.imagenes);
+    let imagenCompartir = body.imagenCompartir ? sanitize(body.imagenCompartir) : null;
     let imagenUrl = null;
 
     if (req.file) {
@@ -467,13 +550,26 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
     }
 
     const connection = await db.getConnection();
-    await connection.query(
-      'INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo, "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())',
-      [nombre, precio, stock, descripcion, categoria || 'General', imagenUrl]
+    const slugFinal = await generarSlugUnico(connection, slug || nombre || 'producto', null);
+
+    const result = await connection.query(
+      `INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo,
+         slug, descripcion_corta, descripcion_completa, materiales, tipo_piedra, color, peso,
+         medidas, estado, imagenes, imagen_compartir, meta_title, meta_descripcion,
+         "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW())
+       RETURNING id, slug`,
+      [
+        nombre, precio, stock, descripcion, categoria || 'General', imagenUrl,
+        slugFinal, descripcionCorta || null, descripcionCompleta || null, materiales || null,
+        tipoPiedra || null, color || null, peso || null, medidas || null, estado || 'disponible',
+        JSON.stringify(imagenesSec), imagenCompartir,
+        metaTitle || null, metaDescripcion || null
+      ]
     );
     connection.release();
 
-    res.json({ success: true, msg: 'Producto agregado', imagen: imagenUrl });
+    res.json({ success: true, msg: 'Producto agregado', imagen: imagenUrl, slug: slugFinal, id: result.rows[0].id });
   } catch (error) {
     console.error("ERROR POST /api/inventario:", error.message);
     console.error(error.stack);
@@ -485,7 +581,7 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
   try {
     if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
-    const { nombre, precio, stock, descripcion, categoria } = sanitizeObject(req.body);
+    const body = sanitizeObject(req.body);
     const connection = await db.getConnection();
 
     const { rows: existing } = await connection.query('SELECT * FROM products WHERE id=$1', [req.params.id]);
@@ -495,11 +591,18 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     }
     const p = existing[0];
 
-    const newNombre = nombre !== undefined ? nombre : p.nombre;
-    const newPrecio = precio !== undefined ? precio : p.precio;
-    const newStock = stock !== undefined ? stock : p.stock;
-    const newDesc = descripcion !== undefined ? descripcion : p.descripcion;
-    const newCat = categoria !== undefined ? categoria : p.categoria;
+    const val = (field, current) => (body[field] !== undefined ? body[field] : current);
+    const newNombre = val('nombre', p.nombre);
+
+    let newSlug = p.slug || (await generarSlugUnico(connection, newNombre, p.id));
+    if (body.slug !== undefined) {
+      newSlug = slugify(body.slug) || newSlug;
+    }
+
+    const imagenesSec = body.imagenes !== undefined
+      ? normalizarArregloImagenes(body.imagenes)
+      : (Array.isArray(p.imagenes) ? p.imagenes : []);
+    const imagenCompartir = body.imagenCompartir !== undefined ? (body.imagenCompartir ? sanitize(body.imagenCompartir) : null) : (p.imagen_compartir || null);
 
     let newImg = p.imagen;
     if (req.file) {
@@ -510,14 +613,99 @@ app.put('/api/inventario/:id', auth, upload.single('imagen'), async (req, res) =
     }
 
     await connection.query(
-      'UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6, "updatedAt"=NOW() WHERE id=$7',
-      [newNombre, newPrecio, newStock, newDesc, newCat, newImg, req.params.id]
+      `UPDATE products SET nombre=$1, precio=$2, stock=$3, descripcion=$4, categoria=$5, imagen=$6,
+         slug=$7, descripcion_corta=$8, descripcion_completa=$9, materiales=$10, tipo_piedra=$11,
+         color=$12, peso=$13, medidas=$14, estado=$15, imagenes=$16, imagen_compartir=$17,
+         meta_title=$18, meta_descripcion=$19, "updatedAt"=NOW()
+       WHERE id=$20`,
+      [
+        newNombre, val('precio', p.precio), val('stock', p.stock), val('descripcion', p.descripcion),
+        val('categoria', p.categoria), newImg, newSlug,
+        val('descripcionCorta', p.descripcion_corta), val('descripcionCompleta', p.descripcion_completa || p.descripcion),
+        val('materiales', p.materiales), val('tipoPiedra', p.tipo_piedra), val('color', p.color),
+        val('peso', p.peso), val('medidas', p.medidas), val('estado', p.estado),
+        JSON.stringify(imagenesSec), imagenCompartir,
+        val('metaTitle', p.meta_title), val('metaDescripcion', p.meta_descripcion),
+        req.params.id
+      ]
     );
 
     connection.release();
-    res.json({ success: true, msg: 'Producto actualizado' });
+    res.json({ success: true, msg: 'Producto actualizado', slug: newSlug });
   } catch (error) {
     console.error("ERROR PUT /api/inventario/:id:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
+  }
+});
+
+// ============ GALERIA DE IMAGENES (SECUNDARIAS + COMPARTIR) ============
+app.post('/api/inventario/:id/galeria', auth, upload.fields([{ name: 'imagenes', maxCount: 6 }, { name: 'imagenCompartir', maxCount: 1 }, { name: 'imagen', maxCount: 1 }]), async (req, res) => {
+  try {
+    if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
+
+    const connection = await db.getConnection();
+    const { rows: existing } = await connection.query('SELECT id, imagenes, imagen_compartir, imagen FROM products WHERE id=$1', [req.params.id]);
+    if (existing.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    const p = existing[0];
+    const files = req.files || {};
+
+    let imagenes = Array.isArray(p.imagenes) ? p.imagenes.slice() : [];
+    if (files.imagenes) {
+      for (const f of files.imagenes) {
+        const url = await subirASupabase(f);
+        imagenes.unshift(url);
+      }
+    }
+
+    let imagenCompartir = p.imagen_compartir || null;
+    if (files.imagenCompartir && files.imagenCompartir[0]) {
+      imagenCompartir = await subirASupabase(files.imagenCompartir[0]);
+    }
+
+    let imagenMain = p.imagen;
+    if (files.imagen && files.imagen[0]) {
+      if (p.imagen && p.imagen.includes('supabase')) await eliminarDeSupabase(p.imagen);
+      imagenMain = await subirASupabase(files.imagen[0]);
+    }
+
+    await connection.query(
+      'UPDATE products SET imagenes=$1, imagen_compartir=$2, imagen=$3, "updatedAt"=NOW() WHERE id=$4',
+      [JSON.stringify(imagenes), imagenCompartir, imagenMain, req.params.id]
+    );
+    connection.release();
+
+    res.json({ success: true, msg: 'Galería actualizada', imagenes, imagen_compartir: imagenCompartir, imagen: imagenMain });
+  } catch (error) {
+    console.error("ERROR POST /api/inventario/:id/galeria:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
+  }
+});
+
+// ============ ELIMINAR IMAGEN DE GALERIA ============
+app.delete('/api/inventario/:id/galeria', auth, async (req, res) => {
+  try {
+    if (req.user.rol !== 'admin') return res.status(403).json({ error: 'No autorizado' });
+    const { url } = req.body || {};
+    if (!url) return res.status(400).json({ error: 'Falta la url de la imagen' });
+
+    const connection = await db.getConnection();
+    const { rows: existing } = await connection.query('SELECT imagenes FROM products WHERE id=$1', [req.params.id]);
+    if (existing.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    const imagenes = (Array.isArray(existing[0].imagenes) ? existing[0].imagenes : []).filter(u => u !== url);
+    await connection.query('UPDATE products SET imagenes=$1, "updatedAt"=NOW() WHERE id=$2', [JSON.stringify(imagenes), req.params.id]);
+    if (url.includes('supabase')) await eliminarDeSupabase(url);
+    connection.release();
+    res.json({ success: true, imagenes });
+  } catch (error) {
+    console.error("ERROR DELETE /api/inventario/:id/galeria:", error.message);
     console.error(error.stack);
     res.status(500).json({ success: false, message: error.message, stack: process.env.NODE_ENV !== "production" ? error.stack : undefined });
   }

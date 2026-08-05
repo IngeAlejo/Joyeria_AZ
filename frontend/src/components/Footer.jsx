@@ -50,7 +50,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <MapPin size={20} className="text-emerald flex-shrink-0" />
-                <span>Bogotá, Colombia</span>
+                <span>Yopal, Colombia</span>
               </li>
             </ul>
           </div>
