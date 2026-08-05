@@ -55,6 +55,11 @@ function ogDesc(p) {
   return raw.slice(0, 155);
 }
 
+function proxyImg(url) {
+  if (typeof url !== 'string' || !/^http/.test(url)) return url;
+  return `${SITE_URL}/api/img?u=${encodeURIComponent(url)}`;
+}
+
 function imagenesGaleria(p) {
   const arr = [];
   if (p.imagen && /^http/.test(p.imagen)) arr.push(p.imagen);
@@ -135,16 +140,20 @@ function renderProductPage({ product, related = [] }) {
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(desc)}">
   <meta property="og:url" content="${url}">
-  <meta property="og:image" content="${esc(img)}">
+  <meta property="og:image" content="${esc(proxyImg(img))}">
+  <meta property="og:image:url" content="${esc(proxyImg(img))}">
+  <meta property="og:image:secure_url" content="${esc(proxyImg(img))}">
   <meta property="og:image:alt" content="${esc(title)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:price:amount" content="${p.precio}">
   <meta property="og:price:currency" content="COP">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(title)}">
   <meta name="twitter:description" content="${esc(desc)}">
-  <meta name="twitter:image" content="${esc(img)}">
+  <meta name="twitter:image" content="${esc(proxyImg(img))}">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Product","name":${JSON.stringify(decodeHtml(p.nombre))},"image":${JSON.stringify(imgs)},"description":${JSON.stringify(raw)},"sku":${JSON.stringify(String(p.id))},"offers":{"@type":"Offer","priceCurrency":"COP","price":"${Number(p.precio || 0)}","availability":"${Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}","url":"${url}"},"brand":{"@type":"Brand","name":"Joyería AZ"}}
+  {"@context":"https://schema.org","@type":"Product","name":${JSON.stringify(decodeHtml(p.nombre))},"image":${JSON.stringify(imgs.map(proxyImg))},"description":${JSON.stringify(raw)},"sku":${JSON.stringify(String(p.id))},"offers":{"@type":"Offer","priceCurrency":"COP","price":"${Number(p.precio || 0)}","availability":"${Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}","url":"${url}"},"brand":{"@type":"Brand","name":"Joyería AZ"}}
   </script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

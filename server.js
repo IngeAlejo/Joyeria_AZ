@@ -514,6 +514,29 @@ app.get('/p/:slug', async (req, res) => {
   }
 });
 
+// ============ PROXY DE IMAGEN (para og:image / twitter:image) ============
+// Sirve las imágenes de Supabase desde el dominio del sitio, evitando que los
+// crawlers sociales (WhatsApp/Facebook) descarten la vista previa por las
+// cabeceras no-cache + cookie de bot de Cloudflare/Supabase.
+app.get('/api/img', async (req, res) => {
+  const u = req.query.u;
+  if (!u || !/^https?:\/\//.test(u)) return res.status(400).end('bad-url');
+  if (!u.includes('supabase.co')) return res.status(403).end('forbidden-host');
+  try {
+    const resp = await fetch(u, { redirect: 'follow' });
+    if (!resp.ok) return res.status(502).send('upstream-error');
+    const buf = await resp.arrayBuffer();
+    const ctype = resp.headers.get('content-type') || 'image/*';
+    res.set('Content-Type', ctype);
+    res.set('Cache-Control', 'public, max-age=86400, s-maxage=604800, immutable');
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.send(Buffer.from(buf));
+  } catch (e) {
+    console.error("ERROR proxy de imagen:", e.message);
+    res.status(502).send('proxy-error');
+  }
+});
+
 // ============ INVENTARIO (SOLO ADMIN) ============
 app.get('/api/inventario', auth, async (req, res) => {
   try {
