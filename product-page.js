@@ -544,7 +544,7 @@ function renderProductPage({ product, related = [] }) {
     }
     function compartir(red) {
       var enc = encodeURIComponent(__URL__);
-      var txtE = encodeURIComponent(__TITLE__ + '\n' + __DESC__);
+      var txtE = encodeURIComponent(__TITLE__ + '\\n' + __DESC__);
       var map = {
         wa: 'https://wa.me/?text=' + encodeURIComponent(__TITLE__ + ' ' + __URL__),
         fb: 'https://www.facebook.com/sharer/sharer.php?u=' + enc,
