@@ -1108,6 +1108,119 @@ app.post('/api/seed-products', auth, async (req, res) => {
   }
 });
 
+// ============ SERVICIOS SEO DINÁMICOS ============
+
+function xmlEscape(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+// robots.txt — dinámico (SITE_URL derivado del host en producción)
+app.get('/robots.txt', (req, res) => {
+  const base = req.protocol + '://' + req.get('host');
+  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /inventario.html
+Disallow: /usuarios.html
+Disallow: /cuenta.html
+Disallow: /frontend/
+Disallow: /seed
+Disallow: /*?*
+
+Sitemap: ${base}/sitemap.xml
+`);
+});
+
+// sitemap.xml — productos públicos + páginas principales (sin panel/admin)
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const base = req.protocol + '://' + req.get('host');
+    const connection = await db.getConnection();
+    const { rows } = await connection.query(
+      `SELECT slug, "updatedAt" FROM products WHERE activo = true AND slug IS NOT NULL AND slug <> '' ORDER BY "updatedAt" DESC`
+    );
+    connection.release();
+
+    const paginas = [
+      { loc: '/', prio: 1.0 },
+      { loc: '/pages/joyeria.html', prio: 0.9 },
+      { loc: '/pages/esmeraldas.html', prio: 0.9 },
+      { loc: '/pages/nosotros.html', prio: 0.6 }
+    ];
+
+    const urls = paginas.map(p => {
+      const fecha = rows[0] ? new Date(rows[0].updatedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+      return `<url><loc>${base}${p.loc}</loc><lastmod>${fecha}</lastmod><priority>${p.prio}</priority></url>`;
+    }).concat(rows.map(r => {
+      const fecha = r.updatedAt ? new Date(r.updatedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+      return `<url><loc>${base}/p/${xmlEscape(r.slug)}</loc><lastmod>${fecha}</lastmod><priority>0.8</priority></url>`;
+    }));
+
+    res.set('Content-Type', 'application/xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('\n')}</urlset>`);
+  } catch (error) {
+    console.error("ERROR sitemap:", error.message);
+    res.status(500).send('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+  }
+});
+
+// feed.xml — Google Merchant Center (productos activos)
+app.get('/api/feed.xml', async (req, res) => {
+  try {
+    const connection = await db.getConnection();
+    const { rows } = await connection.query(
+      `SELECT id, nombre, slug, precio, stock, descripcion, descripcion_completa, imagen, imagenes,
+              categoria, materiales, estado, meta_title, "updatedAt"
+         FROM products WHERE activo = true ORDER BY "updatedAt" DESC`
+    );
+    connection.release();
+    const base = 'https://joyeria-az.vercel.app';
+
+    const items = rows.map(p => {
+      const img = p.imagen || (Array.isArray(p.imagenes) && p.imagenes[0]) || `${base}/img/ALE.png`;
+      const desc = (p.descripcion_completa || p.descripcion || p.nombre || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 5000);
+      const precio = Number(p.precio || 0).toFixed(2);
+      const disponible = Number(p.stock || 0) > 0 && ['disponible', 'nuevo', 'pedido'].includes(p.estado);
+      return `<item>
+  <g:id>${xmlEscape(String(p.id))}</g:id>
+  <g:title>${xmlEscape(p.nombre)}</g:title>
+  <g:description>${xmlEscape(desc)}</g:description>
+  <g:link>${base}/p/${xmlEscape(p.slug || '')}</g:link>
+  <g:image_link>${xmlEscape(img)}</g:image_link>
+  <g:price>${precio} COP</g:price>
+  <g:availability>${disponible ? 'in stock' : 'out of stock'}</g:availability>
+  <g:condition>new</g:condition>
+  <g:brand>Joyería AZ</g:brand>
+  <g:google_product_category>Apparel &amp; Accessories &gt; Jewelry</g:google_product_category>
+</item>`;
+    });
+
+    res.set('Content-Type', 'application/xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
+<channel>
+<title>Joyería AZ — Productos</title>
+<link>${base}</link>
+<description>Catálogo de joyería fina artesanal colombiana</description>${items.join('')}
+</channel>
+</rss>`);
+  } catch (error) {
+    console.error("ERROR feed.xml:", error.message);
+    res.status(500).send('<?xml version="1.0"?><rss version="2.0"></rss>');
+  }
+});
+
+// ============ IA — CREACIÓN MASIVA DE PRODUCTOS ============
+const { createAiRouter } = require('./ai/routes');
+app.use('/api/ai', createAiRouter({ auth }));
+
 const PORT = process.env.PORT || 5000;
 
 // Solo escuchar en local (en Vercel, la funcion serverless maneja las requests)

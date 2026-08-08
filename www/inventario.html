@@ -214,7 +214,10 @@
   <section class="section-az section-light" id="inventario-section">
     <div class="container">
       <!-- Toolbar -->
-      <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+      <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+        <button class="btn-secondary-az" onclick="abrirModalIA()" style="padding:12px 24px;font-size:14px;">
+          <i class="fas fa-sparkles me-2" style="color:var(--az-gold);"></i>Creación masiva con IA
+        </button>
         <button class="btn-gold-az" onclick="abrirModalProducto()" style="padding:12px 24px;font-size:14px;">
           <i class="fas fa-plus me-2"></i>Agregar Nuevo Producto
         </button>
@@ -360,6 +363,76 @@
               <button type="submit" class="btn-gold-az" style="font-size:14px;padding:10px 24px;" id="btn-crear-producto">Guardar Producto</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL IA — CREACIÓN MASIVA -->
+  <div class="modal fade" id="modal-ia" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);">
+        <div class="modal-header border-0" style="padding:24px 28px 16px;flex-wrap:wrap;gap:8px;">
+          <h5 class="modal-title" style="font-family:var(--font-display);font-weight:400;color:var(--az-navy);">
+            <i class="fas fa-sparkles me-2" style="color:var(--az-gold);"></i>Creación masiva con IA
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:0 28px 24px;">
+          <!-- PASO 1: selección -->
+          <div id="ia-paso1">
+            <div id="ia-drop" onclick="document.getElementById('ia-input').click()" style="border:1.5px dashed var(--az-border-strong);border-radius:var(--r-card);padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='var(--az-gold)'" onmouseout="this.style.borderColor='var(--az-border-strong)'">
+              <i class="fas fa-images" style="font-size:34px;color:var(--az-gold);margin-bottom:12px;"></i>
+              <p style="font-family:var(--font-ui);font-size:14px;color:var(--az-navy);font-weight:600;margin-bottom:4px;">Selecciona las imágenes de los productos</p>
+              <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin-bottom:14px;">Cada imagen será analizada por la IA como un producto independiente (máx. 20).</p>
+              <span class="btn-secondary-az" style="padding:10px 22px;font-size:13px;">Elegir imágenes</span>
+              <input type="file" id="ia-input" accept="image/*" multiple style="display:none;">
+            </div>
+
+            <!-- Pistas por imagen -->
+            <div id="ia-pistas" class="mt-4" style="display:none;"></div>
+
+            <div id="ia-err" class="mt-3" style="display:none;font-family:var(--font-ui);font-size:13px;color:#b02a37;background:rgba(220,53,69,.08);border:1px solid rgba(220,53,69,.2);border-radius:var(--r-card);padding:12px 14px;"></div>
+
+            <div id="ia-acciones" class="mt-4 d-none">
+              <!-- Confianza y botón -->
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <button type="button" class="btn-gold-az" id="btn-analizar-ia" onclick="analizarIA()" style="padding:12px 26px;font-size:14px;">
+                  <i class="fas fa-wand-magic-sparkles me-2"></i>Analizar con IA
+                </button>
+                <span id="ia-contador" style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROGRESO -->
+          <div id="ia-progreso" style="display:none;">
+            <div style="text-align:center;padding:30px 0 10px;">
+              <i class="fas fa-brain fa-spin" style="font-size:30px;color:var(--az-gold);"></i>
+              <p id="ia-progreso-txt" style="font-family:var(--font-ui);font-size:14px;color:var(--az-navy);font-weight:600;margin:16px 0 8px;">Analizando las imágenes…</p>
+              <div style="max-width:340px;margin:0 auto;background:var(--az-surface-2);border-radius:var(--r-pill);height:8px;overflow:hidden;">
+                <div id="ia-progreso-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--az-gold),var(--az-gold-dark));transition:width .3s var(--ease-out);"></div>
+              </div>
+              <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-light);margin-top:8px;">Con Gemini, cada imagen se analiza por separado.</p>
+            </div>
+          </div>
+
+          <!-- RESULTADOS / REVISIÓN -->
+          <div id="ia-resultados" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+              <div>
+                <h6 style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--az-navy);margin:0;">Revisión antes de publicar</h6>
+                <p id="ia-resumen" style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin:4px 0 0;"></p>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-secondary-az" onclick="volverSeleccionIA()" style="padding:9px 16px;font-size:13px;">Volver</button>
+                <button class="btn-gold-az" id="btn-aceptar-todos" onclick="aceptarTodosIA()" style="padding:9px 18px;font-size:13px;">
+                  <i class="fas fa-check-double me-1"></i>Aceptar todos
+                </button>
+              </div>
+            </div>
+            <div id="ia-tarjetas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -896,6 +969,434 @@ const res = await fetch(`${API_URL}/products`, {
         btn.innerHTML = 'Guardar Producto';
         btn.disabled = false;
       }
+    }
+
+    // ============ CREACIÓN MASIVA CON IA ============
+    let modalIA = null;
+    let iaArchivos = [];        // { file, url, pista }
+    let iaResultados = [];      // { ok, producto, avisos, error, indice, estado (aceptado/eliminado) }
+    const IA_MAX = 20;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      modalIA = new bootstrap.Modal(document.getElementById('modal-ia'));
+      const input = document.getElementById('ia-input');
+      input.addEventListener('change', () => {
+        const files = Array.from(input.files || []);
+        if (!files.length) return;
+        if (iaArchivos.length + files.length > IA_MAX) {
+          mostrarNotif(`❌ Máximo ${IA_MAX} imágenes por lote`);
+          return;
+        }
+        for (const f of files) {
+          iaArchivos.push({ file: f, url: URL.createObjectURL(f), pista: '' });
+        }
+        input.value = '';
+        renderPistasIA();
+      });
+    });
+
+    function abrirModalIA() {
+      if (!modalIA) modalIA = new bootstrap.Modal(document.getElementById('modal-ia'));
+      document.getElementById('ia-paso1').style.display = '';
+      document.getElementById('ia-progreso').style.display = 'none';
+      document.getElementById('ia-resultados').style.display = 'none';
+      document.getElementById('ia-err').style.display = 'none';
+      modalIA.show();
+    }
+
+    function renderPistasIA() {
+      const cont = document.getElementById('ia-pistas');
+      const haArchivos = iaArchivos.length > 0;
+      cont.style.display = haArchivos ? '' : 'none';
+      if (!haArchivos) return;
+
+      cont.innerHTML = `<label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:8px;display:block;">Pistas para la IA <span style="font-weight:400;color:var(--az-text-light);">(opcional — el administrador puede dar contexto; la IA siempre usa lo visible en la imagen)</span></label>`;
+      iaArchivos.forEach((a, i) => {
+        cont.innerHTML += `
+        <div class="d-flex align-items-center gap-3 mb-2" style="background:var(--az-surface-2);border:1px solid var(--az-border);border-radius:var(--r-card);padding:8px 12px;">
+          <img src="${a.url}" alt="Miniatura ${i + 1}" style="width:52px;height:52px;border-radius:var(--r-card);object-fit:cover;flex-shrink:0;border:1px solid var(--az-border);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);letter-spacing:.06em;text-transform:uppercase;">IMG ${i + 1}</div>
+            <input type="text" class="inv-field" placeholder="Pista opcional para la IA…" value="${esc(a.pista)}" oninput="iaArchivos[${i}].pista = this.value" style="margin-top:4px;">
+          </div>
+          <button type="button" onclick="quitarPistaIA(${i})" style="background:none;border:none;color:var(--az-text-light);cursor:pointer;font-size:15px;flex-shrink:0;" title="Quitar"><i class="fas fa-times-circle"></i></button>
+        </div>`;
+      });
+
+      document.getElementById('ia-acciones').classList.remove('d-none');
+      const contador = document.getElementById('ia-contador');
+      contador.textContent = `${iaArchivos.length} imagen${iaArchivos.length === 1 ? '' : 'es'} · 1 imagen = 1 producto`;
+      // E será analizada con Gemini (no se suben a ninguna parte pública todavía).
+    }
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function quitarPistaIA(i) {
+      URL.revokeObjectURL(iaArchivos[i].url);
+      iaArchivos.splice(i, 1);
+      if (!iaArchivos.length) {
+        document.getElementById('ia-pistas').style.display = 'none';
+        document.getElementById('ia-acciones').classList.add('d-none');
+      } else {
+        renderPistasIA();
+      }
+    }
+
+    // Compresión en cliente (canvas): mantiene calidad suficiente para análisis y
+    // respeta el límite de 5 MB del servidor.
+    function comprimirImagen(file) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const lado = 1600;
+          let { width: w, height: h } = img;
+          if (w > lado || h > lado) {
+            const r = Math.min(lado / w, lado / h);
+            w = Math.round(w * r);
+            h = Math.round(h * r);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+            else resolve(file);
+          }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => resolve(file);
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    async function analizarIA() {
+      if (!iaArchivos.length) return;
+      const token = localStorage.getItem('token');
+      if (!token) { mostrarNotif('❌ Sin autenticación'); return; }
+
+      const archivosComp = [];
+      const btn = document.getElementById('btn-analizar-ia');
+      btn.disabled = true;
+      document.getElementById('ia-paso1').style.display = 'none';
+      document.getElementById('ia-progreso').style.display = '';
+      document.getElementById('ia-progreso-bar').style.width = '0%';
+      setProgresoIA('Preparando imágenes…', 0);
+
+      try {
+        for (let i = 0; i < iaArchivos.length; i++) {
+          setProgresoIA(`Comprimiendo ${i + 1} de ${iaArchivos.length}…`, ((i + 1) / iaArchivos.length) * 20);
+          archivosComp.push(await comprimirImagen(iaArchivos[i].file));
+        }
+
+        const fd = new FormData();
+        for (const f of archivosComp) fd.append('imagenes', f);
+        fd.append('pistas', JSON.stringify(iaArchivos.map(a => a.pista)));
+
+        setProgresoIA('Enviando a la IA…', 45);
+        const res = await fetch(`${API_URL}/ai/analizar`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+
+        setProgresoIA('La IA está analizando las imágenes…', 60);
+
+        if (!res.ok) {
+          let err = 'Error al analizar';
+          try { const d = await res.json(); err = d.error || err; } catch (e) { }
+          throw new Error(err);
+        }
+        const data = await res.json();
+        iaResultados = (data.resultados || []).map((r, i) => ({
+          ...r,
+          indice: i,
+          archivo: iaArchivos[i] ? iaArchivos[i].url : '',
+          estado: 'pendiente'
+        }));
+
+        document.getElementById('ia-progreso').style.display = 'none';
+        mostrarResultadosIA(data);
+      } catch (err) {
+        document.getElementById('ia-progreso').style.display = 'none';
+        document.getElementById('ia-paso1').style.display = '';
+        const errEl = document.getElementById('ia-err');
+        errEl.style.display = '';
+        errEl.textContent = '❌ ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function setProgresoIA(txt, pct) {
+      document.getElementById('ia-progreso-txt').textContent = txt;
+      document.getElementById('ia-progreso-bar').style.width = pct + '%';
+    }
+
+    function mostrarResultadosIA(data) {
+      document.getElementById('ia-resultados').style.display = '';
+      const okCount = iaResultados.filter(r => r.ok).length;
+      const failCount = iaResultados.length - okCount;
+      document.getElementById('ia-resumen').textContent =
+        `${iaResultados.length} producto${iaResultados.length === 1 ? '' : 's'} analizado${iaResultados.length === 1 ? '' : 's'} · ${okCount} listo${okCount === 1 ? '' : 's'} para publicar · ${failCount} con error`;
+      renderTarjetasIA();
+    }
+
+    function badgeConfianza(campo, conf) {
+      if (conf == null) return `<span class="badge-category" style="background:rgba(220,53,69,.1);color:#b02a37;">⚠ Revisar</span>`;
+      if (conf >= 0.75) return `<span class="badge-category" style="background:rgba(45,106,79,.12);color:#1f5a41;">✓ Detectado</span>`;
+      return `<span class="badge-category" style="background:rgba(184,150,90,.16);color:#8a6a33;">⚠ Revisar</span>`;
+    }
+
+    function renderTarjetasIA() {
+      const cont = document.getElementById('ia-tarjetas');
+      cont.innerHTML = '';
+      iaResultados.forEach((r, idx) => {
+        if (r.estado === 'eliminado') return;
+        if (r.estado === 'aceptado') {
+          cont.innerHTML += `<div style="border:1px solid rgba(45,106,79,.25);border-radius:var(--r-card);background:rgba(45,106,79,.05);padding:22px;text-align:center;">
+            <i class="fas fa-circle-check" style="font-size:26px;color:#1f5a41;margin-bottom:8px;"></i>
+            <p style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:#1f5a41;">Producto publicado</p>
+          </div>`;
+          return;
+        }
+        if (!r.ok) {
+          cont.innerHTML += `<div style="border:1px solid rgba(220,53,69,.25);border-radius:var(--r-card);padding:18px;background:var(--az-surface);">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <img src="${r.archivo}" onerror="this.src='img/ALE.png'" style="width:56px;height:56px;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--az-border);">
+              <div>
+                <div style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--az-navy);">IMG ${r.indice + 1}</div>
+                <span class="badge-category" style="background:rgba(220,53,69,.1);color:#b02a37;">Error</span>
+              </div>
+            </div>
+            <p style="font-family:var(--font-ui);font-size:12px;color:#b02a37;margin-bottom:12px;">${esc(r.error)}</p>
+            <button class="btn-secondary-az" onclick="reintentarIA(${idx})" style="padding:8px 16px;font-size:12px;"><i class="fas fa-rotate me-1"></i>Reintentar</button>
+          </div>`;
+          return;
+        }
+        const p = r.producto;
+        cont.innerHTML += `<div style="border:1px solid var(--az-border);border-radius:var(--r-card);padding:16px;background:var(--az-surface);display:flex;flex-direction:column;gap:12px;">
+          <div class="d-flex align-items-center gap-3">
+            <img src="${r.archivo}" onerror="this.src='img/ALE.png'" style="width:64px;height:64px;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--az-border);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);letter-spacing:.08em;text-transform:uppercase;">Producto ${idx + 1}</div>
+              <div style="font-family:var(--font-display);font-size:17px;font-weight:500;color:var(--az-navy);line-height:1.25;">${esc(p.nombre || 'Sin nombre')}</div>
+              <span class="badge-category" style="margin-top:4px;">${esc(p.categoria)}</span>
+              <span class="badge-category" style="background:var(--az-surface-2);color:var(--az-text-muted);border:1px solid var(--az-border);">${p.precio ? '$' : 'Precio: definir'} · Stock: ${p.stock}</span>
+            </div>
+          </div>
+
+          <div style="font-family:var(--font-ui);font-size:12.5px;color:var(--az-text);line-height:1.6;">${esc(p.descripcion || '')}</div>
+
+          <div>
+            <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;">CONFIANZA</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Nombre ${(p.confidence.nombre * 100).toFixed(0)}%</span>
+              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Categoría ${(p.confidence.categoria * 100).toFixed(0)}%</span>
+              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Material ${p.confidence.materiales === null ? '—' : (p.confidence.materiales * 100).toFixed(0) + '%'}</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px;border-top:1px solid var(--az-border);">
+            <button class="btn-gold-az" onclick="aceptarProductoIA(${idx})" style="padding:9px 16px;font-size:13px;flex:1;"><i class="fas fa-check me-1"></i>Aceptar</button>
+            <button class="btn-secondary-az" onclick="editarProductoIA(${idx})" style="padding:9px 14px;font-size:13px;"><i class="fas fa-pen me-1"></i>Editar</button>
+            <button class="btn-nav-login" onclick="reintentarIA(${idx})" style="padding:9px 12px;font-size:12px;" title="Regenerar con IA"><i class="fas fa-rotate me-1"></i>Regenerar</button>
+            <button class="btn-nav-login" onclick="eliminarProductoIA(${idx})" style="padding:9px 12px;font-size:12px;color:#b02a37;" title="Eliminar"><i class="fas fa-trash-can me-1"></i></button>
+          </div>
+        </div>`;
+      });
+      // Refrescar resumen (productos publicados)
+      const okCont = iaResultados.filter(r => r.estado === 'aceptado').length;
+      document.getElementById('ia-resumen').textContent =
+        `${iaResultados.filter(r => r.estado !== 'eliminado' && r.estado !== 'aceptado').length} pendientes · ${okCont} publicados · ${iaResultados.filter(r => r.estado === 'eliminado').length} eliminados`;
+    }
+
+    function reintentarIA(idx) {
+      regenerarIA(idx);
+    }
+
+    function eliminarProductoIA(idx) {
+      iaResultados[idx].estado = 'eliminado';
+      renderTarjetasIA();
+    }
+
+    async function aceptarProductoIA(idx) {
+      const r = iaResultados[idx];
+      if (!r || !r.producto) return;
+      const token = localStorage.getItem('token');
+      try {
+        const fd = new FormData();
+        const p = r.producto;
+        fd.append('nombre', p.nombre || '');
+        fd.append('precio', p.precio || '');
+        fd.append('stock', p.stock || 0);
+        fd.append('descripcion', p.descripcion || '');
+        fd.append('categoria', p.categoria || 'General');
+        fd.append('descripcionCorta', p.descripcion_corta || '');
+        fd.append('descripcionCompleta', p.descripcion_completa || '');
+        fd.append('materiales', p.materiales || '');
+        fd.append('tipoPiedra', p.tipo_piedra || '');
+        fd.append('color', p.color || '');
+        fd.append('peso', p.peso || '');
+        fd.append('medidas', p.medidas || '');
+        fd.append('estado', p.estado || 'disponible');
+        fd.append('metaTitle', p.meta_title || '');
+        fd.append('metaDescripcion', p.meta_descripcion || '');
+        fd.append('slug', p.slug || '');
+        const imgFile = iaArchivos[r.indice] ? iaArchivos[r.indice].file : null;
+        if (imgFile) fd.append('imagen', imgFile);
+
+        const res = await fetch(`${API_URL}/inventario`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+        if (!res.ok) throw new Error('Error al publicar');
+        const data = await res.json();
+        r.estado = 'aceptado';
+        mostrarNotif('✅ Producto publicado con éxito');
+        cargarProductos();
+        renderTarjetasIA();
+      } catch (err) {
+        mostrarNotif('❌ ' + err.message);
+      }
+    }
+
+    async function aceptarTodosIA() {
+      const token = localStorage.getItem('token');
+      const pendientes = iaResultados.filter(r => r.ok && r.estado === 'pendiente');
+      // El backend no limita por lote: publicar uno a uno
+      if (!pendientes.length) { mostrarNotif('⚠ Sin productos pendientes'); return; }
+      const btn = document.getElementById('btn-aceptar-todos');
+      btn.disabled = true;
+      for (let i = 0; i < pendientes.length; i++) {
+        const r = pendientes[i];
+        try {
+          const fd = new FormData();
+          const p = r.producto;
+          fd.append('nombre', p.nombre || '');
+          fd.append('precio', p.precio || '');
+          fd.append('stock', p.stock || 0);
+          fd.append('descripcion', p.descripcion || '');
+          fd.append('categoria', p.categoria || 'General');
+          fd.append('descripcionCorta', p.descripcion_corta || '');
+          fd.append('descripcionCompleta', p.descripcion_completa || '');
+          fd.append('materiales', p.materiales || '');
+          fd.append('tipoPiedra', p.tipo_piedra || '');
+          fd.append('color', p.color || '');
+          fd.append('peso', p.peso || '');
+          fd.append('medidas', p.medidas || '');
+          fd.append('estado', p.estado || 'disponible');
+          fd.append('metaTitle', p.meta_title || '');
+          fd.append('metaDescripcion', p.meta_descripcion || '');
+          fd.append('slug', p.slug || '');
+          const img = iaArchivos[r.indice] ? iaArchivos[r.indice].file : null;
+          if (img) fd.append('imagen', img);
+          const res = await fetch(`${API_URL}/inventario`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: fd
+          });
+          if (!res.ok) throw new Error('Error al publicar');
+          r.estado = 'aceptado';
+        } catch (err) {
+          mostrarNotif(`❌ Producto "${p.producto?.nombre || '#'}" falló: ${err.message}`);
+          break;
+        }
+      }
+      btn.disabled = false;
+      cargarProductos();
+      renderTarjetasIA();
+    }
+
+    function volverSeleccionIA() {
+      document.getElementById('ia-resultados').style.display = 'none';
+      document.getElementById('ia-paso1').style.display = '';
+      renderPistasIA();
+    }
+
+    function regenerarIA(idx) {
+      const r = iaResultados[idx];
+      const ai = iaArchivos[r ? r.indice : idx];
+      if (!ai) return;
+      const token = localStorage.getItem('token');
+      const fd = new FormData();
+      fd.append('imagenes', ai.file);
+      fd.append('pistas', JSON.stringify([ai.pista]));
+
+      document.getElementById('ia-resultados').style.display = 'none';
+      document.getElementById('ia-progreso').style.display = '';
+      setProgresoIA(`Reanalizando imagen ${(r ? r.indice : idx) + 1}…`, 30);
+
+      fetch(`${API_URL}/ai/analizar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: fd
+      }).then(res => res.json()).then(data => {
+        document.getElementById('ia-progreso').style.display = 'none';
+        const res = data.resultados && data.resultados[0];
+        const base = iaResultados[idx] || {};
+        if (res && res.ok) {
+          iaResultados[idx] = { ...res, indice: base.indice != null ? base.indice : idx, archivo: base.archivo || ai.url, estado: 'pendiente' };
+        } else {
+          iaResultados[idx] = { ...base, ok: false, error: (res && res.error) || 'Error al regenerar', estado: 'pendiente' };
+        }
+        document.getElementById('ia-resultados').style.display = '';
+        renderTarjetasIA();
+      }).catch(err => {
+        document.getElementById('ia-progreso').style.display = 'none';
+        const base = iaResultados[idx] || {};
+        iaResultados[idx] = { ...base, ok: false, error: err.message, estado: 'pendiente' };
+        document.getElementById('ia-resultados').style.display = '';
+        renderTarjetasIA();
+      });
+    }
+
+    function editarProductoIA(idx) {
+      const r = iaResultados[idx];
+      if (!r || !r.producto) return;
+      // Edición inline dentro de la tarjeta: campos básicos editables
+      const p = r.producto;
+      const target = document.querySelector(`#ia-tarjetas > div:nth-child(${idx + 1})`);
+      if (!target) return;
+      const input = (val, w = '100%') => `style="width:${w};font-family:var(--font-ui);font-size:13px;padding:8px 10px;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);background:var(--az-surface);color:var(--az-navy);outline:none;margin-top:6px;"`;
+      const v = (x) => esc(x == null ? '' : String(x));
+      target.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <button class="btn-nav-login" onclick="guardarEdicionIA(${idx})" style="padding:8px 14px;font-size:12px;">Guardar</button>
+          <button class="btn-nav-login" onclick="renderTarjetasIA()" style="padding:8px 12px;font-size:12px;">Cancelar</button>
+          <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);text-transform:uppercase;letter-spacing:.08em;margin-left:auto;">Editando producto ${idx + 1}</div>
+        </div>
+        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Nombre</label>
+        <input id="iaEd-nombre" ${input} value="${v(p.nombre)}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Precio COP</label>
+          <input id="iaEd-precio" type="number" min="0" ${input} value="${v(p.precio || '')}" placeholder="Definir precio"></div>
+          <div><label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Stock</label>
+          <input id="iaEd-stock" type="number" min="0" ${input} value="${v(p.stock ?? 0)}"></div>
+        </div>
+        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Categoría</label>
+        <select id="iaEd-categoria" ${input}>${['Anillos', 'Collares', 'Aretes', 'Pulseras', 'Esmeraldas', 'General'].map(c => `<option value="${c}" ${c === p.categoria ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Descripción</label>
+        <textarea id="iaEd-desc" rows="2" ${input}>${v(p.descripcion)}</textarea>
+        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Slug</label>
+        <input id="iaEd-slug" ${input} value="${v(p.slug)}" style="font-family:monospace;font-size:12.5px;">
+      `;
+    }
+
+    function guardarEdicionIA(idx) {
+      const r = iaResultados[idx];
+      if (!r || !r.producto) return;
+      const g = (id) => document.getElementById(id);
+      r.producto.nombre = g('iaEd-nombre').value.trim();
+      r.producto.precio = g('iaEd-precio').value ? Number(g('iaEd-precio').value) : null;
+      r.producto.stock = g('iaEd-stock').value ? Number(g('iaEd-stock').value) : 0;
+      r.producto.categoria = g('iaEd-categoria').value;
+      r.producto.descripcion = g('iaEd-desc').value.trim();
+      r.producto.slug = g('iaEd-slug').value.trim();
+      renderTarjetasIA();
     }
   </script>
 

@@ -155,6 +155,14 @@ function renderProductPage({ product, related = [] }) {
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Product","name":${JSON.stringify(decodeHtml(p.nombre))},"image":${JSON.stringify(imgs.map(proxyImg))},"description":${JSON.stringify(raw)},"sku":${JSON.stringify(String(p.id))},"offers":{"@type":"Offer","priceCurrency":"COP","price":"${Number(p.precio || 0)}","availability":"${Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}","url":"${url}"},"brand":{"@type":"Brand","name":"Joyería AZ"}}
   </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[${[
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: 'Catálogo', item: `${SITE_URL}/pages/joyeria.html` },
+    ...(p.categoria ? [{ '@type': 'ListItem', position: 3, name: decodeHtml(p.categoria), item: `${SITE_URL}/pages/joyeria.html?cat=${esc(encodeURIComponent(p.categoria.toLowerCase()))}` }] : []),
+    { '@type': 'ListItem', position: p.categoria ? 4 : 3, name: decodeHtml(p.nombre), item: url }
+  ].map(i => JSON.stringify(i)).join(',')}}
+  </script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
