@@ -18,6 +18,8 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/p/:slug", "destination": "/api" }
+    { "source": "/p/:slug", "destination": "/api" },
+    { "source": "/robots.txt", "destination": "/api" },
+    { "source": "/sitemap.xml", "destination": "/api" }
   ]
 }
