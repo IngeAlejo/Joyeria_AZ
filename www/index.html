@@ -129,6 +129,23 @@
                 <label class="form-label">Teléfono</label>
                 <input type="tel" id="auth-telefono" class="form-control" placeholder="Opcional" autocomplete="tel">
               </div>
+              <!-- Casillas de Autorización No Preseleccionadas (Ley 1581 / Ley 1480) -->
+              <div class="mb-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="auth-check-terminos" required>
+                  <label class="form-check-label" for="auth-check-terminos" style="font-size:12px;color:var(--az-text-muted);">
+                    He leído y acepto los <a href="pages/terminos-condiciones.html" target="_blank" style="color:var(--az-gold);font-weight:600;">Términos y Condiciones</a>. *
+                  </label>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="auth-check-datos" required>
+                  <label class="form-check-label" for="auth-check-datos" style="font-size:12px;color:var(--az-text-muted);">
+                    Autorizo el tratamiento de mis datos personales conforme a la <a href="pages/politica-tratamiento-datos.html" target="_blank" style="color:var(--az-gold);font-weight:600;">Política de Tratamiento de Datos (Ley 1581)</a>. *
+                  </label>
+                </div>
+              </div>
             </div>
             <button type="submit" class="btn-primary-az w-100 py-3 mt-2">
               <span id="btn-auth-text">Iniciar Sesión</span>
@@ -151,14 +168,14 @@
      ========================================================= -->
   <section class="hero-section" id="inicio">
     <div class="hero-content" data-reveal>
-      <span class="hero-eyebrow">Colombia · Desde 2025</span>
+      <span class="hero-eyebrow">Colombia · Emprendimiento 2025</span>
       <h1 class="hero-headline">
         Joyería fina<br>
         <em>hecha a mano</em>
       </h1>
       <p class="hero-subtext">
-        Esmeraldas colombianas de las minas de Muzo y Chivor.
-        Oro 18k, plata 925 y piedras preciosas con historia.
+        Esmeraldas colombianas auténticas de las minas de Muzo y Chivor.
+        Oro 18k, plata 925 y piezas creadas con dedicación y honestidad.
       </p>
       <div class="hero-ctas">
         <a href="pages/joyeria.html" class="btn-primary-az">
@@ -176,41 +193,42 @@
   </section>
 
   <!-- =========================================================
-     STATS STRIP
+     STATS STRIP (100% Auténtico y Responsive)
      ========================================================= -->
-  <section style="background:var(--az-navy);padding:28px 0;">
+  <section style="background:var(--az-navy);padding:24px 0;">
     <div class="container">
-      <div class="row g-0 text-center">
-        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
-          <div
-            style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
-            +50</div>
-          <div
-            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
-            Clientes</div>
-        </div>
-        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
-          <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">5+
+      <div class="row g-2 text-center align-items-center">
+        <div class="col-6 col-md-3" style="padding:10px 8px;">
+          <div style="font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:300;color:var(--az-gold);line-height:1.1;">
+            2025
           </div>
-          <div
-            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
-            Años</div>
-        </div>
-        <div class="col-6 col-md-3" style="padding:12px 0;border-right:1px solid rgba(255,255,255,0.08);">
-          <div
-            style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--az-gold);line-height:1;">
-            18k</div>
-          <div
-            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
-            Oro puro</div>
-        </div>
-        <div class="col-6 col-md-3" style="padding:12px 0;">
-          <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:white;line-height:1;">Muzo
-            | Chivor
+          <div style="font-family:var(--font-ui);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:5px;">
+            Fundación
           </div>
-          <div
-            style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:6px;">
-            Origen</div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:10px 8px;">
+          <div style="font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:300;color:white;line-height:1.1;">
+            100%
+          </div>
+          <div style="font-family:var(--font-ui);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:5px;">
+            Hecho a Mano
+          </div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:10px 8px;">
+          <div style="font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:300;color:var(--az-gold);line-height:1.1;">
+            18k / 925
+          </div>
+          <div style="font-family:var(--font-ui);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:5px;">
+            Oro & Plata Ley
+          </div>
+        </div>
+        <div class="col-6 col-md-3" style="padding:10px 8px;">
+          <div style="font-family:var(--font-display);font-size:clamp(1.2rem,3.2vw,1.8rem);font-weight:300;color:white;line-height:1.1;white-space:normal;">
+            Muzo & Chivor
+          </div>
+          <div style="font-family:var(--font-ui);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:5px;">
+            Origen Certificado
+          </div>
         </div>
       </div>
     </div>
@@ -219,85 +237,151 @@
   <!-- =========================================================
      PRODUCTOS DESTACADOS
      ========================================================= -->
-  <section class="section-az" id="productos" style="padding-top:30px;">
+  <section class="section-az" id="destacados">
     <div class="container">
       <div class="section-header text-center" data-reveal>
-        <span class="section-label">Colección</span>
-        <h2 class="section-title">Nuestros <em style="font-style:italic;color:var(--az-gold);">Tesoros</em></h2>
-        <p class="section-subtitle mx-auto">Selección exclusiva de joyería fina artesanal. Cada pieza es única.</p>
-      </div>
-
-      <div class="row g-4" id="productos-grid">
-        <!-- Skeletons iniciales -->
-        <div class="col-lg-3 col-md-6">
-          <div class="skeleton skeleton-card"></div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <div class="skeleton skeleton-card"></div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <div class="skeleton skeleton-card"></div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <div class="skeleton skeleton-card"></div>
-        </div>
-      </div>
-
-      <div id="estado-error-home" class="d-none text-center py-5">
-        <i class="fas fa-exclamation-triangle fa-2x mb-3" style="color:#f59e0b;display:block;"></i>
-        <p style="color:var(--az-text-muted);font-size:15px;">No se pudo conectar al servidor.</p>
-        <button class="btn-primary-az mt-2" onclick="cargarProductosHome()">
-          <i class="fas fa-refresh"></i>Reintentar
-        </button>
-      </div>
-
-      <div class="text-center mt-5" data-reveal>
-        <a href="pages/joyeria.html" class="btn-secondary-az">
-          <i class="fas fa-gem"></i>Ver toda la colección
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================
-     PARALLAX — Esmeraldas
-     ========================================================= -->
-  <section style="position:relative;overflow:hidden;">
-    <div style="
-    min-height:480px;
-    background-image:url('img/paralax.jpg');
-    background-attachment:fixed;
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    display:flex;
-    align-items:center;
-    position:relative;
-  ">
-      <div style="position:absolute;inset:0;background:rgba(26,26,46,0.72);"></div>
-      <div class="container"
-        style="position:relative;z-index:1;text-align:center;padding-top:clamp(48px,7vw,80px);padding-bottom:clamp(48px,7vw,80px);">
-        <span
-          style="display:inline-block;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--az-gold);margin-bottom:20px;">Colombia
-          produce el 70% de las esmeraldas del mundo</span>
-        <h2
-          style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:white;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px;">
-          Gemas auténticas de <em style="color:var(--az-gold);font-style:italic;">Muzo y Chivor</em>
-        </h2>
-        <p
-          style="font-family:var(--font-ui);font-size:15px;color:rgba(255,255,255,0.6);max-width:520px;margin:0 auto 36px;line-height:1.8;">
-          Verde intenso, pureza excepcional y origen certificado.
-          Cada esmeralda tiene su propia historia geológica.
+        <span class="section-label">Colección Selecta</span>
+        <h2 class="section-title">Piezas destacadas</h2>
+        <p class="section-subtitle">
+          Cada joya es única. Creadas en oro 18k y plata 925 con esmeraldas colombianas seleccionadas a mano.
         </p>
-        <a href="pages/esmeraldas.html" class="btn-gold-az">
-          <i class="fas fa-gem"></i>Descubrir Esmeraldas
+      </div>
+      <div class="row g-4" id="grid-destacados">
+        <!-- Rellenado por productos.js -->
+        <div class="col-md-6 col-lg-3">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="skeleton skeleton-card"></div>
+        </div>
+      </div>
+      <div class="text-center mt-5" data-reveal>
+        <a href="pages/joyeria.html" class="btn-primary-az">
+          Ver Todo el Catálogo <i class="fas fa-arrow-right ms-2"></i>
         </a>
       </div>
     </div>
   </section>
 
   <!-- =========================================================
-     NOSOTROS
+     COLECCIONES DESTACADAS (Categorías)
+     ========================================================= -->
+  <section class="section-az section-gray" id="colecciones">
+    <div class="container">
+      <div class="section-header text-center" data-reveal>
+        <span class="section-label">Explorar</span>
+        <h2 class="section-title">Nuestras categorías</h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="1">
+          <a href="pages/joyeria.html?cat=anillo" class="category-card" style="display:block;text-decoration:none;">
+            <div class="category-card-inner">
+              <img src="img/IMG_1.png" alt="Anillos de oro y esmeraldas — Joyería AZ">
+              <div class="category-card-overlay">
+                <span class="category-name">Anillos</span>
+                <span class="category-count">Ver colección <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="2">
+          <a href="pages/joyeria.html?cat=collar" class="category-card" style="display:block;text-decoration:none;">
+            <div class="category-card-inner">
+              <img src="img/IMG_2.PNG" alt="Collares y dijes de esmeraldas">
+              <div class="category-card-overlay">
+                <span class="category-name">Collares</span>
+                <span class="category-count">Ver colección <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="3">
+          <a href="pages/joyeria.html?cat=aretes" class="category-card" style="display:block;text-decoration:none;">
+            <div class="category-card-inner">
+              <img src="img/IMG_3.JPG" alt="Aretes de oro y plata 925">
+              <div class="category-card-overlay">
+                <span class="category-name">Aretes</span>
+                <span class="category-count">Ver colección <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3" data-reveal data-delay="4">
+          <a href="pages/esmeraldas.html" class="category-card" style="display:block;text-decoration:none;">
+            <div class="category-card-inner">
+              <img src="img/IMG_4.PNG" alt="Esmeraldas colombianas sueltas y certificadas">
+              <div class="category-card-overlay">
+                <span class="category-name">Esmeraldas</span>
+                <span class="category-count">Origen Muzo & Chivor <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     BANNER ESMERALDAS
+     ========================================================= -->
+  <section class="banner-emerald" id="esmeraldas-banner">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6" data-reveal="left">
+          <span class="section-label" style="color:var(--az-gold);">Origen Colombiano</span>
+          <h2 class="section-title text-white">
+            El verde más puro<br>
+            <em>del mundo</em>
+          </h2>
+          <p style="color:rgba(255,255,255,0.7);font-size:15px;line-height:1.8;margin-bottom:32px;">
+            Las esmeraldas de Boyacá son mundialmente reconocidas por su color verde profundo y su fuego único.
+            En Joyería AZ trabajamos con gemas seleccionadas, garantizando su autenticidad y trazabilidad.
+          </p>
+          <div class="d-flex gap-3 flex-wrap">
+            <a href="pages/esmeraldas.html" class="btn-gold-az">
+              <i class="fas fa-gem"></i>Conocer Esmeraldas
+            </a>
+            <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az">
+              <i class="fab fa-whatsapp"></i>Consultar por WhatsApp
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-6" data-reveal="right">
+          <div class="emerald-badge-grid">
+            <div class="emerald-badge-card">
+              <i class="fas fa-mountain text-gold"></i>
+              <h5>Muzo</h5>
+              <p>Mina histórica célebre por su verde profundo y pureza legendaria.</p>
+            </div>
+            <div class="emerald-badge-card">
+              <i class="fas fa-gem text-gold"></i>
+              <h5>Chivor</h5>
+              <p>Famosa por sus tonos verde azulados y brillo cristalino excepcional.</p>
+            </div>
+            <div class="emerald-badge-card">
+              <i class="fas fa-certificate text-gold"></i>
+              <h5>Autenticidad</h5>
+              <p>Gemas 100% naturales con certificación de origen geológico.</p>
+            </div>
+            <div class="emerald-badge-card">
+              <i class="fas fa-hand-holding-heart text-gold"></i>
+              <h5>Ética</h5>
+              <p>Comercio responsable directo y apoyo al orfebre colombiano.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+     NOSOTROS (Historia 100% Sincera y Aterrizada)
      ========================================================= -->
   <section class="section-az section-gray" id="nosotros">
     <div class="container">
@@ -307,30 +391,29 @@
         </div>
         <div class="col-lg-6" data-reveal="right">
           <span class="section-label">Nuestra historia</span>
-          <h2 class="section-title">Más de 25 años<br>de <em
-              style="font-style:italic;color:var(--az-gold);">tradición</em></h2>
-          <p
-            style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:480px;margin-bottom:32px;">
-            Desde 1998 trabajamos directamente con las minas de Muzo y Chivor para traerte
-            esmeraldas colombianas con certificado de origen. Cada joya es elaborada a mano
-            por artesanos con décadas de experiencia.
+          <h2 class="section-title">Pasión joven,<br><em style="font-style:italic;color:var(--az-gold);">alma artesanal</em></h2>
+          <p style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:480px;margin-bottom:24px;">
+            Joyería AZ nació en <strong>2025</strong> como el sueño de dos jóvenes apasionados por el arte de la orfebrería: <strong>Diego Guerrero y Damián Rodríguez</strong>.
+          </p>
+          <p style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:480px;margin-bottom:32px;">
+            Creemos en la transparencia total y en el valor de las cosas bien hechas. Cada pieza que diseñamos se forja a mano, cuidando cada engaste y seleccionando esmeraldas colombianas auténticas de Muzo y Chivor con honestidad y atención personalizada.
           </p>
           <div>
             <div class="nosotros-stat-item">
-              <span class="nosotros-num">+500</span>
-              <span class="nosotros-label">Clientes satisfechos en Colombia y el mundo</span>
+              <span class="nosotros-num">2025</span>
+              <span class="nosotros-label">Fundado por Diego Guerrero & Damián Rodríguez</span>
             </div>
             <div class="nosotros-stat-item">
               <span class="nosotros-num">100%</span>
-              <span class="nosotros-label">Certificado de autenticidad en cada esmeralda</span>
+              <span class="nosotros-label">Garantía de autenticidad en cada joya y esmeralda</span>
             </div>
             <div class="nosotros-stat-item">
               <span class="nosotros-num">Artesanal</span>
-              <span class="nosotros-label">Cada pieza elaborada a mano, sin excepción</span>
+              <span class="nosotros-label">Atención directa y cercana con los fundadores</span>
             </div>
           </div>
           <a href="pages/nosotros.html" class="btn-secondary-az mt-4" style="display:inline-flex;">
-            Conocer más <i class="fas fa-arrow-right ms-2"></i>
+            Conoce nuestra historia <i class="fas fa-arrow-right ms-2"></i>
           </a>
         </div>
       </div>
@@ -348,7 +431,7 @@
           <h2 class="section-title">Hablemos de <em style="font-style:italic;color:var(--az-gold);">tu joya</em></h2>
           <p
             style="font-family:var(--font-ui);font-size:15px;color:var(--az-text-muted);line-height:1.8;max-width:400px;margin-bottom:36px;">
-            ¿Buscas una pieza especial? Creamos joyería a medida con las piedras y el metal que elijas.
+            ¿Buscas una pieza especial o personalizada? Diego y Damián te atenderán directamente para hacer realidad tu diseño.
           </p>
           <div>
             <div class="contact-info-block">
@@ -369,7 +452,7 @@
               <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
                 <h6>Ubicación</h6>
-                <p>Yopal, Colombia</p>
+                <p>Yopal & Cobertura Nacional, Colombia</p>
               </div>
             </div>
           </div>
@@ -402,7 +485,16 @@
                   <textarea class="form-control" id="contact-mensaje" rows="4" placeholder="Cuéntanos qué buscas..."
                     required></textarea>
                 </div>
+                <!-- Casilla de autorización no preseleccionada -->
                 <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="contact-check-datos" required>
+                    <label class="form-check-label" for="contact-check-datos" style="font-size:12px;color:var(--az-text-muted);">
+                      Autorizo el tratamiento de mis datos de contacto para recibir respuesta conforme a la <a href="pages/politica-tratamiento-datos.html" target="_blank" style="color:var(--az-gold);font-weight:600;">Política de Datos (Ley 1581)</a>. *
+                    </label>
+                  </div>
+                </div>
+                <div class="col-12 mt-2">
                   <button type="submit" class="btn-primary-az w-100 py-3">
                     <i class="fas fa-paper-plane"></i>
                     <span id="contact-btn-text">Enviar mensaje</span>
@@ -418,7 +510,7 @@
   </section>
 
   <!-- =========================================================
-     FOOTER
+     FOOTER LEGAL Y COMPLETO
      ========================================================= -->
   <footer>
     <div class="container">
@@ -429,47 +521,51 @@
               style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
             <span class="footer-brand-name">Joyería AZ</span>
           </div>
-          <p class="footer-tagline">Joyería fina artesanal colombiana. Oro, plata y esmeraldas de origen certificado.
+          <p class="footer-tagline">Joyería fina artesanal colombiana fundada en 2025 por Diego Guerrero y Damián Rodríguez. Oro 18k, plata 925 y esmeraldas de origen certificado.
           </p>
           <div class="d-flex gap-2 mt-4">
             <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i
                 class="fab fa-whatsapp"></i></a>
-            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/joyeri_az?igsi=MWpseG85Y25jcDZieQ%3D%3D&utm_source=qr" target="_blank" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/share/1ETRMjLqwq/?mibextid=wwXIfr" target="_blank" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
           </div>
         </div>
         <div class="col-6 col-lg-2">
           <h6 class="footer-heading">Colecciones</h6>
           <ul class="footer-links">
-            <li><a href="pages/joyeria.html">Joyería</a></li>
+            <li><a href="pages/joyeria.html">Joyería Fina</a></li>
             <li><a href="pages/esmeraldas.html">Esmeraldas</a></li>
             <li><a href="pages/joyeria.html?cat=anillo">Anillos</a></li>
             <li><a href="pages/joyeria.html?cat=collar">Collares</a></li>
+            <li><a href="pages/joyeria.html?cat=aretes">Aretes</a></li>
           </ul>
         </div>
         <div class="col-6 col-lg-2">
-          <h6 class="footer-heading">Páginas</h6>
+          <h6 class="footer-heading">Nosotros</h6>
           <ul class="footer-links">
             <li><a href="index.html">Inicio</a></li>
-            <li><a href="pages/nosotros.html">Nosotros</a></li>
+            <li><a href="pages/nosotros.html">Nuestra Historia</a></li>
             <li><a href="#contacto">Contacto</a></li>
             <li><a href="cuenta.html">Mi Cuenta</a></li>
           </ul>
         </div>
         <div class="col-lg-4">
-          <h6 class="footer-heading">Atención</h6>
+          <h6 class="footer-heading">Legal & Consumidor</h6>
           <ul class="footer-links">
-            <li><a href="https://wa.me/573142056065" target="_blank"><i class="fab fa-whatsapp me-2"
-                  style="color:var(--az-gold);"></i>+57 314 205 6065</a></li>
-            <li><a href="mailto:joyeri.az925@gmail.com"><i class="fas fa-envelope me-2"
-                  style="color:var(--az-gold);"></i>joyeri.az925@gmail.com</a></li>
-            <li><a href="#"><i class="fas fa-map-marker-alt me-2" style="color:var(--az-gold);"></i>Yopal, Colombia</a>
-            </li>
+            <li><a href="pages/terminos-condiciones.html">Términos y Condiciones</a></li>
+            <li><a href="pages/politica-tratamiento-datos.html">Tratamiento de Datos (Ley 1581)</a></li>
+            <li><a href="pages/politica-privacidad.html">Privacidad y Cookies</a></li>
+            <li><a href="pages/devoluciones-garantias.html">Retracto, Cambios y Garantías</a></li>
+            <li><a href="pages/envios-entregas.html">Envíos y Entregas</a></li>
+            <li><a href="pages/pqr.html">Peticiones, Quejas y Reclamos (PQR)</a></li>
           </ul>
+          <div style="font-family:var(--font-ui);font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.6;">
+            Protección al Consumidor · <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-gold);text-decoration:underline;">Superintendencia de Industria y Comercio (SIC)</a>
+          </div>
         </div>
       </div>
       <hr class="footer-divider">
-      <p class="footer-copy">© 2026 Joyería AZ. Todos los derechos reservados.</p>
+      <p class="footer-copy">© 2025 - 2026 Joyería AZ. Emprendimiento Colombiano. Todos los derechos reservados.</p>
     </div>
   </footer>
 

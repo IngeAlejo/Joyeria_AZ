@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peticiones, Quejas y Reclamos (PQR) — Joyería AZ</title>
+  <meta name="description" content="Canal oficial para radicar Peticiones, Quejas, Reclamos y Sugerencias en Joyería AZ. Tiempos de respuesta de 15 días hábiles conforme a la ley colombiana.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR UNIVERSAL -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <h5 class="carrito-title"><i class="fas fa-shopping-bag me-2"></i>Bolsa de Compras</h5>
+      <button class="btn-close btn-close-white" onclick="toggleCarrito()"></button>
+    </div>
+    <div class="carrito-body" id="carrito-items">
+      <div class="carrito-vacio">
+        <i class="fas fa-gem fa-2x mb-3" style="color:var(--az-gold);opacity:0.6;"></i>
+        <p>Tu bolsa está vacía</p>
+      </div>
+    </div>
+    <div class="carrito-footer">
+      <div class="carrito-total-row">
+        <span>Total estimado:</span>
+        <strong id="carrito-total" class="carrito-total-monto">$0 COP</strong>
+      </div>
+      <button class="btn-primary-az w-100 py-3" onclick="iniciarCheckout()">
+        <i class="fab fa-whatsapp me-2"></i>Finalizar por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- HEADER LEGAL -->
+  <section style="background:var(--az-navy);padding:50px 0 40px;position:relative;overflow:hidden;">
+    <div class="container position-relative" style="z-index:1;">
+      <span class="hero-eyebrow" style="color:var(--az-gold);"><i class="fas fa-comments me-1"></i>Atención al Cliente y Consumidor</span>
+      <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:white;margin:12px 0 8px;">
+        Peticiones, Quejas y <em style="font-style:italic;color:var(--az-gold);">Reclamos (PQR)</em>
+      </h1>
+      <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.65);margin:0;max-width:600px;">
+        Tu opinión y satisfacción son fundamentales. Radica tus solicitudes formalmente con respuesta garantizada en un plazo máximo de 15 días hábiles.
+      </p>
+      <div style="font-family:var(--font-ui);font-size:12px;color:rgba(255,255,255,0.45);margin-top:12px;">
+        Línea Directa: <strong>+57 314 2056065</strong> · Joyería AZ
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO PQR -->
+  <main class="section-az" style="background:var(--az-bg);">
+    <div class="container">
+      <div class="row g-5 justify-content-center">
+        
+        <!-- Formulario PQR -->
+        <div class="col-lg-7">
+          <div style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);padding:clamp(24px,5vw,40px);box-shadow:var(--shadow-sm);">
+            <h3 style="font-family:var(--font-display);font-size:1.5rem;color:var(--az-navy);margin-bottom:8px;">
+              Formulario de Radicación PQR
+            </h3>
+            <p style="font-family:var(--font-ui);font-size:13.5px;color:var(--az-text-muted);margin-bottom:24px;">
+              Diligencia los siguientes campos para tramitar tu solicitud. Te enviaremos acuse de recibo y respuesta a tu correo.
+            </p>
+
+            <form id="form-pqr" onsubmit="enviarPQR(event)">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Nombre completo *</label>
+                  <input type="text" id="pqr-nombre" class="form-control" required placeholder="Tu nombre completo">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Cédula / Documento *</label>
+                  <input type="text" id="pqr-doc" class="form-control" required placeholder="Número de documento">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Correo electrónico *</label>
+                  <input type="email" id="pqr-email" class="form-control" required placeholder="tucorreo@ejemplo.com">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Teléfono / Celular *</label>
+                  <input type="tel" id="pqr-tel" class="form-control" required placeholder="Ej: 314 2056065">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Tipo de Solicitud *</label>
+                  <select id="pqr-tipo" class="form-select" required>
+                    <option value="" disabled selected>Selecciona una opción</option>
+                    <option value="Petición">Petición (Consulta o requerimiento)</option>
+                    <option value="Queja">Queja (Inconformidad con la atención)</option>
+                    <option value="Reclamo">Reclamo (Inconformidad con producto o garantía)</option>
+                    <option value="Sugerencia">Sugerencia</option>
+                    <option value="Felicitación">Felicitación</option>
+                    <option value="Habeas Data">Habeas Data (Tratamiento de Datos)</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Número de Pedido (Opcional)</label>
+                  <input type="text" id="pqr-pedido" class="form-control" placeholder="Ej: #1045">
+                </div>
+                <div class="col-12">
+                  <label class="form-label" style="font-size:13px;font-weight:600;color:var(--az-navy);">Detalle de tu solicitud *</label>
+                  <textarea id="pqr-mensaje" rows="4" class="form-control" required placeholder="Describe de forma clara los hechos y tu solicitud puntual..."></textarea>
+                </div>
+
+                <!-- Casillas de Autorización No Preseleccionadas -->
+                <div class="col-12 mt-3">
+                  <div class="form-check" style="margin-bottom:8px;">
+                    <input class="form-check-input" type="checkbox" id="pqr-check-datos" required>
+                    <label class="form-check-label" for="pqr-check-datos" style="font-size:12.5px;color:var(--az-text);">
+                      Autorizo a Joyería AZ para el tratamiento de mis datos personales con el fin exclusivo de atender y dar respuesta a esta solicitud, conforme a la <a href="politica-tratamiento-datos.html" target="_blank" style="color:var(--az-gold);font-weight:600;">Política de Datos (Ley 1581)</a>. *
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-12 mt-2">
+                  <button type="submit" id="btn-pqr-submit" class="btn-primary-az w-100 py-3">
+                    <i class="fas fa-paper-plane me-2"></i>Radicar Solicitud PQR
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <div id="pqr-alerta" class="mt-3 text-center" style="display:none;padding:14px;border-radius:var(--r-card);font-size:14px;"></div>
+          </div>
+        </div>
+
+        <!-- Información Lateral -->
+        <div class="col-lg-5">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            
+            <div style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);padding:24px;box-shadow:var(--shadow-sm);">
+              <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:var(--az-navy);margin-bottom:12px;">
+                <i class="fas fa-clock text-gold me-2"></i>Tiempos de Respuesta
+              </h4>
+              <p style="font-size:13.5px;color:var(--az-text-muted);line-height:1.7;margin:0;">
+                Conforme a la normativa colombiana, las Peticiones, Quejas y Reclamos serán resueltas en un plazo máximo de <strong>quince (15) días hábiles</strong> siguientes a su radicación.
+              </p>
+            </div>
+
+            <div style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);padding:24px;box-shadow:var(--shadow-sm);">
+              <h4 style="font-family:var(--font-ui);font-size:16px;font-weight:700;color:var(--az-navy);margin-bottom:12px;">
+                <i class="fas fa-headset text-gold me-2"></i>Canales de Contacto Directo
+              </h4>
+              <ul style="list-style:none;padding:0;margin:0;font-size:13.5px;display:flex;flex-direction:column;gap:10px;">
+                <li>
+                  <i class="fab fa-whatsapp text-gold me-2"></i><strong>WhatsApp:</strong> +57 314 2056065
+                </li>
+                <li>
+                  <i class="fas fa-envelope text-gold me-2"></i><strong>Correo:</strong> [COMPLETAR: correo oficial / dropify.1707@gmail.com]
+                </li>
+                <li>
+                  <i class="fas fa-map-marker-alt text-gold me-2"></i><strong>Ubicación:</strong> Colombia
+                </li>
+              </ul>
+            </div>
+
+            <div style="background:rgba(184,150,90,0.08);border:1px solid rgba(184,150,90,0.3);border-radius:var(--r-card);padding:20px;">
+              <h5 style="font-family:var(--font-ui);font-size:14px;font-weight:700;color:var(--az-navy);margin-bottom:8px;">
+                Superintendencia de Industria y Comercio (SIC)
+              </h5>
+              <p style="font-size:12.5px;color:var(--az-text);line-height:1.6;margin:0;">
+                Si consideras que tu solicitud no ha sido resuelta oportunamente o requieres información sobre tus derechos como consumidor, puedes acudir a la SIC a través de su sitio web oficial: <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-navy);font-weight:700;text-decoration:underline;">www.sic.gov.co</a>.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana fundada en 2025 por Diego Guerrero y Damián Rodríguez. Piezas hechas a mano con oro, plata y esmeraldas de origen certificado.</p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/joyeri_az?igsi=MWpseG85Y25jcDZieQ%3D%3D&utm_source=qr" target="_blank" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/share/1ETRMjLqwq/?mibextid=wwXIfr" target="_blank" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="joyeria.html">Anillos</a></li>
+            <li><a href="joyeria.html">Collares</a></li>
+            <li><a href="joyeria.html">Aretes</a></li>
+            <li><a href="joyeria.html">Pulseras</a></li>
+            <li><a href="esmeraldas.html">Esmeraldas</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Nosotros</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nuestra Historia</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Legal & Consumidor</h6>
+          <ul class="footer-links">
+            <li><a href="terminos-condiciones.html">Términos y Condiciones</a></li>
+            <li><a href="politica-tratamiento-datos.html">Tratamiento de Datos (Ley 1581)</a></li>
+            <li><a href="politica-privacidad.html">Privacidad y Cookies</a></li>
+            <li><a href="devoluciones-garantias.html">Retracto, Cambios y Garantías</a></li>
+            <li><a href="envios-entregas.html">Envíos y Entregas</a></li>
+            <li><a href="pqr.html" class="active">Peticiones, Quejas y Reclamos (PQR)</a></li>
+          </ul>
+          <div style="font-family:var(--font-ui);font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.6;">
+            Protección al Consumidor · <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-gold);text-decoration:underline;">Superintendencia de Industria y Comercio (SIC)</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 - 2026 Joyería AZ. Emprendimiento Colombiano. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    function enviarPQR(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-pqr-submit');
+      const alerta = document.getElementById('pqr-alerta');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Radicando solicitud…';
+      
+      const nombre = document.getElementById('pqr-nombre').value;
+      const tipo = document.getElementById('pqr-tipo').value;
+      const email = document.getElementById('pqr-email').value;
+      const radicado = 'PQR-' + Date.now().toString().slice(-6);
+
+      setTimeout(() => {
+        alerta.style.display = 'block';
+        alerta.style.background = 'rgba(45,106,79,0.1)';
+        alerta.style.border = '1px solid rgba(45,106,79,0.3)';
+        alerta.style.color = '#1f5a41';
+        alerta.innerHTML = `<strong>¡Solicitud radicada con éxito!</strong><br>Número de radicado: <strong>${radicado}</strong>.<br>Hemos registrado tu ${tipo.toLowerCase()} a nombre de ${nombre}. Recibirás respuesta formal en ${email} dentro del plazo legal de 15 días hábiles.`;
+        document.getElementById('form-pqr').reset();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Radicado';
+      }, 1000);
+    }
+  </script>
+</body>
+
+</html>

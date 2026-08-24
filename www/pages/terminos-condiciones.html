@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Términos y Condiciones de Uso y Compra — Joyería AZ</title>
+  <meta name="description" content="Términos y condiciones de uso y compra en Joyería AZ, conforme a la legislación colombiana (Ley 1480 de 2011 y Ley 527 de 1999).">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR UNIVERSAL -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <h5 class="carrito-title"><i class="fas fa-shopping-bag me-2"></i>Bolsa de Compras</h5>
+      <button class="btn-close btn-close-white" onclick="toggleCarrito()"></button>
+    </div>
+    <div class="carrito-body" id="carrito-items">
+      <div class="carrito-vacio">
+        <i class="fas fa-gem fa-2x mb-3" style="color:var(--az-gold);opacity:0.6;"></i>
+        <p>Tu bolsa está vacía</p>
+      </div>
+    </div>
+    <div class="carrito-footer">
+      <div class="carrito-total-row">
+        <span>Total estimado:</span>
+        <strong id="carrito-total" class="carrito-total-monto">$0 COP</strong>
+      </div>
+      <button class="btn-primary-az w-100 py-3" onclick="iniciarCheckout()">
+        <i class="fab fa-whatsapp me-2"></i>Finalizar por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- HEADER LEGAL -->
+  <section style="background:var(--az-navy);padding:50px 0 40px;position:relative;overflow:hidden;">
+    <div class="container position-relative" style="z-index:1;">
+      <span class="hero-eyebrow" style="color:var(--az-gold);"><i class="fas fa-scale-balanced me-1"></i>Marco Legal Colombia</span>
+      <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:white;margin:12px 0 8px;">
+        Términos y <em style="font-style:italic;color:var(--az-gold);">Condiciones</em>
+      </h1>
+      <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.65);margin:0;max-width:600px;">
+        Condiciones de uso del sitio web, comercio electrónico, derechos y obligaciones conforme a la Ley 1480 de 2011 (Estatuto del Consumidor) y Ley 527 de 1999.
+      </p>
+      <div style="font-family:var(--font-ui);font-size:12px;color:rgba(255,255,255,0.45);margin-top:12px;">
+        Última actualización: <strong>Febrero 2026</strong> · Vigencia aplicable en la República de Colombia
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO LEGAL -->
+  <main class="section-az" style="background:var(--az-bg);">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);padding:clamp(24px,5vw,48px);box-shadow:var(--shadow-sm);line-height:1.8;color:var(--az-text);">
+
+            <!-- 1. IDENTIFICACIÓN -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                1. Identificación del Comercio y Responsable
+              </h3>
+              <p>El presente sitio web y canal de comercio electrónico es operado bajo la marca comercial <strong>Joyería AZ</strong>, emprendimiento artesanal colombiano fundado por Diego Guerrero y Damián Rodríguez.</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li><strong>Nombre / Razón Social:</strong> [COMPLETAR: Razón Social o Nombre del Propietario / Persona Natural con Negocio]</li>
+                <li><strong>NIT / Cédula:</strong> [COMPLETAR: NIT o Documento de Identificación con dígito de verificación]</li>
+                <li><strong>Domicilio y Ciudad:</strong> [COMPLETAR: Dirección física del taller / oficina, Ciudad, Departamento, Colombia]</li>
+                <li><strong>Correo Electrónico de Contacto y Notificaciones:</strong> [COMPLETAR: correo oficial, ej: contacto@joyeria-az.com / dropify.1707@gmail.com]</li>
+                <li><strong>Teléfono / Línea de Atención:</strong> +57 314 2056065</li>
+                <li><strong>Actividad Comercial:</strong> Elaboración, diseño y comercialización de joyería fina artesanal en oro, plata y esmeraldas colombianas.</li>
+              </ul>
+            </section>
+
+            <!-- 2. OBJETO Y ACEPTACIÓN -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                2. Objeto y Aceptación de los Términos
+              </h3>
+              <p>Al acceder, navegar o adquirir productos a través de este portal, el usuario declara haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones. Si no está de acuerdo con alguna disposición, deberá abstenerse de utilizar el sitio y sus servicios de compra.</p>
+              <p>Estos términos regulan la consulta, cotización, compra, garantía, pago y envío de piezas de joyería a través de la plataforma web y los canales oficiales vinculados.</p>
+            </section>
+
+            <!-- 3. PRECIOS Y DISPONIBILIDAD -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                3. Precios, Moneda y Transparencia
+              </h3>
+              <p>Todos los precios exhibidos en la tienda virtual están expresados en <strong>Pesos Colombianos (COP)</strong>. Conforme al Estatuto del Consumidor de Colombia:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li>Los precios reflejan el valor total a pagar por el producto, indicando claramente si incluye o no impuestos aplicables de acuerdo con el régimen tributario del responsable.</li>
+                <li>Los costos de transporte o envío serán liquidados e informados al comprador de manera previa a la confirmación de la orden, según la ciudad de destino.</li>
+                <li>Joyería AZ se reserva el derecho de modificar precios en cualquier momento sin previo aviso; no obstante, se respetará el precio pactado y confirmado al momento de realizar la orden.</li>
+              </ul>
+            </section>
+
+            <!-- 4. NATURALEZA ARTESANAL Y PIEZAS ÚNICAS -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                4. Características de los Productos y Naturaleza Artesanal
+              </h3>
+              <p>Nuestras piezas son elaboradas a mano con metales nobles (Oro 18K y Plata Ley 925) y gemas naturales (esmeraldas colombianas procedentes de minas como Muzo y Chivor). El comprador reconoce y acepta que:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li>Las esmeraldas naturales presentan inclusiones orgánicas características (conocidas en gemología como "jardín"), variaciones tonales y particularidades que dan fe de su autenticidad y origen geológico.</li>
+                <li>Por su condición artesanal, pueden existir sutiles variaciones en peso, engaste y acabado entre piezas del mismo modelo, garantizando su carácter exclusivo.</li>
+                <li>Las fotografías son tomadas buscando la mayor fidelidad cromática; no obstante, la calibración de cada pantalla o dispositivo puede generar ligeras diferencias de apreciación.</li>
+              </ul>
+            </section>
+
+            <!-- 5. PROCESO DE COMPRA Y MEDIOS DE PAGO -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                5. Proceso de Compra y Medios de Pago
+              </h3>
+              <p>La selección de productos en el carrito permite generar un resumen claro de compra. El perfeccionamiento y confirmación del pedido se realiza a través de nuestros canales oficiales autorizados y pasarelas de pago seguras:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li>Transferencias bancarias directas (Bancolombia, Nequi, Daviplata) a cuentas a nombre del titular legal de Joyería AZ.</li>
+                <li>Pasarelas de pago certificadas con cifrado SSL.</li>
+                <li>Una vez verificado el pago, se emitirá el comprobante de venta correspondiente y se coordinará el despacho.</li>
+              </ul>
+            </section>
+
+            <!-- 6. DERECHO DE RETRACTO -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                6. Derecho de Retracto (Art. 47 Ley 1480 de 2011)
+              </h3>
+              <p>Para compras realizadas a distancia a través de métodos no tradicionales o comercio electrónico, el consumidor tiene derecho a retractarse de la compra bajo las siguientes condiciones legales:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li><strong>Término:</strong> Debe ser ejercido dentro de los <strong>cinco (5) días hábiles</strong> siguientes a la entrega del producto.</li>
+                <li><strong>Estado del producto:</strong> La joya debe devolverse en las mismas condiciones en que fue recibida, sin uso, en su empaque original, con certificados y accesorios completos.</li>
+                <li><strong>Costos de transporte:</strong> Los costos de transporte y demás que conlleve la devolución serán asumidos por el consumidor, conforme a la ley.</li>
+                <li><strong>Excepciones legales:</strong> No aplica para joyas elaboradas sobre medidas, personalizadas o grabadas expresamente a solicitud del cliente (Art. 47 numeral 3).</li>
+                <li><strong>Reembolso:</strong> Joyería AZ reintegrará el dinero dentro de los treinta (30) días calendario siguientes a la recepción del producto en las condiciones requeridas.</li>
+              </ul>
+              <p>Para consultar el procedimiento detallado, visita nuestra <a href="devoluciones-garantias.html" style="color:var(--az-gold);font-weight:600;">Política de Cambios, Retracto y Garantías</a>.</p>
+            </section>
+
+            <!-- 7. REVERSIÓN DEL PAGO -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                7. Reversión del Pago (Art. 51 Ley 1480 de 2011)
+              </h3>
+              <p>Cuando las compras se realicen mediante mecanismos de comercio electrónico utilizando tarjetas de crédito, débito o instrumento electrónico, el consumidor podrá solicitar la reversión del pago en caso de fraude, operación no solicitada, producto no recibido o producto defectuoso/no conforme, presentando la queja dentro de los <strong>cinco (5) días hábiles</strong> siguientes al conocimiento del hecho.</p>
+            </section>
+
+            <!-- 8. GARANTÍA LEGAL -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                8. Garantía Legal en Joyería
+              </h3>
+              <p>Joyería AZ garantiza la pureza y ley de los metales preciosos (Oro 18K Ley 750 / Plata Ley 925) y la autenticidad de las esmeraldas naturales.</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li>La garantía cubre defectos de fabricación y autenticidad del material.</li>
+                <li>No cubre daños derivados de mal uso, caídas, golpes, contacto con sustancias químicas, abrasivos, desgaste natural por uso indebido o manipulación por talleres de terceros.</li>
+              </ul>
+            </section>
+
+            <!-- 9. CANAL DE PQR Y AUTORIDAD DE PROTECCIÓN -->
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                9. Peticiones, Quejas, Reclamos (PQR) y Notificaciones
+              </h3>
+              <p>Para cualquier duda, solicitud, queja o reclamo, puedes radicarla a través de nuestro <a href="pqr.html" style="color:var(--az-gold);font-weight:600;">Formulario Oficial de PQR</a> o al correo electrónico <strong>[COMPLETAR: correo PQR / dropify.1707@gmail.com]</strong>. Responderemos en un término máximo de quince (15) días hábiles, conforme a la ley colombiana.</p>
+              <div style="background:var(--az-surface-2);border-left:4px solid var(--az-gold);padding:14px 18px;border-radius:4px;margin-top:16px;font-size:13.5px;">
+                <strong>Información al Consumidor:</strong> Como consumidor en Colombia, puedes acudir ante la <strong>Superintendencia de Industria y Comercio (SIC)</strong>, entidad encargada de velar por la protección del consumidor en Colombia, a través de su portal web oficial: <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-navy);font-weight:700;text-decoration:underline;">www.sic.gov.co</a>.
+              </div>
+            </section>
+
+            <!-- 10. JURISDICCIÓN -->
+            <section>
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                10. Legislación Aplicable y Jurisdicción
+              </h3>
+              <p>Los presentes Términos y Condiciones se rigen e interpretan conforme a las leyes de la República de Colombia. Cualquier controversia será sometida a los jueces y tribunales competentes de Colombia.</p>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana fundada en 2025 por Diego Guerrero y Damián Rodríguez. Piezas hechas a mano con oro, plata y esmeraldas de origen certificado.</p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/joyeri_az?igsi=MWpseG85Y25jcDZieQ%3D%3D&utm_source=qr" target="_blank" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/share/1ETRMjLqwq/?mibextid=wwXIfr" target="_blank" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="joyeria.html">Anillos</a></li>
+            <li><a href="joyeria.html">Collares</a></li>
+            <li><a href="joyeria.html">Aretes</a></li>
+            <li><a href="joyeria.html">Pulseras</a></li>
+            <li><a href="esmeraldas.html">Esmeraldas</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Nosotros</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nuestra Historia</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Legal & Consumidor</h6>
+          <ul class="footer-links">
+            <li><a href="terminos-condiciones.html" class="active">Términos y Condiciones</a></li>
+            <li><a href="politica-tratamiento-datos.html">Tratamiento de Datos (Ley 1581)</a></li>
+            <li><a href="politica-privacidad.html">Privacidad y Cookies</a></li>
+            <li><a href="devoluciones-garantias.html">Retracto, Cambios y Garantías</a></li>
+            <li><a href="envios-entregas.html">Envíos y Entregas</a></li>
+            <li><a href="pqr.html">Peticiones, Quejas y Reclamos (PQR)</a></li>
+          </ul>
+          <div style="font-family:var(--font-ui);font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.6;">
+            Protección al Consumidor · <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-gold);text-decoration:underline;">Superintendencia de Industria y Comercio (SIC)</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 - 2026 Joyería AZ. Emprendimiento Colombiano. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+
+</html>

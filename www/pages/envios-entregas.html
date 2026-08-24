@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Envíos y Entregas — Joyería AZ | Cobertura en Colombia</title>
+  <meta name="description" content="Información clara sobre envíos, tiempos de entrega, costos de flete y cobertura a nivel nacional en Colombia con Joyería AZ.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR UNIVERSAL -->
+  <nav class="navbar navbar-expand-lg" id="navbar-main">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html" aria-label="Joyería AZ — Inicio">
+        <img src="../img/ALE.png" alt="" class="logo-img" aria-hidden="true">
+        <div>
+          <span class="brand-text">AZ</span>
+          <span class="brand-sub">Joyería Fina</span>
+        </div>
+      </a>
+      <button class="navbar-toggler ms-auto me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+          <li class="nav-item"><a class="nav-link" href="../index.html#contacto">Contacto</a></li>
+          <li class="nav-item"><a class="nav-link" href="joyeria.html">Joyería</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 ms-2" style="flex-shrink:0;">
+          <div id="auth-anon" class="d-flex gap-2 align-items-center">
+            <a class="btn-nav-login" href="#" onclick="mostrarLogin(); return false;">Iniciar Sesión</a>
+            <a class="btn-nav-cta" href="#" onclick="mostrarRegister(); return false;">Crear Cuenta</a>
+          </div>
+          <div id="auth-logged" class="d-flex gap-2 align-items-center d-none">
+            <a class="nav-link" href="../cuenta.html"><i class="fas fa-user-circle me-1"></i><span id="nav-user-name">Mi Cuenta</span></a>
+            <button class="btn-nav-login" onclick="logout()">Salir</button>
+          </div>
+          <button class="btn-cart" id="btn-carrito-toggle" onclick="toggleCarrito()" aria-label="Ver carrito">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="badge-carrito" class="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CARRITO SIDEBAR -->
+  <div id="carrito-flotante" class="carrito-flotante" role="dialog" aria-label="Carrito">
+    <div class="carrito-header">
+      <h5 class="carrito-title"><i class="fas fa-shopping-bag me-2"></i>Bolsa de Compras</h5>
+      <button class="btn-close btn-close-white" onclick="toggleCarrito()"></button>
+    </div>
+    <div class="carrito-body" id="carrito-items">
+      <div class="carrito-vacio">
+        <i class="fas fa-gem fa-2x mb-3" style="color:var(--az-gold);opacity:0.6;"></i>
+        <p>Tu bolsa está vacía</p>
+      </div>
+    </div>
+    <div class="carrito-footer">
+      <div class="carrito-total-row">
+        <span>Total estimado:</span>
+        <strong id="carrito-total" class="carrito-total-monto">$0 COP</strong>
+      </div>
+      <button class="btn-primary-az w-100 py-3" onclick="iniciarCheckout()">
+        <i class="fab fa-whatsapp me-2"></i>Finalizar por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- HEADER LEGAL -->
+  <section style="background:var(--az-navy);padding:50px 0 40px;position:relative;overflow:hidden;">
+    <div class="container position-relative" style="z-index:1;">
+      <span class="hero-eyebrow" style="color:var(--az-gold);"><i class="fas fa-truck-fast me-1"></i>Envíos Asegurados</span>
+      <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:white;margin:12px 0 8px;">
+        Envíos, Entregas y <em style="font-style:italic;color:var(--az-gold);">Costos</em>
+      </h1>
+      <p style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.65);margin:0;max-width:600px;">
+        Información transparente sobre cobertura en Colombia, tiempos de despacho, empaques de seguridad y tarifas de transporte.
+      </p>
+      <div style="font-family:var(--font-ui);font-size:12px;color:rgba(255,255,255,0.45);margin-top:12px;">
+        Última actualización: <strong>Febrero 2026</strong> · Joyería AZ
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO LEGAL -->
+  <main class="section-az" style="background:var(--az-bg);">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div style="background:var(--az-surface);border:1px solid var(--az-border);border-radius:var(--r-card);padding:clamp(24px,5vw,48px);box-shadow:var(--shadow-sm);line-height:1.8;color:var(--az-text);">
+
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                1. Cobertura Nacional
+              </h3>
+              <p>Joyería AZ realiza despachos a nivel nacional en Colombia a través de empresas de mensajería especializada y logística con cobertura en las principales ciudades capitales (Bogotá, Medellín, Cali, Barranquilla, Bucaramanga, Cartagena, Manizales, Pereira, etc.) y municipios con acceso terrestre o aéreo regular.</p>
+              <p style="font-size:14px;color:var(--az-text-muted);"><em>Para destinos especiales o zonas con reexpedición, los tiempos de entrega pueden variar según las frecuencias de la transportadora.</em></p>
+            </section>
+
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                2. Tiempos de Preparación y Entrega
+              </h3>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li><strong>Piezas en Inventario Disponible:</strong> El alistamiento y despacho se efectúa dentro de las 24 a 48 horas hábiles siguientes a la confirmación del pago. El tiempo de transporte en ciudades principales suele ser de <strong>2 a 4 días hábiles</strong>.</li>
+                <li><strong>Piezas Personalizadas o sobre Medida:</strong> Al ser elaboradas artesanalmente a mano por nuestros orfebres, requieren un tiempo de fabricación de <strong>7 a 15 días hábiles</strong> antes de ser despachadas.</li>
+              </ul>
+            </section>
+
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                3. Costos de Envío y Fletes
+              </h3>
+              <p>El valor del envío es informado al cliente de manera previa y transparente antes de cerrar la orden de compra:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li><strong>Tarifa General Nacional:</strong> [COMPLETAR: valor estándar, ej: $15.000 - $25.000 COP o Envío Gratis por compras superiores a determinado monto].</li>
+                <li><strong>Promociones de Envío Gratis:</strong> Cuando apliquen, se indicarán explícitamente en el sitio web y en el resumen de compra.</li>
+              </ul>
+            </section>
+
+            <section class="mb-5">
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                4. Empaque de Seguridad y Seguro
+              </h3>
+              <p>Toda pieza de Joyería AZ se envía en su estuche rígido de lujo, protegida en empaque discreto sin logos externos ostentosos para proteger la seguridad del envío durante el trayecto, e incluye su número de guía para rastreo en línea.</p>
+            </section>
+
+            <section>
+              <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--az-navy);border-bottom:1.5px solid var(--az-border);padding-bottom:8px;margin-bottom:16px;">
+                5. Recomendaciones al Recibir el Paquete
+              </h3>
+              <p>Al momento de recibir tu pedido:</p>
+              <ul style="padding-left:20px;font-size:14.5px;">
+                <li>Verifica que la bolsa o caja de seguridad no presente signos de apertura previa, roturas o alteraciones en los precintos.</li>
+                <li>Si observas alguna irregularidad, déjalo asentado en la guía de entrega del transportador y contáctanos inmediatamente al WhatsApp <strong>+57 314 2056065</strong> o al correo <strong>[COMPLETAR: correo oficial / dropify.1707@gmail.com]</strong>.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="../img/ALE.png" alt="Logo" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,150,90,0.4);">
+            <span class="footer-brand-name">Joyería AZ</span>
+          </div>
+          <p class="footer-tagline">Joyería fina artesanal colombiana fundada en 2025 por Diego Guerrero y Damián Rodríguez. Piezas hechas a mano con oro, plata y esmeraldas de origen certificado.</p>
+          <div class="d-flex gap-2 mt-4">
+            <a href="https://wa.me/573142056065" target="_blank" class="footer-social" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/joyeri_az?igsi=MWpseG85Y25jcDZieQ%3D%3D&utm_source=qr" target="_blank" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/share/1ETRMjLqwq/?mibextid=wwXIfr" target="_blank" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Colecciones</h6>
+          <ul class="footer-links">
+            <li><a href="joyeria.html">Anillos</a></li>
+            <li><a href="joyeria.html">Collares</a></li>
+            <li><a href="joyeria.html">Aretes</a></li>
+            <li><a href="joyeria.html">Pulseras</a></li>
+            <li><a href="esmeraldas.html">Esmeraldas</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">Nosotros</h6>
+          <ul class="footer-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="nosotros.html">Nuestra Historia</a></li>
+            <li><a href="../index.html#contacto">Contacto</a></li>
+            <li><a href="../cuenta.html">Mi Cuenta</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Legal & Consumidor</h6>
+          <ul class="footer-links">
+            <li><a href="terminos-condiciones.html">Términos y Condiciones</a></li>
+            <li><a href="politica-tratamiento-datos.html">Tratamiento de Datos (Ley 1581)</a></li>
+            <li><a href="politica-privacidad.html">Privacidad y Cookies</a></li>
+            <li><a href="devoluciones-garantias.html">Retracto, Cambios y Garantías</a></li>
+            <li><a href="envios-entregas.html" class="active">Envíos y Entregas</a></li>
+            <li><a href="pqr.html">Peticiones, Quejas y Reclamos (PQR)</a></li>
+          </ul>
+          <div style="font-family:var(--font-ui);font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.6;">
+            Protección al Consumidor · <a href="https://www.sic.gov.co" target="_blank" rel="noopener noreferrer" style="color:var(--az-gold);text-decoration:underline;">Superintendencia de Industria y Comercio (SIC)</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 - 2026 Joyería AZ. Emprendimiento Colombiano. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+
+</html>

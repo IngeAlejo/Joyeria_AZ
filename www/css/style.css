@@ -397,60 +397,99 @@ img {
   .navbar {
     height: auto;
     min-height: 64px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
   }
 
   .navbar .container {
     flex-wrap: wrap;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   .navbar-collapse {
     width: 100%;
-    padding: 12px 0 16px;
+    padding: 16px 0 12px;
     border-top: 1px solid var(--az-border);
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .navbar-nav {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    align-items: stretch;
+    gap: 4px;
     width: 100%;
-    margin-left: 0;
+    margin: 0 0 12px 0;
   }
 
   .nav-link {
     width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: var(--r-card);
+    color: var(--az-navy);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .nav-link:hover {
+    color: var(--az-gold);
+    background: rgba(184, 150, 90, 0.06);
+  }
+
+  .nav-link.active {
+    color: var(--az-gold);
+    background: rgba(184, 150, 90, 0.08);
+    font-weight: 600;
+    border-left: 3px solid var(--az-gold);
+  }
+
+  /* Apilar bloques de auth en móvil de forma limpia y alineada */
+  .navbar .d-flex[style*="flex-shrink:0"] {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 10px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--az-border);
+  }
+
+  #auth-anon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #auth-logged {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+  }
+
+  #auth-logged .nav-link {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 14px;
+    background: var(--az-surface-2);
+    border: 1px solid var(--az-border);
   }
 
   .btn-nav-login,
   .btn-nav-cta {
     width: auto;
-    text-align: left;
-    margin-top: 6px;
-  }
-
-  /* Apilar bloques de auth en columna (móvil) */
-  .navbar .d-flex[style*="flex-shrink:0"] {
-    flex-direction: column;
-    align-items: flex-start;
-    width: auto;
-    gap: 6px;
-    margin-left: 0;
-    margin-top: 8px;
-  }
-
-  #auth-anon,
-  #auth-logged {
-    flex-direction: column;
-    align-items: flex-start;
-    width: auto;
-    gap: 6px;
-  }
-
-  #auth-logged .nav-link {
-    padding: 8px 0;
+    text-align: center;
+    margin-top: 0;
+    padding: 8px 18px;
+    font-size: 13.5px;
   }
 
   /* Ocultar el carrito del menú en móvil (ya hay botón flotante) */
