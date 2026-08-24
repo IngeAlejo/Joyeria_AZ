@@ -579,7 +579,12 @@
               <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin:2px 0 0;">Catalogación inteligente de piezas mediante Google Gemini</p>
             </div>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-nav-login" onclick="limpiarLoteIA()" style="font-size:12px;padding:6px 12px;" title="Limpiar fotos y comenzar lote nuevo">
+              <i class="fas fa-rotate-left me-1"></i>Nuevo Lote
+            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
         </div>
 
         <div class="modal-body" style="padding:28px;">
@@ -1065,59 +1070,100 @@ const res = await fetch(`${API_URL}/products`, {
     // ============ CREACIÓN MASIVA CON IA ============
     let modalIA = null;
     let iaArchivos = [];        // { file, url, pista }
-    let iaResultados = [];      // { ok, producto, avisos, error, indice, estado (aceptado/eliminado) }
+    let iaResultados = [];      // { ok, producto, avisos, error, indice, estado (pendiente/aceptado/eliminado) }
     const IA_MAX = 20;
 
     document.addEventListener('DOMContentLoaded', () => {
-      modalIA = new bootstrap.Modal(document.getElementById('modal-ia'));
+      const modalEl = document.getElementById('modal-ia');
+      if (modalEl) {
+        modalIA = new bootstrap.Modal(modalEl);
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          if (!iaResultados.length || iaResultados.every(r => r.estado === 'aceptado' || r.estado === 'eliminado')) {
+            limpiarLoteIA(true);
+          }
+        });
+      }
+
       const input = document.getElementById('ia-input');
-      input.addEventListener('change', () => {
-        const files = Array.from(input.files || []);
-        if (!files.length) return;
-        if (iaArchivos.length + files.length > IA_MAX) {
-          mostrarNotif(`❌ Máximo ${IA_MAX} imágenes por lote`);
-          return;
-        }
-        for (const f of files) {
-          iaArchivos.push({ file: f, url: URL.createObjectURL(f), pista: '' });
-        }
-        input.value = '';
-        renderPistasIA();
-      });
+      if (input) {
+        input.addEventListener('change', () => {
+          const files = Array.from(input.files || []);
+          if (!files.length) return;
+          if (iaArchivos.length + files.length > IA_MAX) {
+            mostrarNotif(`❌ Máximo ${IA_MAX} imágenes por lote`);
+            return;
+          }
+          for (const f of files) {
+            iaArchivos.push({ file: f, url: URL.createObjectURL(f), pista: '' });
+          }
+          input.value = '';
+          renderPistasIA();
+        });
+      }
     });
 
     function abrirModalIA() {
       if (!modalIA) modalIA = new bootstrap.Modal(document.getElementById('modal-ia'));
-      document.getElementById('ia-paso1').style.display = '';
-      document.getElementById('ia-progreso').style.display = 'none';
-      document.getElementById('ia-resultados').style.display = 'none';
-      document.getElementById('ia-err').style.display = 'none';
+      // Si el lote anterior ya terminó, abrir limpio para no mostrar fotos viejas
+      if (!iaResultados.length || iaResultados.every(r => r.estado === 'aceptado' || r.estado === 'eliminado')) {
+        limpiarLoteIA(true);
+      } else {
+        document.getElementById('ia-paso1').style.display = 'none';
+        document.getElementById('ia-progreso').style.display = 'none';
+        document.getElementById('ia-resultados').style.display = '';
+        renderTarjetasIA();
+      }
       modalIA.show();
+    }
+
+    function limpiarLoteIA(silencioso = false) {
+      iaArchivos.forEach(a => { if (a && a.url) { try { URL.revokeObjectURL(a.url); } catch(e){} } });
+      iaArchivos = [];
+      iaResultados = [];
+      const input = document.getElementById('ia-input');
+      if (input) input.value = '';
+      const pistasEl = document.getElementById('ia-pistas');
+      if (pistasEl) { pistasEl.innerHTML = ''; pistasEl.style.display = 'none'; }
+      const accEl = document.getElementById('ia-acciones');
+      if (accEl) accEl.classList.add('d-none');
+      const errEl = document.getElementById('ia-err');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      const paso1 = document.getElementById('ia-paso1');
+      if (paso1) paso1.style.display = '';
+      const prog = document.getElementById('ia-progreso');
+      if (prog) prog.style.display = 'none';
+      const res = document.getElementById('ia-resultados');
+      if (res) res.style.display = 'none';
+      const tarj = document.getElementById('ia-tarjetas');
+      if (tarj) tarj.innerHTML = '';
+      if (!silencioso) mostrarNotif('✨ Lote reiniciado. Puedes seleccionar nuevas fotos.');
     }
 
     function renderPistasIA() {
       const cont = document.getElementById('ia-pistas');
       const haArchivos = iaArchivos.length > 0;
       cont.style.display = haArchivos ? '' : 'none';
-      if (!haArchivos) return;
+      if (!haArchivos) {
+        document.getElementById('ia-acciones').classList.add('d-none');
+        return;
+      }
 
-      cont.innerHTML = `<label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:8px;display:block;">Pistas para la IA <span style="font-weight:400;color:var(--az-text-light);">(opcional — el administrador puede dar contexto; la IA siempre usa lo visible en la imagen)</span></label>`;
+      cont.innerHTML = `<label style="font-family:var(--font-ui);font-size:12px;font-weight:700;color:var(--az-text-muted);margin-bottom:8px;display:block;">Pistas opcionales para la IA <span style="font-weight:400;color:var(--az-text-light);">(puedes indicar detalles específicos; la IA llenará automáticamente toda la ficha de la joya)</span></label>`;
       iaArchivos.forEach((a, i) => {
         cont.innerHTML += `
         <div class="d-flex align-items-center gap-3 mb-2" style="background:var(--az-surface-2);border:1px solid var(--az-border);border-radius:var(--r-card);padding:8px 12px;">
           <img src="${a.url}" alt="Miniatura ${i + 1}" style="width:52px;height:52px;border-radius:var(--r-card);object-fit:cover;flex-shrink:0;border:1px solid var(--az-border);">
           <div style="flex:1;min-width:0;">
-            <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);letter-spacing:.06em;text-transform:uppercase;">IMG ${i + 1}</div>
-            <input type="text" class="inv-field" placeholder="Pista opcional para la IA…" value="${esc(a.pista)}" oninput="iaArchivos[${i}].pista = this.value" style="margin-top:4px;">
+            <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);letter-spacing:.06em;text-transform:uppercase;">FOTO ${i + 1}</div>
+            <input type="text" class="inv-field" placeholder="Pista opcional (ej: Esmeralda natural 0.8ct, Oro 18K, Talla 7)…" value="${esc(a.pista)}" oninput="iaArchivos[${i}].pista = this.value" style="margin-top:4px;">
           </div>
-          <button type="button" onclick="quitarPistaIA(${i})" style="background:none;border:none;color:var(--az-text-light);cursor:pointer;font-size:15px;flex-shrink:0;" title="Quitar"><i class="fas fa-times-circle"></i></button>
+          <button type="button" onclick="quitarPistaIA(${i})" style="background:none;border:none;color:var(--az-text-light);cursor:pointer;font-size:16px;flex-shrink:0;" title="Quitar foto"><i class="fas fa-times-circle"></i></button>
         </div>`;
       });
 
       document.getElementById('ia-acciones').classList.remove('d-none');
       const contador = document.getElementById('ia-contador');
-      contador.textContent = `${iaArchivos.length} imagen${iaArchivos.length === 1 ? '' : 'es'} · 1 imagen = 1 producto`;
-      // E será analizada con Gemini (no se suben a ninguna parte pública todavía).
+      contador.textContent = `${iaArchivos.length} foto${iaArchivos.length === 1 ? '' : 's'} seleccionada${iaArchivos.length === 1 ? '' : 's'} · 1 foto = 1 producto`;
     }
 
     function esc(s) {
@@ -1125,7 +1171,7 @@ const res = await fetch(`${API_URL}/products`, {
     }
 
     function quitarPistaIA(i) {
-      URL.revokeObjectURL(iaArchivos[i].url);
+      if (iaArchivos[i] && iaArchivos[i].url) URL.revokeObjectURL(iaArchivos[i].url);
       iaArchivos.splice(i, 1);
       if (!iaArchivos.length) {
         document.getElementById('ia-pistas').style.display = 'none';
@@ -1135,8 +1181,6 @@ const res = await fetch(`${API_URL}/products`, {
       }
     }
 
-    // Compresión en cliente (canvas): mantiene calidad suficiente para análisis y
-    // respeta el límite de 5 MB del servidor.
     function comprimirImagen(file) {
       return new Promise((resolve) => {
         const img = new Image();
@@ -1174,11 +1218,11 @@ const res = await fetch(`${API_URL}/products`, {
       document.getElementById('ia-paso1').style.display = 'none';
       document.getElementById('ia-progreso').style.display = '';
       document.getElementById('ia-progreso-bar').style.width = '0%';
-      setProgresoIA('Preparando imágenes…', 0);
+      setProgresoIA('Preparando y optimizando imágenes…', 0);
 
       try {
         for (let i = 0; i < iaArchivos.length; i++) {
-          setProgresoIA(`Comprimiendo ${i + 1} de ${iaArchivos.length}…`, ((i + 1) / iaArchivos.length) * 20);
+          setProgresoIA(`Procesando foto ${i + 1} de ${iaArchivos.length}…`, ((i + 1) / iaArchivos.length) * 25);
           archivosComp.push(await comprimirImagen(iaArchivos[i].file));
         }
 
@@ -1186,17 +1230,17 @@ const res = await fetch(`${API_URL}/products`, {
         for (const f of archivosComp) fd.append('imagenes', f);
         fd.append('pistas', JSON.stringify(iaArchivos.map(a => a.pista)));
 
-        setProgresoIA('Enviando a la IA…', 45);
+        setProgresoIA('Catalogando con Google Gemini…', 50);
         const res = await fetch(`${API_URL}/ai/analizar`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: fd
         });
 
-        setProgresoIA('La IA está analizando las imágenes…', 60);
+        setProgresoIA('Generando fichas completas y optimización SEO…', 85);
 
         if (!res.ok) {
-          let err = 'Error al analizar';
+          let err = 'Error al analizar imágenes';
           try { const d = await res.json(); err = d.error || err; } catch (e) { }
           throw new Error(err);
         }
@@ -1228,17 +1272,7 @@ const res = await fetch(`${API_URL}/products`, {
 
     function mostrarResultadosIA(data) {
       document.getElementById('ia-resultados').style.display = '';
-      const okCount = iaResultados.filter(r => r.ok).length;
-      const failCount = iaResultados.length - okCount;
-      document.getElementById('ia-resumen').textContent =
-        `${iaResultados.length} producto${iaResultados.length === 1 ? '' : 's'} analizado${iaResultados.length === 1 ? '' : 's'} · ${okCount} listo${okCount === 1 ? '' : 's'} para publicar · ${failCount} con error`;
       renderTarjetasIA();
-    }
-
-    function badgeConfianza(campo, conf) {
-      if (conf == null) return `<span class="badge-category" style="background:rgba(220,53,69,.1);color:#b02a37;">⚠ Revisar</span>`;
-      if (conf >= 0.75) return `<span class="badge-category" style="background:rgba(45,106,79,.12);color:#1f5a41;">✓ Detectado</span>`;
-      return `<span class="badge-category" style="background:rgba(184,150,90,.16);color:#8a6a33;">⚠ Revisar</span>`;
     }
 
     function renderTarjetasIA() {
@@ -1247,61 +1281,129 @@ const res = await fetch(`${API_URL}/products`, {
       iaResultados.forEach((r, idx) => {
         if (r.estado === 'eliminado') return;
         if (r.estado === 'aceptado') {
-          cont.innerHTML += `<div style="border:1px solid rgba(45,106,79,.25);border-radius:var(--r-card);background:rgba(45,106,79,.05);padding:22px;text-align:center;">
-            <i class="fas fa-circle-check" style="font-size:26px;color:#1f5a41;margin-bottom:8px;"></i>
-            <p style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:#1f5a41;">Producto publicado</p>
+          cont.innerHTML += `
+          <div style="border:1px solid rgba(45,106,79,.25);border-radius:var(--r-card);background:rgba(45,106,79,.05);padding:24px;text-align:center;">
+            <i class="fas fa-circle-check" style="font-size:32px;color:#1f5a41;margin-bottom:10px;"></i>
+            <h6 style="font-family:var(--font-display);font-size:16px;color:#1f5a41;margin:0 0 4px;">Producto Publicado</h6>
+            <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin:0;">${esc(r.producto?.nombre || '')}</p>
           </div>`;
           return;
         }
         if (!r.ok) {
-          cont.innerHTML += `<div style="border:1px solid rgba(220,53,69,.25);border-radius:var(--r-card);padding:18px;background:var(--az-surface);">
+          cont.innerHTML += `
+          <div style="border:1px solid rgba(220,53,69,.25);border-radius:var(--r-card);padding:18px;background:var(--az-surface);">
             <div class="d-flex align-items-center gap-3 mb-2">
               <img src="${r.archivo}" onerror="this.src='img/ALE.png'" style="width:56px;height:56px;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--az-border);">
               <div>
-                <div style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--az-navy);">IMG ${r.indice + 1}</div>
-                <span class="badge-category" style="background:rgba(220,53,69,.1);color:#b02a37;">Error</span>
+                <div style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--az-navy);">FOTO ${r.indice + 1}</div>
+                <span class="badge-category" style="background:rgba(220,53,69,.1);color:#b02a37;">Error de Análisis</span>
               </div>
             </div>
             <p style="font-family:var(--font-ui);font-size:12px;color:#b02a37;margin-bottom:12px;">${esc(r.error)}</p>
-            <button class="btn-secondary-az" onclick="reintentarIA(${idx})" style="padding:8px 16px;font-size:12px;"><i class="fas fa-rotate me-1"></i>Reintentar</button>
+            <div class="d-flex gap-2">
+              <button class="btn-secondary-az" onclick="reintentarIA(${idx})" style="padding:8px 16px;font-size:12px;"><i class="fas fa-rotate me-1"></i>Reintentar</button>
+              <button class="btn-nav-login" onclick="eliminarProductoIA(${idx})" style="padding:8px 12px;font-size:12px;color:#b02a37;" title="Descartar"><i class="fas fa-trash-can"></i></button>
+            </div>
           </div>`;
           return;
         }
+
         const p = r.producto;
-        cont.innerHTML += `<div style="border:1px solid var(--az-border);border-radius:var(--r-card);padding:16px;background:var(--az-surface);display:flex;flex-direction:column;gap:12px;">
-          <div class="d-flex align-items-center gap-3">
-            <img src="${r.archivo}" onerror="this.src='img/ALE.png'" style="width:64px;height:64px;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--az-border);">
+        const confNombre = p.confidence?.nombre != null ? `${(p.confidence.nombre * 100).toFixed(0)}%` : '—';
+        const confCat = p.confidence?.categoria != null ? `${(p.confidence.categoria * 100).toFixed(0)}%` : '—';
+        const confMat = p.confidence?.materiales != null ? `${(p.confidence.materiales * 100).toFixed(0)}%` : '—';
+
+        cont.innerHTML += `
+        <div id="card-ia-${idx}" style="border:1.5px solid var(--az-border);border-radius:var(--r-card);padding:18px;background:var(--az-surface);display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);">
+          
+          <!-- Encabezado de Tarjeta -->
+          <div class="d-flex align-items-start gap-3">
+            <img src="${r.archivo}" onerror="this.src='img/ALE.png'" style="width:70px;height:70px;border-radius:var(--r-card);object-fit:cover;border:1px solid var(--az-border);flex-shrink:0;">
             <div style="flex:1;min-width:0;">
-              <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);letter-spacing:.08em;text-transform:uppercase;">Producto ${idx + 1}</div>
-              <div style="font-family:var(--font-display);font-size:17px;font-weight:500;color:var(--az-navy);line-height:1.25;">${esc(p.nombre || 'Sin nombre')}</div>
-              <span class="badge-category" style="margin-top:4px;">${esc(p.categoria)}</span>
-              <span class="badge-category" style="background:var(--az-surface-2);color:var(--az-text-muted);border:1px solid var(--az-border);">${p.precio ? '$' : 'Precio: definir'} · Stock: ${p.stock}</span>
+              <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                <span class="badge-category" style="font-size:11px;">${esc(p.categoria || 'General')}</span>
+                <span class="badge-category" style="background:var(--az-surface-2);color:var(--az-text-muted);font-size:11px;">${esc(p.estado || 'disponible')}</span>
+              </div>
+              <div style="font-family:var(--font-display);font-size:16.5px;font-weight:600;color:var(--az-navy);line-height:1.25;" title="${esc(p.nombre)}">${esc(p.nombre || 'Sin nombre')}</div>
             </div>
           </div>
 
-          <div style="font-family:var(--font-ui);font-size:12.5px;color:var(--az-text);line-height:1.6;">${esc(p.descripcion || '')}</div>
-
-          <div>
-            <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-bottom:6px;">CONFIANZA</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Nombre ${(p.confidence.nombre * 100).toFixed(0)}%</span>
-              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Categoría ${(p.confidence.categoria * 100).toFixed(0)}%</span>
-              <span style="font-size:11px;font-weight:700;color:var(--az-text-muted);">Material ${p.confidence.materiales === null ? '—' : (p.confidence.materiales * 100).toFixed(0) + '%'}</span>
+          <!-- BLOQUE DE REVISIÓN HUMANA (Inputs Directos) -->
+          <div style="background:rgba(184,150,90,0.06);border:1px solid rgba(184,150,90,0.3);border-radius:var(--r-card);padding:12px 14px;">
+            <div style="font-family:var(--font-ui);font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--az-gold);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-user-pen"></i> Revisión Humana Obligatoria
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:3px;">Precio COP *</label>
+                <input type="number" class="inv-field" style="padding:6px 10px;font-size:13px;font-weight:600;color:var(--az-navy);background:var(--az-surface);" placeholder="Definir precio" value="${p.precio || ''}" min="0" oninput="iaResultados[${idx}].producto.precio = this.value">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:3px;">Stock *</label>
+                <input type="number" class="inv-field" style="padding:6px 10px;font-size:13px;font-weight:600;color:var(--az-navy);background:var(--az-surface);" placeholder="Stock" value="${p.stock != null && p.stock !== '' ? p.stock : 1}" min="0" oninput="iaResultados[${idx}].producto.stock = this.value">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:3px;">Peso de joya / piedra</label>
+                <input type="text" class="inv-field" style="padding:6px 10px;font-size:12.5px;background:var(--az-surface);" placeholder="Ej: 3.5 g / 0.8 ct" value="${esc(p.peso || '')}" oninput="iaResultados[${idx}].producto.peso = this.value">
+              </div>
+              <div class="col-6">
+                <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:3px;">Medidas / Talla</label>
+                <input type="text" class="inv-field" style="padding:6px 10px;font-size:12.5px;background:var(--az-surface);" placeholder="Ej: Talla 7 / 45 cm" value="${esc(p.medidas || '')}" oninput="iaResultados[${idx}].producto.medidas = this.value">
+              </div>
             </div>
           </div>
 
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px;border-top:1px solid var(--az-border);">
-            <button class="btn-gold-az" onclick="aceptarProductoIA(${idx})" style="padding:9px 16px;font-size:13px;flex:1;"><i class="fas fa-check me-1"></i>Aceptar</button>
-            <button class="btn-secondary-az" onclick="editarProductoIA(${idx})" style="padding:9px 14px;font-size:13px;"><i class="fas fa-pen me-1"></i>Editar</button>
-            <button class="btn-nav-login" onclick="reintentarIA(${idx})" style="padding:9px 12px;font-size:12px;" title="Regenerar con IA"><i class="fas fa-rotate me-1"></i>Regenerar</button>
-            <button class="btn-nav-login" onclick="eliminarProductoIA(${idx})" style="padding:9px 12px;font-size:12px;color:#b02a37;" title="Eliminar"><i class="fas fa-trash-can me-1"></i></button>
+          <!-- DATOS LLENADOS POR IA (Ficha Técnica) -->
+          <div style="font-family:var(--font-ui);font-size:12px;display:flex;flex-direction:column;gap:5px;background:var(--az-surface-2);border-radius:var(--r-card);padding:10px 12px;border:1px solid var(--az-border);">
+            <div style="display:flex;justify-content:space-between;gap:8px;">
+              <span style="color:var(--az-text-muted);font-weight:600;">Materiales:</span>
+              <span style="color:var(--az-navy);font-weight:600;text-align:right;">${esc(p.materiales || 'No detectado')}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:8px;">
+              <span style="color:var(--az-text-muted);font-weight:600;">Piedra:</span>
+              <span style="color:var(--az-navy);font-weight:600;text-align:right;">${esc(p.tipo_piedra || 'Sin piedra')}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:8px;">
+              <span style="color:var(--az-text-muted);font-weight:600;">Color:</span>
+              <span style="color:var(--az-navy);font-weight:600;text-align:right;">${esc(p.color || '—')}</span>
+            </div>
+            <div style="margin-top:4px;color:var(--az-text);line-height:1.45;border-top:1px solid var(--az-border);padding-top:6px;">
+              ${esc(p.descripcion_corta || p.descripcion || '')}
+            </div>
+            <div style="font-family:monospace;font-size:11px;color:var(--az-text-light);word-break:break-all;">
+              /${esc(p.slug || '')}
+            </div>
+          </div>
+
+          <!-- Confianza de la IA -->
+          <div class="d-flex align-items-center justify-content-between" style="font-family:var(--font-ui);font-size:11px;color:var(--az-text-muted);border-top:1px solid var(--az-border);padding-top:8px;">
+            <span>Confianza IA:</span>
+            <span>Nombre <strong>${confNombre}</strong> · Cat <strong>${confCat}</strong> · Mat <strong>${confMat}</strong></span>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px;">
+            <button class="btn-gold-az" onclick="aceptarProductoIA(${idx})" style="padding:9px 16px;font-size:13px;flex:1;">
+              <i class="fas fa-check me-1"></i>Aceptar y Publicar
+            </button>
+            <button class="btn-secondary-az" onclick="editarProductoIA(${idx})" style="padding:9px 12px;font-size:12.5px;" title="Editar toda la ficha técnica">
+              <i class="fas fa-pen-to-square me-1"></i>Editar Ficha
+            </button>
+            <button class="btn-nav-login" onclick="reintentarIA(${idx})" style="padding:9px 12px;font-size:12px;" title="Regenerar con IA">
+              <i class="fas fa-rotate"></i>
+            </button>
+            <button class="btn-nav-login" onclick="eliminarProductoIA(${idx})" style="padding:9px 12px;font-size:12px;color:#b02a37;" title="Descartar producto">
+              <i class="fas fa-trash-can"></i>
+            </button>
           </div>
         </div>`;
       });
-      // Refrescar resumen (productos publicados)
+
       const okCont = iaResultados.filter(r => r.estado === 'aceptado').length;
+      const pendCont = iaResultados.filter(r => r.estado === 'pendiente').length;
+      const elimCont = iaResultados.filter(r => r.estado === 'eliminado').length;
       document.getElementById('ia-resumen').textContent =
-        `${iaResultados.filter(r => r.estado !== 'eliminado' && r.estado !== 'aceptado').length} pendientes · ${okCont} publicados · ${iaResultados.filter(r => r.estado === 'eliminado').length} eliminados`;
+        `${pendCont} pendiente${pendCont === 1 ? '' : 's'} de revisión · ${okCont} publicado${okCont === 1 ? '' : 's'} · ${elimCont} descartado${elimCont === 1 ? '' : 's'}`;
     }
 
     function reintentarIA(idx) {
@@ -1317,24 +1419,25 @@ const res = await fetch(`${API_URL}/products`, {
       const r = iaResultados[idx];
       if (!r || !r.producto) return;
       const token = localStorage.getItem('token');
+      if (!token) { mostrarNotif('❌ Sin autenticación'); return; }
       try {
         const fd = new FormData();
         const p = r.producto;
-        fd.append('nombre', p.nombre || '');
-        fd.append('precio', p.precio || '');
-        fd.append('stock', p.stock || 0);
-        fd.append('descripcion', p.descripcion || '');
+        fd.append('nombre', p.nombre || 'Producto');
+        fd.append('precio', p.precio != null && p.precio !== '' ? p.precio : 0);
+        fd.append('stock', p.stock != null && p.stock !== '' ? p.stock : 1);
+        fd.append('descripcion', p.descripcion || p.descripcion_completa || '');
         fd.append('categoria', p.categoria || 'General');
-        fd.append('descripcionCorta', p.descripcion_corta || '');
-        fd.append('descripcionCompleta', p.descripcion_completa || '');
+        fd.append('descripcionCorta', p.descripcion_corta || p.descripcion || '');
+        fd.append('descripcionCompleta', p.descripcion_completa || p.descripcion || '');
         fd.append('materiales', p.materiales || '');
-        fd.append('tipoPiedra', p.tipo_piedra || '');
+        fd.append('tipoPiedra', p.tipo_piedra || p.tipoPiedra || '');
         fd.append('color', p.color || '');
         fd.append('peso', p.peso || '');
         fd.append('medidas', p.medidas || '');
         fd.append('estado', p.estado || 'disponible');
-        fd.append('metaTitle', p.meta_title || '');
-        fd.append('metaDescripcion', p.meta_descripcion || '');
+        fd.append('metaTitle', p.meta_title || p.metaTitle || '');
+        fd.append('metaDescripcion', p.meta_descripcion || p.metaDescripcion || '');
         fd.append('slug', p.slug || '');
         const imgFile = iaArchivos[r.indice] ? iaArchivos[r.indice].file : null;
         if (imgFile) fd.append('imagen', imgFile);
@@ -1344,10 +1447,12 @@ const res = await fetch(`${API_URL}/products`, {
           headers: { 'Authorization': `Bearer ${token}` },
           body: fd
         });
-        if (!res.ok) throw new Error('Error al publicar');
-        const data = await res.json();
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || errData.error || 'Error al publicar');
+        }
         r.estado = 'aceptado';
-        mostrarNotif('✅ Producto publicado con éxito');
+        mostrarNotif(`✅ "${p.nombre || 'Producto'}" publicado con éxito`);
         cargarProductos();
         renderTarjetasIA();
       } catch (err) {
@@ -1357,47 +1462,57 @@ const res = await fetch(`${API_URL}/products`, {
 
     async function aceptarTodosIA() {
       const token = localStorage.getItem('token');
+      if (!token) { mostrarNotif('❌ Sin autenticación'); return; }
       const pendientes = iaResultados.filter(r => r.ok && r.estado === 'pendiente');
-      // El backend no limita por lote: publicar uno a uno
-      if (!pendientes.length) { mostrarNotif('⚠ Sin productos pendientes'); return; }
+      if (!pendientes.length) { mostrarNotif('⚠ Sin productos pendientes de publicar'); return; }
+
       const btn = document.getElementById('btn-aceptar-todos');
-      btn.disabled = true;
+      if (btn) btn.disabled = true;
+      let publicados = 0;
+
       for (let i = 0; i < pendientes.length; i++) {
         const r = pendientes[i];
+        const p = r.producto;
         try {
           const fd = new FormData();
-          const p = r.producto;
-          fd.append('nombre', p.nombre || '');
-          fd.append('precio', p.precio || '');
-          fd.append('stock', p.stock || 0);
-          fd.append('descripcion', p.descripcion || '');
+          fd.append('nombre', p.nombre || 'Producto');
+          fd.append('precio', p.precio != null && p.precio !== '' ? p.precio : 0);
+          fd.append('stock', p.stock != null && p.stock !== '' ? p.stock : 1);
+          fd.append('descripcion', p.descripcion || p.descripcion_completa || '');
           fd.append('categoria', p.categoria || 'General');
-          fd.append('descripcionCorta', p.descripcion_corta || '');
-          fd.append('descripcionCompleta', p.descripcion_completa || '');
+          fd.append('descripcionCorta', p.descripcion_corta || p.descripcion || '');
+          fd.append('descripcionCompleta', p.descripcion_completa || p.descripcion || '');
           fd.append('materiales', p.materiales || '');
-          fd.append('tipoPiedra', p.tipo_piedra || '');
+          fd.append('tipoPiedra', p.tipo_piedra || p.tipoPiedra || '');
           fd.append('color', p.color || '');
           fd.append('peso', p.peso || '');
           fd.append('medidas', p.medidas || '');
           fd.append('estado', p.estado || 'disponible');
-          fd.append('metaTitle', p.meta_title || '');
-          fd.append('metaDescripcion', p.meta_descripcion || '');
+          fd.append('metaTitle', p.meta_title || p.metaTitle || '');
+          fd.append('metaDescripcion', p.meta_descripcion || p.metaDescripcion || '');
           fd.append('slug', p.slug || '');
           const img = iaArchivos[r.indice] ? iaArchivos[r.indice].file : null;
           if (img) fd.append('imagen', img);
+
           const res = await fetch(`${API_URL}/inventario`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: fd
           });
-          if (!res.ok) throw new Error('Error al publicar');
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || errData.error || 'Error al publicar');
+          }
           r.estado = 'aceptado';
+          publicados++;
         } catch (err) {
-          mostrarNotif(`❌ Producto "${p?.nombre || '#'}" falló: ${err.message}`);
+          mostrarNotif(`❌ Error en "${p?.nombre || '#'}" : ${err.message}`);
           break;
         }
       }
-      btn.disabled = false;
+
+      if (btn) btn.disabled = false;
+      if (publicados > 0) mostrarNotif(`✅ ${publicados} productos publicados exitosamente`);
       cargarProductos();
       renderTarjetasIA();
     }
@@ -1419,7 +1534,7 @@ const res = await fetch(`${API_URL}/products`, {
 
       document.getElementById('ia-resultados').style.display = 'none';
       document.getElementById('ia-progreso').style.display = '';
-      setProgresoIA(`Reanalizando imagen ${(r ? r.indice : idx) + 1}…`, 30);
+      setProgresoIA(`Reanalizando imagen ${(r ? r.indice : idx) + 1}…`, 35);
 
       fetch(`${API_URL}/ai/analizar`, {
         method: 'POST',
@@ -1448,32 +1563,104 @@ const res = await fetch(`${API_URL}/products`, {
     function editarProductoIA(idx) {
       const r = iaResultados[idx];
       if (!r || !r.producto) return;
-      // Edición inline dentro de la tarjeta: campos básicos editables
       const p = r.producto;
-      const target = document.querySelector(`#ia-tarjetas > div:nth-child(${idx + 1})`);
+      const target = document.getElementById(`card-ia-${idx}`);
       if (!target) return;
-      const input = (val, w = '100%') => `style="width:${w};font-family:var(--font-ui);font-size:13px;padding:8px 10px;border:1.5px solid var(--az-border-strong);border-radius:var(--r-input);background:var(--az-surface);color:var(--az-navy);outline:none;margin-top:6px;"`;
       const v = (x) => esc(x == null ? '' : String(x));
+
       target.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <button class="btn-nav-login" onclick="guardarEdicionIA(${idx})" style="padding:8px 14px;font-size:12px;">Guardar</button>
-          <button class="btn-nav-login" onclick="renderTarjetasIA()" style="padding:8px 12px;font-size:12px;">Cancelar</button>
-          <div style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-light);text-transform:uppercase;letter-spacing:.08em;margin-left:auto;">Editando producto ${idx + 1}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--az-border);">
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--az-navy);">
+            <i class="fas fa-pen-to-square me-1 text-gold"></i> Editando Ficha Producto ${idx + 1}
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn-gold-az" onclick="guardarEdicionIA(${idx})" style="padding:6px 14px;font-size:12px;">Guardar</button>
+            <button type="button" class="btn-nav-login" onclick="renderTarjetasIA()" style="padding:6px 10px;font-size:12px;">Cancelar</button>
+          </div>
         </div>
-        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Nombre</label>
-        <input id="iaEd-nombre" ${input} value="${v(p.nombre)}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Precio COP</label>
-          <input id="iaEd-precio" type="number" min="0" ${input} value="${v(p.precio || '')}" placeholder="Definir precio"></div>
-          <div><label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);">Stock</label>
-          <input id="iaEd-stock" type="number" min="0" ${input} value="${v(p.stock ?? 0)}"></div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+          <div>
+            <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Nombre del producto</label>
+            <input id="iaEd-nombre-${idx}" class="inv-field" value="${v(p.nombre)}">
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Categoría</label>
+              <select id="iaEd-categoria-${idx}" class="inv-field">
+                ${['Anillos', 'Collares', 'Aretes', 'Pulseras', 'Esmeraldas', 'General'].map(c => `<option value="${c}" ${c === p.categoria ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Estado</label>
+              <select id="iaEd-estado-${idx}" class="inv-field">
+                ${['disponible', 'nuevo', 'pedido', 'agotado'].map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${e.charAt(0).toUpperCase() + e.slice(1)}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2" style="background:rgba(184,150,90,0.06);border:1px solid rgba(184,150,90,0.25);border-radius:var(--r-card);padding:8px 10px;">
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-gold);display:block;margin-bottom:2px;">Precio (COP) *</label>
+              <input id="iaEd-precio-${idx}" type="number" min="0" class="inv-field" value="${v(p.precio || '')}" placeholder="Definir precio">
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-gold);display:block;margin-bottom:2px;">Stock *</label>
+              <input id="iaEd-stock-${idx}" type="number" min="0" class="inv-field" value="${v(p.stock != null ? p.stock : 1)}">
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Peso (g / ct)</label>
+              <input id="iaEd-peso-${idx}" class="inv-field" value="${v(p.peso)}" placeholder="Ej: 3.5 g / 0.8 ct">
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Medidas / Talla</label>
+              <input id="iaEd-medidas-${idx}" class="inv-field" value="${v(p.medidas)}" placeholder="Ej: Talla 7 / 45 cm">
+            </div>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Materiales</label>
+              <input id="iaEd-materiales-${idx}" class="inv-field" value="${v(p.materiales)}">
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Tipo de Piedra</label>
+              <input id="iaEd-piedra-${idx}" class="inv-field" value="${v(p.tipo_piedra || p.tipoPiedra)}">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Color</label>
+            <input id="iaEd-color-${idx}" class="inv-field" value="${v(p.color)}">
+          </div>
+
+          <div>
+            <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Descripción corta</label>
+            <input id="iaEd-descCorta-${idx}" class="inv-field" value="${v(p.descripcion_corta || p.descripcionCorta)}">
+          </div>
+
+          <div>
+            <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Descripción completa</label>
+            <textarea id="iaEd-desc-${idx}" class="inv-field" rows="2">${v(p.descripcion_completa || p.descripcion)}</textarea>
+          </div>
+
+          <div>
+            <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Slug (URL)</label>
+            <input id="iaEd-slug-${idx}" class="inv-field" value="${v(p.slug)}" style="font-family:monospace;font-size:12px;">
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Meta Título (SEO)</label>
+              <input id="iaEd-metaTitle-${idx}" class="inv-field" value="${v(p.meta_title || p.metaTitle)}">
+            </div>
+            <div class="col-6">
+              <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);display:block;margin-bottom:2px;">Meta Descripción (SEO)</label>
+              <input id="iaEd-metaDesc-${idx}" class="inv-field" value="${v(p.meta_descripcion || p.metaDescripcion)}">
+            </div>
+          </div>
         </div>
-        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Categoría</label>
-        <select id="iaEd-categoria" ${input}>${['Anillos', 'Collares', 'Aretes', 'Pulseras', 'Esmeraldas', 'General'].map(c => `<option value="${c}" ${c === p.categoria ? 'selected' : ''}>${c}</option>`).join('')}</select>
-        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Descripción</label>
-        <textarea id="iaEd-desc" rows="2" ${input}>${v(p.descripcion)}</textarea>
-        <label style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--az-text-muted);margin-top:6px;">Slug</label>
-        <input id="iaEd-slug" ${input} value="${v(p.slug)}" style="font-family:monospace;font-size:12.5px;">
       `;
     }
 
@@ -1481,12 +1668,27 @@ const res = await fetch(`${API_URL}/products`, {
       const r = iaResultados[idx];
       if (!r || !r.producto) return;
       const g = (id) => document.getElementById(id);
-      r.producto.nombre = g('iaEd-nombre').value.trim();
-      r.producto.precio = g('iaEd-precio').value ? Number(g('iaEd-precio').value) : null;
-      r.producto.stock = g('iaEd-stock').value ? Number(g('iaEd-stock').value) : 0;
-      r.producto.categoria = g('iaEd-categoria').value;
-      r.producto.descripcion = g('iaEd-desc').value.trim();
-      r.producto.slug = g('iaEd-slug').value.trim();
+      const p = r.producto;
+
+      if (g(`iaEd-nombre-${idx}`)) p.nombre = g(`iaEd-nombre-${idx}`).value.trim();
+      if (g(`iaEd-categoria-${idx}`)) p.categoria = g(`iaEd-categoria-${idx}`).value;
+      if (g(`iaEd-estado-${idx}`)) p.estado = g(`iaEd-estado-${idx}`).value;
+      if (g(`iaEd-precio-${idx}`)) p.precio = g(`iaEd-precio-${idx}`).value ? Number(g(`iaEd-precio-${idx}`).value) : null;
+      if (g(`iaEd-stock-${idx}`)) p.stock = g(`iaEd-stock-${idx}`).value !== '' ? Number(g(`iaEd-stock-${idx}`).value) : 1;
+      if (g(`iaEd-peso-${idx}`)) p.peso = g(`iaEd-peso-${idx}`).value.trim();
+      if (g(`iaEd-medidas-${idx}`)) p.medidas = g(`iaEd-medidas-${idx}`).value.trim();
+      if (g(`iaEd-materiales-${idx}`)) p.materiales = g(`iaEd-materiales-${idx}`).value.trim();
+      if (g(`iaEd-piedra-${idx}`)) p.tipo_piedra = g(`iaEd-piedra-${idx}`).value.trim();
+      if (g(`iaEd-color-${idx}`)) p.color = g(`iaEd-color-${idx}`).value.trim();
+      if (g(`iaEd-descCorta-${idx}`)) p.descripcion_corta = g(`iaEd-descCorta-${idx}`).value.trim();
+      if (g(`iaEd-desc-${idx}`)) {
+        p.descripcion = g(`iaEd-desc-${idx}`).value.trim();
+        p.descripcion_completa = g(`iaEd-desc-${idx}`).value.trim();
+      }
+      if (g(`iaEd-slug-${idx}`)) p.slug = g(`iaEd-slug-${idx}`).value.trim();
+      if (g(`iaEd-metaTitle-${idx}`)) p.meta_title = g(`iaEd-metaTitle-${idx}`).value.trim();
+      if (g(`iaEd-metaDesc-${idx}`)) p.meta_descripcion = g(`iaEd-metaDesc-${idx}`).value.trim();
+
       renderTarjetasIA();
     }
   </script>

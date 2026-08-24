@@ -66,8 +66,10 @@ function validarProductoAI(raw, { categorias = CATEGORIAS_DEFAULT, indice = 0 } 
   const producto = {
     nombre,
     precio: null, // la IA NUNCA inventa precio
-    stock: 0,     // la IA NUNCA define stock
+    stock: 1,     // sugerido por defecto
     descripcion: texto(raw.descripcion, 500),
+    descripcion_corta: texto(raw.descripcion_corta, 160) || texto(raw.descripcion, 160),
+    descripcion_completa: texto(raw.descripcion_completa, 2000) || texto(raw.descripcion, 2000),
     categoria,
     materiales: texto(raw.materiales, 80),
     tipo_piedra: texto(raw.tipo_piedra, 60),
