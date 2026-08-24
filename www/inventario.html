@@ -565,6 +565,97 @@
       </div>
     </div>
   </div>
+  <!-- MODAL CREACIÓN MASIVA CON IA -->
+  <div class="modal fade" id="modal-ia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content" style="border-radius:var(--r-card);border:1px solid var(--az-border);background:var(--az-surface);box-shadow:0 20px 45px rgba(10,25,47,0.18);">
+        <div class="modal-header border-0" style="padding:24px 28px 16px;background:var(--az-surface-2);border-bottom:1px solid var(--az-border) !important;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(184,150,90,0.12);border:1px solid rgba(184,150,90,0.3);display:flex;align-items:center;justify-content:center;color:var(--az-gold);font-size:18px;">
+              <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <h5 class="modal-title" style="font-family:var(--font-display);font-weight:500;color:var(--az-navy);margin:0;">Creación Masiva con IA</h5>
+              <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin:2px 0 0;">Catalogación inteligente de piezas mediante Google Gemini</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body" style="padding:28px;">
+          <!-- Alerta de error -->
+          <div id="ia-err" class="alert alert-danger" style="display:none;font-size:13px;border-radius:var(--r-card);margin-bottom:20px;"></div>
+
+          <!-- PASO 1: Selección y Pistas -->
+          <div id="ia-paso1">
+            <!-- Zona de Carga / Dropzone -->
+            <div style="border:2px dashed var(--az-border-strong);border-radius:var(--r-card);padding:36px 20px;text-align:center;background:var(--az-surface-2);cursor:pointer;transition:border-color .2s;"
+                 onclick="document.getElementById('ia-input').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--az-gold)';"
+                 ondragleave="this.style.borderColor='var(--az-border-strong)';"
+                 ondrop="event.preventDefault();this.style.borderColor='var(--az-border-strong)';if(event.dataTransfer.files.length){const inp=document.getElementById('ia-input');inp.files=event.dataTransfer.files;inp.dispatchEvent(new Event('change'));}">
+              <input type="file" id="ia-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none;">
+              <div style="width:54px;height:54px;border-radius:50%;background:rgba(184,150,90,0.1);color:var(--az-gold);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;">
+                <i class="fas fa-cloud-arrow-up"></i>
+              </div>
+              <h6 style="font-family:var(--font-display);font-size:17px;font-weight:500;color:var(--az-navy);margin-bottom:6px;">Selecciona o arrastra las fotos de las joyas</h6>
+              <p style="font-family:var(--font-ui);font-size:12.5px;color:var(--az-text-muted);margin:0;">Hasta 20 imágenes por lote (JPG, PNG, WEBP) · 1 imagen = 1 producto</p>
+            </div>
+
+            <!-- Lista de Pistas por Imagen -->
+            <div id="ia-pistas" style="display:none;margin-top:20px;"></div>
+
+            <!-- Barra de Acciones Paso 1 -->
+            <div id="ia-acciones" class="d-none" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--az-border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+              <div class="d-flex align-items-center gap-2">
+                <span id="ia-contador" style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--az-navy);">0 imágenes seleccionadas</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn-nav-login" onclick="document.getElementById('ia-input').click()" style="padding:10px 18px;font-size:13px;">
+                  <i class="fas fa-plus me-1"></i>Añadir más fotos
+                </button>
+                <button type="button" id="btn-analizar-ia" class="btn-gold-az" onclick="analizarIA()" style="padding:10px 24px;font-size:13px;">
+                  <i class="fas fa-wand-magic-sparkles me-2"></i>Analizar con IA
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 2: Progreso -->
+          <div id="ia-progreso" style="display:none;padding:50px 20px;text-align:center;">
+            <div class="spinner-border text-warning mb-3" style="width:3rem;height:3rem;color:var(--az-gold) !important;" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <div id="ia-progreso-txt" style="font-family:var(--font-display);font-size:18px;color:var(--az-navy);margin-bottom:16px;">Analizando imágenes con IA…</div>
+            <div style="background:var(--az-surface-2);border-radius:10px;height:10px;max-width:440px;margin:0 auto;overflow:hidden;border:1px solid var(--az-border);">
+              <div id="ia-progreso-bar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--az-gold),var(--az-emerald));transition:width .4s ease;"></div>
+            </div>
+            <p style="font-family:var(--font-ui);font-size:12px;color:var(--az-text-muted);margin-top:14px;">Extrayendo nombres, descripciones comerciales, materiales y optimización SEO.</p>
+          </div>
+
+          <!-- PASO 3: Resultados -->
+          <div id="ia-resultados" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--az-surface-2);border-radius:var(--r-card);border:1px solid var(--az-border);">
+              <div>
+                <span id="ia-resumen" style="font-family:var(--font-ui);font-size:13.5px;font-weight:700;color:var(--az-navy);">Resultados del análisis</span>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <button type="button" class="btn-secondary-az" onclick="volverSeleccionIA()" style="padding:8px 16px;font-size:12.5px;">
+                  <i class="fas fa-arrow-left me-1"></i>Cargar más fotos
+                </button>
+                <button type="button" id="btn-aceptar-todos" class="btn-gold-az" onclick="aceptarTodosIA()" style="padding:8px 20px;font-size:12.5px;">
+                  <i class="fas fa-check-double me-1"></i>Publicar Todos
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid de Tarjetas de Productos IA -->
+            <div id="ia-tarjetas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="az-footer">
@@ -1302,7 +1393,7 @@ const res = await fetch(`${API_URL}/products`, {
           if (!res.ok) throw new Error('Error al publicar');
           r.estado = 'aceptado';
         } catch (err) {
-          mostrarNotif(`❌ Producto "${p.producto?.nombre || '#'}" falló: ${err.message}`);
+          mostrarNotif(`❌ Producto "${p?.nombre || '#'}" falló: ${err.message}`);
           break;
         }
       }

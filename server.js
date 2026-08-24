@@ -574,6 +574,8 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
 
     const connection = await db.getConnection();
     const slugFinal = await generarSlugUnico(connection, slug || nombre || 'producto', null);
+    const precioFinal = (precio === '' || precio == null || isNaN(Number(precio))) ? 0 : Number(precio);
+    const stockFinal = (stock === '' || stock == null || isNaN(parseInt(stock, 10))) ? 0 : parseInt(stock, 10);
 
     const result = await connection.query(
       `INSERT INTO products (nombre, precio, stock, descripcion, categoria, imagen, activo,
@@ -583,7 +585,7 @@ app.post('/api/inventario', auth, upload.single('imagen'), async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW())
        RETURNING id, slug`,
       [
-        nombre, precio, stock, descripcion, categoria || 'General', imagenUrl,
+        nombre, precioFinal, stockFinal, descripcion, categoria || 'General', imagenUrl,
         slugFinal, descripcionCorta || null, descripcionCompleta || null, materiales || null,
         tipoPiedra || null, color || null, peso || null, medidas || null, estado || 'disponible',
         JSON.stringify(imagenesSec), imagenCompartir,

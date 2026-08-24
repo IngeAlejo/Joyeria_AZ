@@ -3,7 +3,8 @@
 // La API key vive SOLO en variables de entorno del backend.
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const FALLBACK_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.7-flash'];
 
 function obtenerApiKey() {
   const key = process.env.GEMINI_API_KEY;
@@ -32,7 +33,7 @@ function extraerJson(texto) {
   return JSON.parse(t);
 }
 
-async function llamarGemini(prompt, mime, base64, model) {
+async function llamarGeminiConModelo(prompt, mime, base64, model) {
   const apiKey = obtenerApiKey();
   const url = `${GEMINI_BASE}/${model}:generateContent?key=${apiKey}`;
 
@@ -48,8 +49,8 @@ async function llamarGemini(prompt, mime, base64, model) {
     ],
     generationConfig: {
       responseMimeType: 'application/json',
-      temperature: 0.6,
-      maxOutputTokens: 1600
+      temperature: 0.4,
+      maxOutputTokens: 4096
     }
   };
 
@@ -64,12 +65,31 @@ async function llamarGemini(prompt, mime, base64, model) {
   }
   if (!resp.ok) {
     const detalle = await resp.text().catch(() => '');
-    throw new Error('Error de Gemini (HTTP ' + resp.status + '): ' + detalle.slice(0, 200));
+    throw new Error(`Error de Gemini (${model} HTTP ${resp.status}): ${detalle.slice(0, 200)}`);
   }
 
   const data = await resp.json();
   if (data?.error) throw new Error(data.error.message || 'Error de Gemini');
   return extraerJson(extraerTexto(data));
+}
+
+// Llama a Gemini con reintentos y fallback a modelos alternativos ante 503 u otros fallos
+async function llamarGemini(prompt, mime, base64, modelInicial) {
+  const modelosAProbar = [modelInicial || DEFAULT_MODEL, ...FALLBACK_MODELS.filter(m => m !== (modelInicial || DEFAULT_MODEL))];
+  let ultimoError = null;
+
+  for (const modelo of modelosAProbar) {
+    try {
+      return await llamarGeminiConModelo(prompt, mime, base64, modelo);
+    } catch (err) {
+      ultimoError = err;
+      console.warn(`[AI WARN] Falló modelo ${modelo}: ${err.message}. Probando siguiente modelo si está disponible...`);
+      // Si fue rate limit o error temporal, esperar 500ms antes de reintentar
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+
+  throw ultimoError || new Error('No se pudo procesar la imagen con los modelos de IA disponibles');
 }
 
 // Interfaz pública concreta del proveedor.
@@ -79,4 +99,4 @@ async function analizarProducto({ imagenBase64, mimeType, pista, categorias, mod
   return llamarGemini(prompt, mimeType, imagenBase64, model || DEFAULT_MODEL);
 }
 
-module.exports = { analizarProducto, obtenerApiKey, GEMINI_BASE, DEFAULT_MODEL };
+module.exports = { analizarProducto, obtenerApiKey, GEMINI_BASE, DEFAULT_MODEL, FALLBACK_MODELS };
