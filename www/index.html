@@ -164,31 +164,41 @@
   </div>
 
   <!-- =========================================================
-     HERO — Split layout profesional
+     HERO — Rediseño Lujo (Unificado con resto de páginas)
      ========================================================= -->
-  <section class="hero-section" id="inicio">
-    <div class="hero-content" data-reveal>
-      <span class="hero-eyebrow">Colombia · Emprendimiento 2025</span>
-      <h1 class="hero-headline">
-        Joyería fina<br>
-        <em>hecha a mano</em>
-      </h1>
-      <p class="hero-subtext">
-        Esmeraldas colombianas auténticas de las minas de Muzo y Chivor.
-        Oro 18k, plata 925 y piezas creadas con dedicación y honestidad.
-      </p>
-      <div class="hero-ctas">
-        <a href="pages/joyeria.html" class="btn-primary-az">
-          <i class="fas fa-gem"></i>Ver Colección
-        </a>
-        <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az">
-          <i class="fab fa-whatsapp"></i>WhatsApp
-        </a>
-      </div>
+  <section id="inicio" style="background: url('img/hero_luxury.png') center/cover no-repeat; padding-top:0;position:relative;overflow:hidden;min-height:90vh;display:flex;align-items:center;border-bottom:1px solid rgba(184,150,90,0.25);">
+    <!-- Overlay for text readability -->
+    <div style="position:absolute;inset:0;background:linear-gradient(145deg, rgba(10,13,20,0.92) 0%, rgba(26,26,46,0.88) 65%, rgba(17,26,36,0.8) 100%);"></div>
+    
+    <!-- Decorative Luxury Ambient Layer -->
+    <div style="position:absolute;inset:0;pointer-events:none;">
+      <div style="position:absolute;top:-100px;right:-80px;width:550px;height:550px;border-radius:50%;background:radial-gradient(circle,rgba(184,150,90,0.12) 0%,transparent 65%);"></div>
+      <div style="position:absolute;bottom:-60px;left:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(45,106,79,0.12) 0%,transparent 65%);"></div>
+      <div style="position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(184,150,90,0.08);animation:heroRotate 45s linear infinite;"></div>
     </div>
-    <div class="hero-image-col">
-      <img src="img/IMG_2.PNG" alt="Esmeraldas colombianas auténticas — Joyería AZ">
-      <div class="hero-image-overlay"></div>
+
+    <div class="container" style="position:relative;z-index:1;padding-top:clamp(60px, 8vw, 120px);padding-bottom:clamp(60px, 8vw, 120px);">
+      <div class="row">
+        <div class="col-lg-8" data-reveal>
+          <span class="hero-eyebrow" style="color:var(--az-gold);">Colombia · Emprendimiento 2025</span>
+          <h1 class="hero-headline" style="color:white;font-size:clamp(3.5rem, 6vw, 5.5rem);margin-bottom:24px;">
+            Joyería fina<br>
+            <em style="font-style:italic;color:var(--az-gold);">hecha a mano</em>
+          </h1>
+          <p class="hero-subtext" style="color:rgba(255,255,255,0.7);font-size:18px;max-width:540px;line-height:1.7;margin-bottom:40px;">
+            Esmeraldas colombianas auténticas de las minas de Muzo y Chivor.
+            Oro 18k, plata 925 y piezas creadas con dedicación y honestidad.
+          </p>
+          <div class="hero-ctas">
+            <a href="pages/joyeria.html" class="btn-primary-az" style="padding:14px 32px;font-size:15px;">
+              <i class="fas fa-gem me-2"></i>Ver Colección
+            </a>
+            <a href="https://wa.me/573142056065" target="_blank" class="btn-whatsapp-az" style="padding:14px 32px;font-size:15px;">
+              <i class="fab fa-whatsapp me-2"></i>WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -622,7 +632,7 @@
     async function cargarProductosHome() {
       mostrarSkeletonsHome();
       try {
-        const res = await fetch(`${API}/api/productos`);
+        const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const todos = data.productos || data || [];

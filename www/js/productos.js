@@ -12,7 +12,7 @@ async function cargarProductos() {
   ).join('');
 
   try {
-    const res = await fetch(`${window.API_BASE_URL}/api/productos`);
+    const res = await fetch(`${window.API_BASE_URL}/api/products`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const lista = (data.productos || data || []).slice(0, 8);

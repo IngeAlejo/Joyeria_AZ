@@ -1148,8 +1148,199 @@ img {
 }
 
 /* =====================================================
-   FOOTER
+   CATEGORY CARDS — Home page categories grid
    ===================================================== */
+.category-card {
+  display: block;
+  text-decoration: none;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  transition: transform 0.45s var(--ease-out), box-shadow 0.45s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.category-card-inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  height: 320px;
+  background: var(--az-surface-2);
+}
+
+.category-card-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+
+.category-card:hover .category-card-inner img {
+  transform: scale(1.06);
+}
+
+.category-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(26, 26, 46, 0.85) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  transition: background 0.4s ease;
+}
+
+.category-card:hover .category-card-overlay {
+  background: linear-gradient(180deg, transparent 20%, rgba(26, 26, 46, 0.92) 100%);
+}
+
+.category-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: white;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.category-count {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--az-gold);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.3s var(--ease-out);
+}
+
+.category-card:hover .category-count {
+  gap: 10px;
+}
+
+/* =====================================================
+   BANNER ESMERALDAS — Emerald origin section (home)
+   ===================================================== */
+.banner-emerald {
+  background: linear-gradient(135deg, #0d1117 0%, var(--az-navy) 60%, #111a22 100%);
+  padding: clamp(48px, 6vw, 88px) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-emerald::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 106, 79, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.banner-emerald::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 150, 90, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.banner-emerald .section-title {
+  color: white;
+}
+
+.banner-emerald .section-title em {
+  font-style: italic;
+  color: var(--az-gold);
+}
+
+/* Emerald badge grid — 2×2 feature cards */
+.emerald-badge-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 575px) {
+  .emerald-badge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.emerald-badge-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(184, 150, 90, 0.2);
+  border-radius: var(--r-card);
+  padding: 24px;
+  backdrop-filter: blur(6px);
+  transition: border-color 0.3s ease, transform 0.3s var(--ease-out);
+}
+
+.emerald-badge-card:hover {
+  border-color: rgba(184, 150, 90, 0.45);
+  transform: translateY(-3px);
+}
+
+.emerald-badge-card i {
+  font-size: 22px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.emerald-badge-card h5 {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 6px;
+}
+
+.emerald-badge-card p {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  margin: 0;
+  max-width: none;
+}
+
+/* =====================================================
+   UTILITY CLASSES
+   ===================================================== */
+.text-gold {
+  color: var(--az-gold) !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+/* Section subtitle — center when in text-center */
+.text-center .section-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =====================================================
+   HERO ROTATION — Decorative ring animation (sub-pages)
+   ===================================================== */
+@keyframes heroRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
 footer {
   background: var(--az-navy);
   color: rgba(255, 255, 255, 0.55);
