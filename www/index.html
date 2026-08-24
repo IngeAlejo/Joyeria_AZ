@@ -246,8 +246,8 @@
           Cada joya es única. Creadas en oro 18k y plata 925 con esmeraldas colombianas seleccionadas a mano.
         </p>
       </div>
-      <div class="row g-4" id="grid-destacados">
-        <!-- Rellenado por productos.js -->
+      <div class="row g-4" id="productos-grid">
+        <!-- Rellenado por JS -->
         <div class="col-md-6 col-lg-3">
           <div class="skeleton skeleton-card"></div>
         </div>
@@ -260,6 +260,11 @@
         <div class="col-md-6 col-lg-3">
           <div class="skeleton skeleton-card"></div>
         </div>
+      </div>
+      <div id="estado-error-home" class="d-none text-center py-4">
+        <i class="fas fa-exclamation-triangle" style="color:#f59e0b;font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+        <p style="color:var(--az-text-muted);font-size:14px;">No se pudieron cargar los productos.</p>
+        <button class="btn-secondary-az mt-2" onclick="cargarProductosHome()">Reintentar</button>
       </div>
       <div class="text-center mt-5" data-reveal>
         <a href="pages/joyeria.html" class="btn-primary-az">
@@ -270,7 +275,7 @@
   </section>
 
   <!-- =========================================================
-     COLECCIONES DESTACADAS (Categorías)
+     COLECCIONES DESTACADAS (Categorías — ocultas si vacías)
      ========================================================= -->
   <section class="section-az section-gray" id="colecciones">
     <div class="container">
@@ -278,8 +283,8 @@
         <span class="section-label">Explorar</span>
         <h2 class="section-title">Nuestras categorías</h2>
       </div>
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3" data-reveal data-delay="1">
+      <div class="row g-4" id="cat-grid">
+        <div class="col-md-6 col-lg-3" id="cat-anillo" data-reveal data-delay="1">
           <a href="pages/joyeria.html?cat=anillo" class="category-card" style="display:block;text-decoration:none;">
             <div class="category-card-inner">
               <img src="img/IMG_1.png" alt="Anillos de oro y esmeraldas — Joyería AZ">
@@ -290,7 +295,7 @@
             </div>
           </a>
         </div>
-        <div class="col-md-6 col-lg-3" data-reveal data-delay="2">
+        <div class="col-md-6 col-lg-3" id="cat-collar" data-reveal data-delay="2">
           <a href="pages/joyeria.html?cat=collar" class="category-card" style="display:block;text-decoration:none;">
             <div class="category-card-inner">
               <img src="img/IMG_2.PNG" alt="Collares y dijes de esmeraldas">
@@ -301,10 +306,10 @@
             </div>
           </a>
         </div>
-        <div class="col-md-6 col-lg-3" data-reveal data-delay="3">
+        <div class="col-md-6 col-lg-3" id="cat-aretes" data-reveal data-delay="3">
           <a href="pages/joyeria.html?cat=aretes" class="category-card" style="display:block;text-decoration:none;">
             <div class="category-card-inner">
-              <img src="img/IMG_3.JPG" alt="Aretes de oro y plata 925">
+              <img src="img/IMG_3.PNG" alt="Aretes de oro y plata 925">
               <div class="category-card-overlay">
                 <span class="category-name">Aretes</span>
                 <span class="category-count">Ver colección <i class="fas fa-arrow-right"></i></span>
@@ -312,13 +317,25 @@
             </div>
           </a>
         </div>
-        <div class="col-md-6 col-lg-3" data-reveal data-delay="4">
+        <div class="col-md-6 col-lg-3" id="cat-pulsera" data-reveal data-delay="3">
+          <a href="pages/joyeria.html?cat=pulsera" class="category-card" style="display:block;text-decoration:none;">
+            <div class="category-card-inner">
+              <img src="img/IMG_222.PNG" alt="Pulseras de plata y esmeraldas">
+              <div class="category-card-overlay">
+                <span class="category-name">Pulseras</span>
+                <span class="category-count">Ver colección <i class="fas fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>
+        </div>
+        <!-- Esmeraldas siempre visible -->
+        <div class="col-md-6 col-lg-3" id="cat-esmeralda" data-reveal data-delay="4">
           <a href="pages/esmeraldas.html" class="category-card" style="display:block;text-decoration:none;">
             <div class="category-card-inner">
               <img src="img/IMG_4.PNG" alt="Esmeraldas colombianas sueltas y certificadas">
               <div class="category-card-overlay">
                 <span class="category-name">Esmeraldas</span>
-                <span class="category-count">Origen Muzo & Chivor <i class="fas fa-arrow-right"></i></span>
+                <span class="category-count">Origen Muzo &amp; Chivor <i class="fas fa-arrow-right"></i></span>
               </div>
             </div>
           </a>
@@ -605,13 +622,15 @@
     async function cargarProductosHome() {
       mostrarSkeletonsHome();
       try {
-        const res = await fetch(`${API}/api/products`);
+        const res = await fetch(`${API}/api/productos`);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const todos = data.productos || data || [];
-        // Las esmeraldas solo se muestran en esmeraldas.html
+        // Esmeraldas solo en esmeraldas.html
         const lista = todos.filter(p => !(p.categoria || '').toLowerCase().includes('esmeralda')).slice(0, 8);
         renderProductosHome(lista);
+        // Ocultar categorías sin productos
+        ocultarCategoriasSinProductos(todos);
       } catch (e) {
         ocultarSkeletonsHome();
         document.getElementById('estado-error-home')?.classList.remove('d-none');
@@ -687,6 +706,16 @@
     function ocultarSkeletonsHome() {
       const grid = document.getElementById('productos-grid');
       if (grid) grid.querySelectorAll('.skeleton').forEach(s => s.parentElement?.remove());
+    }
+
+    /* Ocultar tarjetas de categorías que no tienen productos */
+    function ocultarCategoriasSinProductos(todos) {
+      const catMap = { 'cat-anillo': 'anillo', 'cat-collar': 'collar', 'cat-aretes': 'aretes', 'cat-pulsera': 'pulsera' };
+      Object.entries(catMap).forEach(([elId, catKey]) => {
+        const tiene = todos.some(p => (p.categoria || '').toLowerCase().includes(catKey));
+        const el = document.getElementById(elId);
+        if (el) el.style.display = tiene ? '' : 'none';
+      });
     }
 
     /* Formulario de contacto → WhatsApp */
